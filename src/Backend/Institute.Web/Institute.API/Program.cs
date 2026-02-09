@@ -51,7 +51,7 @@ builder.Services.AddScoped<ILecturerService, LecturerService>();
 builder.Services.AddHttpClient<ClerkService>();
 builder.Services.AddScoped(typeof(IClerkService), typeof(ClerkService));
 
-builder.Services.AddScoped<BankMisrPaymentService>();
+builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
 #endregion
 #region(Authentication And Authorization)
 

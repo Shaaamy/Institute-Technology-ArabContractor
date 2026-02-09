@@ -63,6 +63,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Order> Orders { get; set; }
     public virtual DbSet<OrderItem> OrderItems { get; set; }
     public virtual DbSet<Payment> Payments { get; set; }
+    public virtual DbSet<PaymentLifecycleDetail> PaymentLifecycleDetails { get; set; }
+    public virtual DbSet<TransactionLog> TransactionLogs { get; set; }
 
 
     //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -172,6 +174,24 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.HasKey(p => p.Id);
+        });
+
+        // PaymentLifecycleDetail
+        modelBuilder.Entity<PaymentLifecycleDetail>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.HasOne(p => p.Order)
+                  .WithMany()
+                  .HasForeignKey(p => p.OrderId);
+        });
+
+        // TransactionLog
+        modelBuilder.Entity<TransactionLog>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.HasOne(p => p.Order)
+                  .WithMany()
+                  .HasForeignKey(p => p.OrderId);
         });
 
 
