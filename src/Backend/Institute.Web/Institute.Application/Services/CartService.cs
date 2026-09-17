@@ -2,11 +2,6 @@
 using Institute.Application.Interfaces.IService;
 using Institute.Domain.Entities;
 using Institute.Domain.specifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Institute.Application.Services
 {
@@ -31,14 +26,12 @@ namespace Institute.Application.Services
 
         public async Task<Cart> GetUserCartAsync(string clerkUserId)
         {
-            // 1️⃣ نجيب المستخدم
             var userSpec = new BaseSpecification<AppUser>(u => u.ClerkUserId == clerkUserId && !u.IsDeleted);
             var user = (await _userRepository.GetAllWithSpecAsync(userSpec)).FirstOrDefault();
 
             if (user == null)
                 throw new Exception("User not found");
 
-            // 2️⃣ نجيب الكارت
             var cartSpec = new BaseSpecification<Cart>(c => c.UserId == user.Id && !c.IsCheckedOut);
             cartSpec.AddInclude(c => c.Items);
             cartSpec.AddInclude("Items.Planwork");
@@ -48,12 +41,7 @@ namespace Institute.Application.Services
 
             if (cart == null)
             {
-                cart = new Cart
-                {
-                    UserId = user.Id,
-                    CreatedAt = DateTime.UtcNow
-                };
-
+                cart = new Cart { UserId = user.Id, CreatedAt = DateTime.UtcNow };
                 await _cartRepository.AddAsync(cart);
                 await _cartRepository.SaveChangesAsync();
             }
@@ -61,11 +49,10 @@ namespace Institute.Application.Services
             return cart;
         }
 
-        public async Task AddToCartAsync(string clerkUserId, int planworkId)
+        public async Task AddToCartAsync(string clerkUserId, int planworkId, bool isOnline = false)
         {
             var cart = await GetUserCartAsync(clerkUserId);
 
-            // نتأكد إنه مش موجود
             var itemSpec = new BaseSpecification<CartItem>(
                 i => i.CartId == cart.Id && i.PlanworkId == planworkId);
 
@@ -73,25 +60,39 @@ namespace Institute.Application.Services
                 .FirstOrDefault();
 
             if (existingItem != null)
+            {
+                // ✅ لو اليوزر غيّر النوع — حدّث السعر والنوع
+                if (existingItem.IsOnline != isOnline)
+                {
+                    var planworkForUpdate = await _planworkRepository.GetByIdAsync(planworkId);
+                    existingItem.IsOnline = isOnline;
+                    existingItem.Price = isOnline
+                        ? (planworkForUpdate?.OnlineCost ?? planworkForUpdate?.PlanCost ?? 0)
+                        : (planworkForUpdate?.PlanCost ?? 0);
+                    _cartItemRepository.Update(existingItem);
+                    await _cartItemRepository.SaveChangesAsync();
+                }
                 return;
+            }
 
-            // نجيب الكورس
             var planwork = await _planworkRepository.GetByIdAsync(planworkId);
             if (planwork == null)
                 throw new Exception("Course not found");
-            var cost = planwork.PlanCost ?? 0; // إذا كان null، نعتبره 0
 
-            var cartItem = new CartItem
+            // ✅ السعر يتحدد حسب النوع
+            var price = isOnline
+                ? (planwork.OnlineCost ?? planwork.PlanCost ?? 0)
+                : (planwork.PlanCost ?? 0);
+
+            await _cartItemRepository.AddAsync(new CartItem
             {
                 CartId = cart.Id,
                 PlanworkId = planworkId,
-                Price = cost
-            };
+                Price = price,
+                IsOnline = isOnline  // ✅
+            });
 
-            await _cartItemRepository.AddAsync(cartItem);
             await _cartItemRepository.SaveChangesAsync();
-
-
         }
 
         public async Task RemoveFromCartAsync(string clerkUserId, int planworkId)
@@ -101,15 +102,11 @@ namespace Institute.Application.Services
             var itemSpec = new BaseSpecification<CartItem>(
                 i => i.CartId == cart.Id && i.PlanworkId == planworkId);
 
-            var item = (await _cartItemRepository.GetAllWithSpecAsync(itemSpec))
-                .FirstOrDefault();
-
-            if (item == null)
-                return;
+            var item = (await _cartItemRepository.GetAllWithSpecAsync(itemSpec)).FirstOrDefault();
+            if (item == null) return;
 
             _cartItemRepository.Delete(item);
             await _cartItemRepository.SaveChangesAsync();
-
         }
     }
 }

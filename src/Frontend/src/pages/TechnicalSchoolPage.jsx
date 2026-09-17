@@ -42,14 +42,23 @@ export default function TechnicalSchoolPage() {
 
     return (
 
-        <div style={{ fontFamily: '"Droid Arabic Kufi", serif', direction: 'rtl' }}>
+        <div style={{ fontFamily: '"Noto Kufi Arabic", serif', direction: 'rtl' }}>
             {/* ======== ADDED PART (NO CHANGE) ======== */}
-            <div className="overview_intro" style={{ position: 'fixed', background: '#F5F7E1', width: '100%', zIndex: '1' , top:70}}>
-                <span className="overview" style={{ position: 'relative', bottom: '5px' }}>
-                    <a href="/" className="btn_go_home">الصفحة الرئيسية</a> -تطوير التعليم الفني
-                </span>
+           
+            <div style={{ position: 'fixed', top: 70, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: '8px 20px' }}>
+                <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic",, serif', fontSize: '1rem' }}>
+                    <a
+                        href="/"
+                        style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                        onMouseEnter={e => e.target.style.color = '#f57c00'}
+                        onMouseLeave={e => e.target.style.color = '#0865a8'}
+                    >
+                        الصفحة الرئيسية
+                    </a>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <span style={{ color: '#374151', marginRight: '8px' }}>تطوير التعليم الفني</span>
+                </div>
             </div>
-
             {/* Hero Section */}
             <div style={{
                 background: 'linear-gradient(135deg, #070707 0%, #0865a8 100%)',

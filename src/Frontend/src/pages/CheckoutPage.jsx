@@ -43,7 +43,7 @@ function TermsModal({ onClose, onAccept }) {
                 background: '#fff', borderRadius: 18, width: '100%', maxWidth: 640,
                 maxHeight: '88vh', display: 'flex', flexDirection: 'column',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.3)', overflow: 'hidden',
-                fontFamily: '"Droid Arabic Kufi", serif'
+                fontFamily: '"Noto Kufi Arabic", serif'
             }}>
                 {/* Header */}
                 <div style={{
@@ -223,7 +223,7 @@ function TermsModal({ onClose, onAccept }) {
                         background: 'linear-gradient(90deg,#0865a8,#f57c00)',
                         color: '#fff', border: 'none', borderRadius: 10,
                         padding: '10px 28px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
-                        fontFamily: '"Droid Arabic Kufi", serif'
+                        fontFamily: '"Noto Kufi Arabic", serif'
                     }}>
                         فهمت وأوافق
                     </button>
@@ -294,35 +294,64 @@ export default function CheckoutPage() {
 
     // Mastercard global callbacks
     useEffect(() => {
-        window.completeCallback = async (resultIndicator) => {
+        // ✅ لو المستخدم رجع بالـ Back من صفحة الدفع، وقف الـ loading فوراً
+        const handlePageShow = (event) => {
+            if (event.persisted) {
+                setLoading(false);
+            }
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                setLoading(false);
+            }
+        };
+
+        window.addEventListener('pageshow', handlePageShow);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        window.completeCallbackReact = async (resultIndicator) => {
             if (resultIndicator === successIndicatorRef.current) {
                 try {
                     const token = await getTokenRef.current();
                     await fetch(
                         `${API_BASE}/api/checkout/result?orderId=${orderIdRef.current}&transactionRef=${resultIndicator}`,
-                        { method: "GET", headers: { Authorization: `Bearer ${token}` } }
+                        {
+                            method: "GET",
+                            headers: { Authorization: `Bearer ${token}` }
+                        }
                     );
                 } catch (_) { }
+
                 localStorage.removeItem("cartItems");
                 window.dispatchEvent(new Event("cartUpdated"));
+
                 navigate(`/payment-return?orderId=${orderIdRef.current}&resultIndicator=${resultIndicator}`);
             } else {
                 setLoading(false);
                 setError("فشل التحقق من الدفع. يرجى التواصل مع الدعم الفني.");
             }
         };
-        window.errorCallback = (err) => {
+
+        window.errorCallbackReact = (err) => {
             setLoading(false);
-            setError("حدث خطأ أثناء الدفع: " + (err?.error?.explanation || "يرجى المحاولة مرة أخرى."));
+            setError(
+                "حدث خطأ أثناء الدفع: " +
+                (err?.error?.explanation || "يرجى المحاولة مرة أخرى.")
+            );
         };
-        window.cancelCallback = () => {
+
+        window.cancelCallbackReact = () => {
             setLoading(false);
             setError("تم إلغاء عملية الدفع.");
         };
+
         return () => {
-            delete window.completeCallback;
-            delete window.errorCallback;
-            delete window.cancelCallback;
+            window.removeEventListener('pageshow', handlePageShow);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            delete window.completeCallbackReact;
+            delete window.errorCallbackReact;
+            delete window.cancelCallbackReact;
         };
     }, []);
 
@@ -427,7 +456,7 @@ export default function CheckoutPage() {
         return (
             <div dir="rtl" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
                 <Spinner />
-                <p style={{ color: '#6b7280', fontFamily: '"Droid Arabic Kufi", serif' }}>جاري تحميل سلة التسوق...</p>
+                <p style={{ color: '#6b7280', fontFamily: '"Noto Kufi Arabic", serif' }}>جاري تحميل سلة التسوق...</p>
             </div>
         );
     }
@@ -436,9 +465,9 @@ export default function CheckoutPage() {
         <>
             {showTermsModal && <TermsModal onClose={() => setShowTermsModal(false)} onAccept={() => setTermsAccepted(true)} />}
 
-            <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet" />
             <style>{`
-                * { font-family: "Droid Arabic Kufi", serif !important; }
+                * { font-family: "Noto Kufi Arabic", serif !important; }
                 .co-wrap { padding-top: 108px; }
                 @media (min-width: 768px)  { .co-wrap { padding-top: 128px; } }
                 @media (min-width: 1024px) { .co-wrap { padding-top: 138px; } }
@@ -447,13 +476,29 @@ export default function CheckoutPage() {
                 .terms-shake { animation: shake 0.5s ease-in-out; }
             `}</style>
 
-            {/* Breadcrumb */}
-            <div style={{ position: 'fixed', top: 70, left: 0, right: 0, zIndex: 40, background: '#F5F7E1', borderBottom: '1px solid #d1d5db', padding: '6px 12px', textAlign: 'center', fontSize: 'clamp(0.7rem, 2vw, 0.9rem)' }}>
-                <a href="/" style={{ color: '#374151', textDecoration: 'none' }}>الصفحة الرئيسية</a>
-                <span style={{ margin: '0 6px', color: '#9ca3af' }}>-</span>
-                <Link to="/cart" style={{ color: '#374151', textDecoration: 'none' }}>سلة التسوق</Link>
-                <span style={{ margin: '0 6px', color: '#9ca3af' }}>-</span>
-                <span style={{ fontWeight: 700, color: '#111' }}>إتمام الدفع</span>
+            {/* ── Breadcrumb ── */}
+            <div style={{ position: 'fixed', top: 70, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: '8px 20px' }}>
+                <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic", serif', fontSize: '1rem' }}>
+                    <a
+                        href="/"
+                        style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                        onMouseEnter={e => e.target.style.color = '#f57c00'}
+                        onMouseLeave={e => e.target.style.color = '#0865a8'}
+                    >
+                        الصفحة الرئيسية
+                    </a>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <Link
+                        to="/cart"
+                        style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                        onMouseEnter={e => e.target.style.color = '#f57c00'}
+                        onMouseLeave={e => e.target.style.color = '#0865a8'}
+                    >
+                        سلة التسوق
+                    </Link>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <span style={{ color: '#374151', fontWeight: 700, marginRight: '8px' }}>إتمام الدفع</span>
+                </div>
             </div>
 
             <div dir="rtl" className="co-wrap" style={{ minHeight: '100vh', background: '#fff', paddingBottom: '4rem' }}>

@@ -13,5 +13,7 @@
         public decimal? Cost { get; set; }
         public bool? OnSale { get; set; }
         public List<CourseFileDto> Files { get; set; } = new();
+        public bool IsOnline { get; set; }
+        public decimal? OnlineCost { get; set; }
     }
 }

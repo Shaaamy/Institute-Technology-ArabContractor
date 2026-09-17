@@ -20,5 +20,7 @@ namespace Institute.Domain.Entities
 
         public DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
         public bool Attended { get; set; }
+        public bool IsOnline { get; set; }
+
     }
 }

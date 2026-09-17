@@ -14,6 +14,11 @@ namespace Institute.Application.DTOs.AdminDtos
         public int AttendanceCount { get; set; }
         public int CertificatesCount { get; set; }
         public int RefundsCount { get; set; }
-    
+
+        public decimal TotalRevenue { get; set; }
+        public decimal TotalRefunds { get; set; }
+        public decimal NetRevenue { get; set; }
+
+
     }
 }

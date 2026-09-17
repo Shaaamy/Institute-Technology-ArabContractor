@@ -1,512 +1,245 @@
 import React from 'react';
 import {
-    Box,
-    Container,
-    Typography,
-    Grid,
-    Link as MuiLink,
-    IconButton,
-    Stack
+    Box, Container, Typography, Grid,
+    Link as MuiLink, IconButton, Stack
 } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import FaxIcon from '@mui/icons-material/Fax';
 import EmailIcon from '@mui/icons-material/Email';
 import FacebookIcon from '@mui/icons-material/Facebook';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import TwitterIcon from '@mui/icons-material/Twitter';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { Link } from 'react-router-dom';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
-    const sectionDivider = {
-        borderLeft: { xs: 'none', md: '1px solid rgba(255, 255, 255, 0.15)' },
-        height: 'auto',
-        pl: { xs: 0, md: 4 },
-        pr: { xs: 0, md: 2 },
-        textAlign: 'left',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start'
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === 'ar';
+
+    const quickLinks = [
+        { key: 'footer.links.about', path: '/overview' },
+        { key: 'footer.links.news', path: '/news' },
+        { key: 'footer.links.contact', path: '/contact' },
+    ];
+
+    const headingAfter = {
+        content: '""',
+        position: 'absolute',
+        bottom: -8,
+        left: isRTL ? 'auto' : 0,
+        right: isRTL ? 0 : 'auto',
+        width: 40,
+        height: 2,
+        bgcolor: '#f57c00',
     };
 
     return (
-        <Box sx={{
-            backgroundImage: 'linear-gradient(#070707,#0865a8)',
-            color: 'white',
-            py: { xs: 4, md: 6 },
-            direction: 'ltr',
-            borderTop: '3px solid #f57c00',
-            position: 'relative',
-            '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '100%',
-                background: 'radial-gradient(circle at 20% 50%, rgba(245, 124, 0, 0.05) 0%, transparent 50%)',
-                pointerEvents: 'none'
-            }
-        }}>
+        <Box
+            component="footer"
+            dir={isRTL ? 'rtl' : 'ltr'}
+            sx={{
+                backgroundImage: 'linear-gradient(#070707,#0865a8)',
+                color: 'white',
+                py: { xs: 4, md: 6 },
+                borderTop: '3px solid #f57c00',
+                position: 'relative',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, height: '100%',
+                    background: 'radial-gradient(circle at 20% 50%, rgba(245,124,0,0.05) 0%, transparent 50%)',
+                    pointerEvents: 'none',
+                },
+            }}
+        >
             <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
                 <Grid container spacing={{ xs: 3, md: 4 }}>
 
-                    {/* القسم 1: اسم المعهد والعنوان */}
-                    <Grid item xs={12} sm={6} md={4} sx={{ textAlign: 'left' }}>
-                        <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{
-                                fontWeight: 'bold',
-                                mb: 2,
-                                color: '#f57c00',
-                                fontFamily: '"Droid Arabic Kufi", serif',
-                                fontSize: { xs: '1rem', md: '1.1rem' },
-                                lineHeight: 1.4
-                            }}
-                        >
-                            المعهد التكنولوجي لهندسة التشييد والإدارة
+                    {/* ── Col 1: Institute name & address ── */}
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        <Typography variant="h6" gutterBottom sx={{
+                            fontWeight: 'bold', mb: 2, color: '#f57c00',
+                            fontFamily: '"Noto Kufi Arabic",serif',
+                            fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.4,
+                        }}>
+                            {t('footer.instituteName')}
                         </Typography>
 
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: 1.5,
-                            mb: 2,
-                            justifyContent: 'flex-start'
-                        }}>
-                            <LocationOnIcon
-                                fontSize="small"
-                                sx={{
-                                    color: '#f57c00',
-                                    mt: 0.3,
-                                    fontSize: '1.2rem'
-                                }}
-                            />
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    lineHeight: 1.7,
-                                    fontFamily: '"Droid Arabic Kufi", serif',
-                                    color: 'rgba(255,255,255,0.85)',
-                                    fontSize: '0.9rem'
-                                }}
-                            >
-                                6 ش محمود المليجي - المنطقة السادسة - مدينة نصر - القاهرة
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 2 }}>
+                            <LocationOnIcon fontSize="small" sx={{ color: '#f57c00', mt: 0.3, fontSize: '1.2rem', flexShrink: 0 }} />
+                            <Typography variant="body2" sx={{
+                                lineHeight: 1.7, fontFamily: '"Noto Kufi Arabic",serif',
+                                color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem',
+                            }}>
+                                {t('footer.address')}
                             </Typography>
                         </Box>
 
                         <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1.5,
-                            justifyContent: 'flex-start',
-                            bgcolor: 'rgba(245, 124, 0, 0.1)',
-                            py: 1,
-                            px: 1.5,
-                            borderRadius: 1,
-                            border: '1px solid rgba(245, 124, 0, 0.2)',
+                            display: 'flex', alignItems: 'center', gap: 1.5,
+                            bgcolor: 'rgba(245,124,0,0.1)', py: 1, px: 1.5,
+                            borderRadius: 1, border: '1px solid rgba(245,124,0,0.2)',
                             transition: 'all 0.3s ease',
-                            '&:hover': {
-                                bgcolor: 'rgba(245, 124, 0, 0.15)',
-                                borderColor: 'rgba(245, 124, 0, 0.4)'
-                            }
+                            '&:hover': { bgcolor: 'rgba(245,124,0,0.15)', borderColor: 'rgba(245,124,0,0.4)' },
                         }}>
-                            <EmailIcon
-                                fontSize="small"
-                                sx={{ color: '#f57c00', fontSize: '1.1rem' }}
-                            />
-                            <MuiLink
-                                href="mailto:icemt@arabcont.com"
-                                color="inherit"
-                                underline="hover"
-                                sx={{
-                                    fontFamily: '"Droid Arabic Kufi", serif',
-                                    fontSize: '0.85rem',
-                                    color: 'white',
-                                    '&:hover': {
-                                        color: '#f57c00'
-                                    }
-                                }}
-                            >
+                            <EmailIcon fontSize="small" sx={{ color: '#f57c00', fontSize: '1.1rem', flexShrink: 0 }} />
+                            <MuiLink href="mailto:icemt@arabcont.com" color="inherit" underline="hover"
+                                sx={{ fontFamily: '"Noto Kufi Arabic",serif', fontSize: '0.85rem', color: 'white', '&:hover': { color: '#f57c00' } }}>
                                 icemt@arabcont.com
                             </MuiLink>
                         </Box>
                     </Grid>
 
-                    {/* Section 2: Contact Us */}
-                    <Grid item xs={12} sm={6} md={2.5} sx={sectionDivider}>
-                        <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{
-                                fontWeight: 'bold',
-                                mb: 2.5,
-                                fontFamily: '"Droid Arabic Kufi", serif',
-                                color: 'white',
-                                fontSize: { xs: '0.95rem', md: '1rem' },
-                                position: 'relative',
-                                '&::after': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    bottom: -8,
-                                    right: 0,
-                                    width: '40px',
-                                    height: '2px',
-                                    bgcolor: '#f57c00'
-                                }
-                            }}
-                        >
-                            اتصل بنا
+                    {/* ── Col 2: Contact ── */}
+                    <Grid size={{ xs: 12, sm: 6, md: 2.5 }} sx={{
+                        borderInlineStart: { xs: 'none', md: '1px solid rgba(255,255,255,0.15)' },
+                        paddingInlineStart: { xs: 0, md: 4 },
+                    }}>
+                        <Typography variant="h6" gutterBottom sx={{
+                            fontWeight: 'bold', mb: 2.5,
+                            fontFamily: '"Noto Kufi Arabic",serif', color: 'white',
+                            fontSize: { xs: '0.95rem', md: '1rem' },
+                            position: 'relative',
+                            '&::after': headingAfter,
+                        }}>
+                            {t('footer.contactUs')}
                         </Typography>
                         <Stack spacing={2}>
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    transform: 'translateX(-3px)',
-                                    '& .MuiSvgIcon-root': {
-                                        color: '#f57c00'
-                                    }
-                                }
-                            }}>
-                                <PhoneIcon
-                                    fontSize="small"
-                                    sx={{
-                                        color: '#0865a8',
-                                        transition: 'color 0.2s ease',
-                                        fontSize: '1.1rem'
-                                    }}
-                                />
-                                <Box>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontWeight: 'bold',
-                                            fontFamily: '"Droid Arabic Kufi", serif',
-                                            color: 'rgba(255,255,255,0.7)',
-                                            fontSize: '0.75rem',
-                                            mb: 0.2
-                                        }}
-                                    >
-                                        تليفون
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontFamily: '"Droid Arabic Kufi", serif',
-                                            fontSize: '0.85rem'
-                                        }}
-                                    >
-                                        23892120 02 2+
-                                    </Typography>
+                            {[
+                                { icon: <PhoneIcon fontSize="small" sx={{ color: '#0865a8', fontSize: '1.1rem', flexShrink: 0 }} />, label: t('footer.phone'), value: '+2 02 23892120' },
+                                { icon: <FaxIcon fontSize="small" sx={{ color: '#0865a8', fontSize: '1.1rem', flexShrink: 0 }} />, label: t('footer.fax'), value: '+2 02 23892025' },
+                            ].map(({ icon, label, value }) => (
+                                <Box key={label} sx={{
+                                    display: 'flex', alignItems: 'center', gap: 1.5,
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        transform: isRTL ? 'translateX(-3px)' : 'translateX(3px)',
+                                        '& .MuiSvgIcon-root': { color: '#f57c00' },
+                                    },
+                                }}>
+                                    {icon}
+                                    <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold', fontFamily: '"Noto Kufi Arabic",serif', color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', mb: 0.2 }}>
+                                            {label}
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ fontFamily: '"Noto Kufi Arabic",serif', fontSize: '0.85rem' }}>
+                                            {value}
+                                        </Typography>
+                                    </Box>
                                 </Box>
-                            </Box>
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    transform: 'translateX(-3px)',
-                                    '& .MuiSvgIcon-root': {
-                                        color: '#f57c00'
-                                    }
-                                }
-                            }}>
-                                <FaxIcon
-                                    fontSize="small"
-                                    sx={{
-                                        color: '#0865a8',
-                                        transition: 'color 0.2s ease',
-                                        fontSize: '1.1rem'
-                                    }}
-                                />
-                                <Box>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontWeight: 'bold',
-                                            fontFamily: '"Droid Arabic Kufi", serif',
-                                            color: 'rgba(255,255,255,0.7)',
-                                            fontSize: '0.75rem',
-                                            mb: 0.2
-                                        }}
-                                    >
-                                        فاكس
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontFamily: '"Droid Arabic Kufi", serif',
-                                            fontSize: '0.85rem'
-                                        }}
-                                    >
-                                        23892025 02 2+
-                                    </Typography>
-                                </Box>
-                            </Box>
+                            ))}
                         </Stack>
                     </Grid>
 
-
-                    {/* القسم 3: ساعات العمل */}
-                    <Grid item xs={12} sm={6} md={2.5} sx={sectionDivider}>
-                        <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{
-                                fontWeight: 'bold',
-                                mb: 2.5,
-                                fontFamily: '"Droid Arabic Kufi", serif',
-                                color: 'white',
-                                fontSize: { xs: '0.95rem', md: '1rem' },
-                                position: 'relative',
-                                '&::after': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    bottom: -8,
-                                    right: 0,
-                                    width: '40px',
-                                    height: '2px',
-                                    bgcolor: '#f57c00'
-                                }
-                            }}
-                        >
-                            ساعات العمل
+                    {/* ── Col 3: Working Hours ── */}
+                    <Grid size={{ xs: 12, sm: 6, md: 2.5 }} sx={{
+                        borderInlineStart: { xs: 'none', md: '1px solid rgba(255,255,255,0.15)' },
+                        paddingInlineStart: { xs: 0, md: 4 },
+                    }}>
+                        <Typography variant="h6" gutterBottom sx={{
+                            fontWeight: 'bold', mb: 2.5,
+                            fontFamily: '"Noto Kufi Arabic",serif', color: 'white',
+                            fontSize: { xs: '0.95rem', md: '1rem' },
+                            position: 'relative',
+                            '&::after': headingAfter,
+                        }}>
+                            {t('footer.workingHours')}
                         </Typography>
                         <Box sx={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: 1.5,
-                            bgcolor: 'rgba(8, 101, 168, 0.2)',
-                            p: 2,
-                            borderRadius: 1,
-                            border: '1px solid rgba(8, 101, 168, 0.3)'
+                            display: 'flex', alignItems: 'flex-start', gap: 1.5,
+                            bgcolor: 'rgba(8,101,168,0.2)', p: 2, borderRadius: 1,
+                            border: '1px solid rgba(8,101,168,0.3)',
                         }}>
-                            <AccessTimeIcon
-                                fontSize="small"
-                                sx={{
-                                    color: '#f57c00',
-                                    mt: 0.3,
-                                    fontSize: '1.2rem'
-                                }}
-                            />
+                            <AccessTimeIcon fontSize="small" sx={{ color: '#f57c00', mt: 0.3, fontSize: '1.2rem', flexShrink: 0 }} />
                             <Box>
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        mb: 1,
-                                        fontFamily: '"Droid Arabic Kufi", serif',
-                                        color: 'white',
-                                        fontWeight: 'bold',
-                                        fontSize: '0.85rem'
-                                    }}
-                                >
-                                    الأحد - الخميس
+                                <Typography variant="body2" sx={{ mb: 1, fontFamily: '"Noto Kufi Arabic",serif', color: 'white', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                                    {t('footer.workDays')}
                                 </Typography>
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        fontFamily: '"Droid Arabic Kufi", serif',
-                                        color: 'rgba(255,255,255,0.8)',
-                                        fontSize: '0.8rem'
-                                    }}
-                                >
-                                    8:30 ص - 5:00 م
+                                <Typography variant="body2" sx={{ fontFamily: '"Noto Kufi Arabic",serif', color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem' }}>
+                                    {t('footer.workTime')}
                                 </Typography>
                             </Box>
                         </Box>
                     </Grid>
 
-                    {/* القسم 4: روابط تهمك */}
-                    <Grid item xs={12} sm={6} md={3} sx={sectionDivider}>
-                        <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{
-                                fontWeight: 'bold',
-                                mb: 2.5,
-                                fontFamily: '"Droid Arabic Kufi", serif',
-                                color: 'white',
-                                fontSize: { xs: '0.95rem', md: '1rem' },
-                                position: 'relative',
-                                '&::after': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    bottom: -8,
-                                    right: 0,
-                                    width: '40px',
-                                    height: '2px',
-                                    bgcolor: '#f57c00'
-                                }
-                            }}
-                        >
-                            روابط تهمك
+                    {/* ── Col 4: Quick Links ── */}
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }} sx={{
+                        borderInlineStart: { xs: 'none', md: '1px solid rgba(255,255,255,0.15)' },
+                        paddingInlineStart: { xs: 0, md: 4 },
+                    }}>
+                        <Typography variant="h6" gutterBottom sx={{
+                            fontWeight: 'bold', mb: 2.5,
+                            fontFamily: '"Noto Kufi Arabic",serif', color: 'white',
+                            fontSize: { xs: '0.95rem', md: '1rem' },
+                            position: 'relative',
+                            '&::after': headingAfter,
+                        }}>
+                            {t('footer.quickLinks')}
                         </Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                            {[
-                                { text: 'الرئيسية', path: '/' },
-                                { text: 'عن المعهد', path: '/overview' },
-                                { text: 'الأخبار', path: '/news' },
-                                { text: 'اتصل بنا', path: '/contact' }
-                            ].map((item, index) => (
-                                <MuiLink
-                                    key={index}
-                                    component={Link}
-                                    to={item.path}
-                                    color="inherit"
-                                    underline="none"
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        fontFamily: '"Droid Arabic Kufi", serif',
-                                        fontSize: '0.85rem',
-                                        color: 'rgba(255,255,255,0.85)',
-                                        transition: 'all 0.2s ease',
-                                        py: 0.5,
-                                        '&:hover': {
-                                            color: '#f57c00',
-                                            transform: 'translateX(-5px)',
-                                            '& span': {
-                                                color: '#f57c00'
-                                            }
-                                        }
-                                    }}
-                                >
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            marginRight: '10px',
-                                            color: '#0865a8',
-                                            fontWeight: 'bold',
-                                            transition: 'color 0.2s ease'
-                                        }}
-                                    >
-                                        ◄
+                            {quickLinks.map(({ key, path }) => (
+                                <MuiLink key={key} component={Link} to={path} color="inherit" underline="none" sx={{
+                                    display: 'flex', alignItems: 'center', gap: 1,
+                                    fontFamily: '"Noto Kufi Arabic",serif', fontSize: '0.85rem',
+                                    color: 'rgba(255,255,255,0.85)', transition: 'all 0.2s ease', py: 0.5,
+                                    '&:hover': {
+                                        color: '#f57c00',
+                                        transform: isRTL ? 'translateX(-5px)' : 'translateX(5px)',
+                                        '& .arrow': { color: '#f57c00' },
+                                    },
+                                }}>
+                                    <Box component="span" className="arrow" sx={{ color: '#0865a8', fontWeight: 'bold', fontSize: '0.7rem', transition: 'color 0.2s ease', flexShrink: 0 }}>
+                                        {isRTL ? '◄' : '►'}
                                     </Box>
-                                    {item.text}
+                                    {t(key)}
                                 </MuiLink>
                             ))}
                         </Box>
                     </Grid>
-
                 </Grid>
 
-                {/* الشريط السفلي */}
+                {/* ── Bottom bar ── */}
                 <Box sx={{
-                    mt: { xs: 5, md: 6 },
-                    pt: 3,
-                    borderTop: '1px solid rgba(245, 124, 0, 0.3)',
+                    mt: { xs: 5, md: 6 }, pt: 3,
+                    borderTop: '1px solid rgba(245,124,0,0.3)',
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
                     gap: { xs: 2, md: 0 },
                     justifyContent: 'space-between',
-                    alignItems: { xs: 'flex-start', md: 'center' }
+                    alignItems: { xs: 'flex-start', md: 'center' },
                 }}>
-
-                    <Box sx={{ textAlign: 'left', flex: 1 }}>
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                color: 'rgba(255,255,255,0.7)',
-                                fontFamily: '"Droid Arabic Kufi", serif',
-                                fontSize: { xs: '0.75rem', md: '0.8rem' },
-                                lineHeight: 1.6,
-                                mb: 1
-                            }}
-                        >
-                            جميع الحقوق محفوظة 2025 © المعهد التكنولوجي لهندسة التشييد والإدارة
+                    <Box>
+                        <Typography variant="body2" sx={{
+                            color: 'rgba(255,255,255,0.7)', fontFamily: '"Noto Kufi Arabic",serif',
+                            fontSize: { xs: '0.75rem', md: '0.8rem' }, lineHeight: 1.6, mb: 1,
+                        }}>
+                            {t('footer.rights')}
                         </Typography>
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                color: 'rgba(255,255,255,0.6)',
-                                fontFamily: '"Droid Arabic Kufi", serif',
-                                fontSize: { xs: '0.7rem', md: '0.75rem' },
-                                mb: 0.5
-                            }}
-                        >
-                            تصميم مركز معلومات الإدارة العليا
-                        </Typography>
-                        <Typography
-                            variant="caption"
-                            sx={{
-                                color: '#f57c00',
-                                display: 'block',
-                                fontFamily: '"Droid Arabic Kufi", serif',
-                                fontSize: '0.9rem'
-                            }}
-                        >
-                            Designed by Yasmina Maged, Samir Yousri & Ahmed Taha
+                        <Typography variant="caption" sx={{ color: '#f57c00', display: 'block', fontFamily: '"Noto Kufi Arabic",serif', fontSize: '0.9rem' }}>
+                            {t('footer.designedBy')}
                         </Typography>
                     </Box>
 
-                    <Box sx={{
-                        display: 'flex',
-                        gap: 1.5,
-                        alignItems: 'center'
-                    }}>
-                        <IconButton
-                            size="small"
-                            sx={{
-                                color: 'white',
-                                bgcolor: 'rgba(255,255,255,0.1)',
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    color: 'white',
-                                    bgcolor: '#1877F2',
-                                    transform: 'translateY(-3px)',
-                                    boxShadow: '0 4px 12px rgba(24, 119, 242, 0.4)'
-                                }
-                            }}
-                            href="https://ar-ar.facebook.com/arabcont2017/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <FacebookIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                            size="small"
-                            sx={{
-                                color: 'white',
-                                bgcolor: 'rgba(255,255,255,0.1)',
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    color: 'white',
-                                    bgcolor: '#E4405F',
-                                    transform: 'translateY(-3px)',
-                                    boxShadow: '0 4px 12px rgba(228, 64, 95, 0.4)'
-                                }
-                            }}
-                            href="#"
-                        >
-                            <InstagramIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                            size="small"
-                            sx={{
-                                color: 'white',
-                                bgcolor: 'rgba(255,255,255,0.1)',
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    color: 'white',
-                                    bgcolor: '#1DA1F2',
-                                    transform: 'translateY(-3px)',
-                                    boxShadow: '0 4px 12px rgba(29, 161, 242, 0.4)'
-                                }
-                            }}
-                            href="https://x.com/arabcont?lang=en"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <TwitterIcon fontSize="small" />
-                        </IconButton>
+                    <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+                        {[
+                            { href: 'https://www.facebook.com/arabcont.icemt', icon: <FacebookIcon fontSize="small" />, hoverBg: '#1877F2', shadow: 'rgba(24,119,242,0.4)' },
+                            { href: 'https://youtube.com/@ac-icemt?si=dS7CixRAX08votqw', icon: <YouTubeIcon fontSize="small" />, hoverBg: '#FF0000', shadow: 'rgba(255,0,0,0.4)' },
+                            { href: 'https://wa.me/201109754459', icon: <WhatsAppIcon fontSize="small" />, hoverBg: '#25D366', shadow: 'rgba(37,211,102,0.4)' },
+                            { href: 'https://www.linkedin.com/company/arabcont-icemt/posts/?feedView=all', icon: <LinkedInIcon fontSize="small" />, hoverBg: '#0A66C2', shadow: 'rgba(10,102,194,0.4)' },
+                        ].map(({ href, icon, hoverBg, shadow }) => (
+                            <IconButton key={href} size="small" component="a" href={href} target="_blank" rel="noopener noreferrer"
+                                sx={{
+                                    color: 'white', bgcolor: 'rgba(255,255,255,0.1)',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': { color: 'white', bgcolor: hoverBg, transform: 'translateY(-3px)', boxShadow: `0 4px 12px ${shadow}` },
+                                }}>
+                                {icon}
+                            </IconButton>
+                        ))}
                     </Box>
-
                 </Box>
             </Container>
         </Box>

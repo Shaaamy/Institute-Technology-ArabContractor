@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
 using Institute.API.DTOs;
 using Institute.API.Helpers;
+using Institute.Application.DTOs;
 using Institute.Application.Interfaces;
+using Institute.Application.Interfaces.IService;
 using Institute.Domain.Entities;
-using Institute.Domain.specifications;
-using Institute.Domain.specifications.BookSpec;
 using Institute.Domain.specifications.NewsSpec;
-using Institute.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Institute.API.Controllers
 {
@@ -17,84 +14,114 @@ namespace Institute.API.Controllers
     [ApiController]
     public class NewsController : ControllerBase
     {
-        // In your controller
-
-        private readonly IReadOnlyService<Dailynews> _bookService;
+        private readonly IReadOnlyService<Dailynews> _newsService;
         private readonly IMapper _mapper;
         private readonly IRepository<Dailynews> _repo;
+        private readonly INewsService _newsWriteService;
 
-        public NewsController(IReadOnlyService<Dailynews> bookService, IMapper mapper,IRepository<Dailynews>  Repo )
+        public NewsController(
+            IReadOnlyService<Dailynews> newsService,
+            IMapper mapper,
+            IRepository<Dailynews> repo,
+            INewsService newsWriteService)
         {
-            _bookService = bookService;
-
+            _newsService = newsService;
             _mapper = mapper;
-            _repo = Repo;
+            _repo = repo;
+            _newsWriteService = newsWriteService;
         }
 
-
-
-
-
-        //[HttpGet("getAllNews")]
-        //public async Task<IActionResult> GetAllNews()
-        //{
-        //    var spec = new NewsWithMainPicSpec();
-
-        //    var news = await _bookService.GetAllWithSpec(spec);
-
-        //    var result = _mapper.Map<IReadOnlyList<NewsListDto>>(news);
-
-        //    return Ok(result);
-        //}
-
+        // ── GET ALL ───────────────────────────────────────────────────
         [HttpGet("getAllNews")]
         public async Task<ActionResult<Pagination<NewsListDto>>> GetAllNews(
-     [FromQuery] NewsSpecParams newsParams)
+            [FromQuery] NewsSpecParams newsParams)
         {
-            // 1️⃣ Spec للبيانات
             var spec = new NewsWithMainPicSpec(newsParams);
-
-            // 2️⃣ جلب البيانات
             var news = await _repo.GetAllWithSpecAsync(spec);
 
-            // 3️⃣ Mapping
-            var data = _mapper.Map<IReadOnlyList<Dailynews>, IReadOnlyList<NewsListDto>>(news);
+            // ✅ بدل الـ mapper — بنبني يدوياً عشان نضيف ImageUrls
+            var data = news.Select(x => new NewsListDto
+            {
+                Id = x.NewsId,
+                Title = x.ATitel,
+                PublishedAt = x.NewsDate ?? DateTime.UtcNow,
+                ImageUrl = BuildImageUrl(
+                    x.NewsPics?
+                    .OrderBy(p => p.PicPeriorty)
+                    .FirstOrDefault()?.ImageName),
 
-            // 4️⃣ Count
+                // ✅ زيادة — كل الصور
+                ImageUrls = x.NewsPics?
+                    .OrderBy(p => p.PicPeriorty)
+                    .Select(p => BuildImageUrl(p.ImageName))
+                    .ToList()
+            }).ToList();
+
             var countSpec = new NewsWithFiltersForCountSpec(newsParams);
             var count = await _repo.GetCountAsync(countSpec);
 
-            // 5️⃣ Pagination (final shape)
             return Ok(new Pagination<NewsListDto>(
-                newsParams.PageIndex,
-                newsParams.PageSize,
-                count,
-                data
-            ));
+                newsParams.PageIndex, newsParams.PageSize, count, data));
         }
 
-
-
+        // ── GET BY ID ─────────────────────────────────────────────────
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNewsById(int id)
         {
-            if (id <= 0)
-                return BadRequest("Invalid news id");
+            if (id <= 0) return BadRequest("Invalid news id");
 
             var spec = new NewsWithDetailsSpec(id);
+            var news = await _newsService.GetEntityWithSpec(spec);
 
-            var news = await _bookService.GetEntityWithSpec(spec);
+            if (news == null) return NotFound();
 
-            if (news == null)
-                return NotFound();
+            var dto = _mapper.Map<NewsDetailsDto>(news);
 
-            var newsDto = _mapper.Map<NewsDetailsDto>(news);
+            // ✅ زيادة — كل الصور
+            dto.ImageUrls = news.NewsPics?
+                .OrderBy(p => p.PicPeriorty)
+                .Select(p => BuildImageUrl(p.ImageName))
+                .ToList();
 
-            return Ok(newsDto);
+            return Ok(dto);
         }
+        // ── GET YEARS ─────────────────────────────────────────────────
+        //[HttpGet("years")]
+        //public async Task<ActionResult<IEnumerable<int>>> GetNewsYears()
+        //{
+        //    var spec = new NewsWithMainPicSpec(new NewsSpecParams { PageSize = int.MaxValue, PageIndex = 1 });
+        //    var news = await _repo.GetAllWithSpecAsync(spec);
 
+        //    var years = news
+        //        .Where(x => x.NewsDate.HasValue)
+        //        .Select(x => x.NewsDate!.Value.Year)
+        //        .Distinct()
+        //        .OrderByDescending(y => y)
+        //        .ToList();
 
+        //    return Ok(years);
+        //}
+        [HttpGet("years")]
+        public async Task<ActionResult<IEnumerable<int>>> GetNewsYears()
+        {
+            var news = await _repo.GetAllAsync();
 
+            var years = news
+                .Where(x => x.NewsDate.HasValue)
+                .Select(x => x.NewsDate.Value.Year)
+                .Distinct()
+                .OrderByDescending(x => x)
+                .ToList();
 
+            return Ok(years);
+        }
+        // ── BUILD URL ─────────────────────────────────────────────────
+        private string? BuildImageUrl(string? blobName)
+        {
+            if (string.IsNullOrWhiteSpace(blobName))
+                return null;
+
+            return $"https://acwebappbackup.blob.core.windows.net/icemt/news/{blobName}";
+        }
     }
 }

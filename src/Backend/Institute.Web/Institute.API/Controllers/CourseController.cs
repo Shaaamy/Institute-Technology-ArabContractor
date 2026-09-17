@@ -24,7 +24,6 @@ namespace Institute.API.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IRepository<Order> _orderRepo;
 
-
         public CourseController(
             IRepository<Planwork> planRepo,
             IRepository<PlanFile> fileRepo,
@@ -43,38 +42,46 @@ namespace Institute.API.Controllers
             _orderRepo = orderRepo;
         }
 
-
+        // ══════════════════════════════════════════════════════════════
+        // GET /api/course/programs/{slug}/courses
+        // بيجيب كل الكورسات اللي تحت برنامج معين عن طريق الـ Slug بتاعه
+        // بيشتغل Recursive عشان يجمع الكورسات من كل المستويات
+        // سواء كانت مباشرة تحت البرنامج أو تحت محاور/عناوين تنظيمية
+        // ══════════════════════════════════════════════════════════════
         [HttpGet("programs/{slug}/courses")]
         public async Task<IActionResult> GetProgramCourses(string slug)
         {
-            // ✅ هات كل الداتا مرة واحدة
+            // جيب كل الـ Planworks والـ Files مرة واحدة من الـ DB
             var planworks = (await _planRepo.GetAllAsync()).ToList();
             var files = (await _fileRepo.GetAllAsync()).ToList();
 
-            // ✅ تأكد إن الـ Program / Axis موجود
+            // دور على البرنامج بالـ Slug — لو مش موجود رجع 404
             var program = planworks.FirstOrDefault(x => x.Slug == slug);
             if (program == null)
                 return NotFound();
+
             var programId = program.ChildId;
-            // ✅ جمع الكورسات Recursive (نفس Logic الـ Builder)
+
+            // جمع الكورسات Recursive من كل المستويات
             var courses = GetCoursesRecursive(planworks, files, programId);
 
-            // ✅ Response النهائي (Cards)
             return Ok(new ProgramCoursesDto
             {
                 ProgramId = program.ChildId,
                 Slug = program.Slug,
                 ProgramName = program.ServiceTitle,
                 Courses = courses
-                    .OrderBy(c => c.Id) // أو Priority لو حابب
+                    .OrderBy(c => c.Id)
                     .ToList()
             });
         }
 
-
-        // =========================================================
-        // RECURSIVE COURSE COLLECTOR (WITH LOOP PROTECTION ✅)
-        // =========================================================
+        // ══════════════════════════════════════════════════════════════
+        // HELPER — GetCoursesRecursive (Entry Point)
+        // نقطة الدخول للـ Recursive — بتبدأ بـ HashSet فاضي
+        // الـ HashSet ده بيحمي من الـ Infinite Loop
+        // لو في ChildId اتزار قبل كده بيتجاهله
+        // ══════════════════════════════════════════════════════════════
         private List<CourseCardDto> GetCoursesRecursive(
             List<Planwork> planworks,
             List<PlanFile> files,
@@ -88,6 +95,12 @@ namespace Institute.API.Controllers
             );
         }
 
+        // ══════════════════════════════════════════════════════════════
+        // HELPER — GetCoursesRecursive (Core Logic)
+        // بتجمع الكورسات من مستوى معين وكل المستويات اللي تحته
+        // كورس حقيقي = DetailsFlag: false + CourseDate != null
+        // عنوان تنظيمي = CourseDate == null (بيتنزل فيه Recursive)
+        // ══════════════════════════════════════════════════════════════
         private List<CourseCardDto> GetCoursesRecursive(
             List<Planwork> planworks,
             List<PlanFile> files,
@@ -96,13 +109,13 @@ namespace Institute.API.Controllers
         {
             var result = new List<CourseCardDto>();
 
-            // ✅ منع Loop
+            // حماية من الـ Infinite Loop
             if (visited.Contains(parentId))
                 return result;
 
             visited.Add(parentId);
 
-            // ✅ كورسات مباشرة
+            // جيب الكورسات المباشرة تحت الـ parentId
             var directCourses = planworks
                 .Where(x =>
                     x.ParentId == parentId &&
@@ -118,14 +131,16 @@ namespace Institute.API.Controllers
                     Place = c.CoursePlace,
                     Date = c.CourseDate,
                     Description = c.CourseDesc,
-                    Cost = c.PlanCost
-
+                    Cost = c.PlanCost,
+                    IsOnline = c.IsOnline,
+                    OnlineCost = c.OnlineCost
                 })
                 .ToList();
 
             result.AddRange(directCourses);
 
-            // ✅ Children تنظيمية (محاور / عناوين)
+            // جيب العناوين التنظيمية (اللي مالهاش CourseDate)
+            // وانزل فيها Recursive عشان تجيب الكورسات اللي جوّاها
             var childrenIds = planworks
                 .Where(x =>
                     x.ParentId == parentId &&
@@ -142,18 +157,20 @@ namespace Institute.API.Controllers
             }
 
             return result;
-
         }
 
+        // ══════════════════════════════════════════════════════════════
+        // GET /api/course/{slug}
+        // بيجيب تفاصيل كورس واحد كامل عن طريق الـ Slug بتاعه
+        // بيرجع كل البيانات + الملفات المرفقة مرتبة بالـ Priority
+        // ══════════════════════════════════════════════════════════════
         [HttpGet("{slug}")]
         public async Task<IActionResult> GetCourseById(string slug)
         {
             var planworks = (await _planRepo.GetAllAsync()).ToList();
             var files = (await _fileRepo.GetAllAsync()).ToList();
 
-            // =========================
-            // find course
-            // =========================
+            // دور على الكورس بالـ Slug
             var course = planworks.FirstOrDefault(x =>
                 x.Slug == slug &&
                 x.DetailsFlag == false &&
@@ -163,9 +180,7 @@ namespace Institute.API.Controllers
             if (course == null)
                 return NotFound();
 
-            // =========================
-            // files mapping (from PlanFile)
-            // =========================
+            // جيب الملفات المرتبطة بالكورس ده مرتبة بالـ Priority
             var courseFiles = files
                 .Where(f => f.PlanId == course.ChildId)
                 .OrderBy(f => f.FilePeriorty)
@@ -176,9 +191,6 @@ namespace Institute.API.Controllers
                 })
                 .ToList();
 
-            // =========================
-            // map to CourseDto
-            // =========================
             var dto = new CourseDto
             {
                 Id = course.ChildId,
@@ -190,12 +202,19 @@ namespace Institute.API.Controllers
                 Days = course.CourseDays,
                 Content = course.CourseContent,
                 Cost = course.PlanCost,
-                Files = courseFiles
+                Files = courseFiles,
+                IsOnline = course.IsOnline,
+                OnlineCost = course.OnlineCost
             };
 
             return Ok(dto);
         }
 
+        // ══════════════════════════════════════════════════════════════
+        // GET /api/course/latest
+        // بيجيب آخر 20 كورس متاحين
+        // بيستخدم الـ CategoryService اللي فيها Logic الترتيب والفلترة
+        // ══════════════════════════════════════════════════════════════
         [HttpGet("latest")]
         public async Task<IActionResult> GetLatestCourses()
         {
@@ -203,10 +222,15 @@ namespace Institute.API.Controllers
             return Ok(courses);
         }
 
+        // ══════════════════════════════════════════════════════════════
+        // GET /api/course/my-courses
+        // بيجيب كل الكورسات اللي اليوزر المسجل دخول سجل فيها
+        // سواء كانت مدفوعة (ليها OrderId) أو مجانية (OrderId = null)
+        // ══════════════════════════════════════════════════════════════
         [HttpGet("my-courses")]
         public async Task<IActionResult> GetMyCourses()
         {
-            // 1️⃣ جايب الـ User الحالي من Clerk
+            // جيب الـ User الحالي من Clerk
             var clerkUserId = _clerkService.GetAuthenticatedUserId(User);
             if (clerkUserId == null)
                 return Unauthorized();
@@ -215,8 +239,7 @@ namespace Institute.API.Controllers
             if (appUser == null)
                 return NotFound("User not found in local DB");
 
-            // 2️⃣ جيب كل الـ Enrollments بتاعت اليوزر ده (مدفوعة + مجانية)
-            // بنستخدم AnyAsync + GetAllAsync بدل Specification عشان نضمن إن الـ Include شغال صح
+            // جيب كل الـ Enrollments بتاعت اليوزر ده
             var allEnrollments = await _enrollmentRepo.GetAllAsync();
             var userEnrollments = allEnrollments
                 .Where(e => e.UserId == appUser.Id)
@@ -224,7 +247,8 @@ namespace Institute.API.Controllers
 
             var allPlanworks = (await _planRepo.GetAllAsync()).ToList();
 
-            // 3️⃣ بنعمل Join يدوي بين Enrollment و Planwork
+            // عمل Join يدوي بين Enrollment و Planwork
+            // IsFree = true لو مفيش OrderId (كورس مجاني)
             var courses = userEnrollments
                 .Select(e =>
                 {
@@ -240,7 +264,9 @@ namespace Institute.API.Controllers
                         EnrolledAt = e.EnrolledAt,
                         OrderId = e.OrderId,
                         Cost = plan.PlanCost,
-                        IsFree = e.OrderId == null // ✅ المجاني مالوش Order
+                        IsFree = e.OrderId == null,
+                        IsOnline = plan.IsOnline,
+                        OnlineCost = plan.OnlineCost
                     };
                 })
                 .Where(c => c != null)
@@ -249,12 +275,17 @@ namespace Institute.API.Controllers
             return Ok(courses);
         }
 
-        // ─── تسجيل في كورس مجاني مباشرة بدون Cart/Payment ───────────────
+        // ══════════════════════════════════════════════════════════════
+        // POST /api/course/enroll-free/{planworkId}
+        // [Authorize] — محتاج يكون اليوزر مسجل دخول
+        // بيسجل اليوزر في كورس مجاني مباشرة من غير Cart أو Payment
+        // بيعمل Order وهمي بـ 0 جنيه عشان الـ DB مش بتقبل OrderId = null
+        // ══════════════════════════════════════════════════════════════
         [HttpPost("enroll-free/{planworkId}")]
         [Authorize]
         public async Task<IActionResult> EnrollInFreeCourse(int planworkId)
         {
-            // 1️⃣ جيب الـ User الحالي
+            // جيب الـ User الحالي
             var clerkUserId = _clerkService.GetAuthenticatedUserId(User);
             if (clerkUserId == null)
                 return Unauthorized();
@@ -263,7 +294,7 @@ namespace Institute.API.Controllers
             if (appUser == null)
                 return NotFound("المستخدم غير موجود.");
 
-            // 2️⃣ تحقق إن الكورس موجود ومجاني فعلاً
+            // تحقق إن الكورس موجود وفعلاً مجاني (PlanCost = 0 أو null)
             var planworks = (await _planRepo.GetAllAsync()).ToList();
             var course = planworks.FirstOrDefault(p =>
                 p.ChildId == planworkId &&
@@ -274,14 +305,14 @@ namespace Institute.API.Controllers
             if (course == null)
                 return BadRequest(new { message = "الكورس غير موجود أو غير مجاني." });
 
-            // 3️⃣ منع التكرار
+            // منع التسجيل المكرر في نفس الكورس
             var alreadyEnrolled = await _enrollmentRepo.AnyAsync(
                 e => e.UserId == appUser.Id && e.PlanworkId == planworkId);
 
             if (alreadyEnrolled)
                 return Ok(new { message = "أنت مسجل في هذا الكورس بالفعل.", alreadyEnrolled = true });
 
-            // 4️⃣ أنشئ Order وهمي بـ 0 جنيه عشان OrderId مش nullable في الداتابيز
+            // أنشئ Order وهمي بـ 0 جنيه
             var freeOrder = new Order
             {
                 UserId = appUser.Id,
@@ -292,7 +323,7 @@ namespace Institute.API.Controllers
             await _orderRepo.AddAsync(freeOrder);
             await _orderRepo.SaveChangesAsync();
 
-            // 5️⃣ أنشئ الـ Enrollment مع الـ OrderId
+            // أنشئ الـ Enrollment مرتبط بالـ Order الوهمي
             await _enrollmentRepo.AddAsync(new Enrollment
             {
                 UserId = appUser.Id,
@@ -310,6 +341,5 @@ namespace Institute.API.Controllers
                 courseSlug = course.Slug
             });
         }
-
     }
 }

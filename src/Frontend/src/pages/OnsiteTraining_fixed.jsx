@@ -81,51 +81,26 @@ const OnsiteTraining = () => {
             sx={{
                 minHeight: '100vh',
                 bgcolor: '#ffffff',
-                fontFamily: '"Droid Arabic Kufi", serif',
+                fontFamily: '"Noto Kufi Arabic", serif',
             }}
             dir="rtl"
             lang="ar"
         >
-            <Box
-                sx={{
-                    position: "fixed",
-                    top: NAV_HEIGHT,
-                    left: 0,
-                    width: "100%",
-                    bgcolor: "#F5F7E1",
-                    borderBottom: "1px solid #d1d5db",
-                    px: { xs: 2, md: 5 },
-                    py: 2,
-                    zIndex: 40,
-                }}
-            >
-                <Box sx={{ textAlign: "center" }}>
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            fontFamily: '"Droid Arabic Kufi", serif',
-                            fontSize: { xs: "0.875rem", md: "1rem" }
-                        }}
+           
+            <div style={{ position: 'fixed', top: 70, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: '8px 20px' }}>
+                <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic", serif', fontSize: '1rem' }}>
+                    <a
+                        href="/"
+                        style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                        onMouseEnter={e => e.target.style.color = '#f57c00'}
+                        onMouseLeave={e => e.target.style.color = '#0865a8'}
                     >
-                        <a
-                            href="/"
-                            style={{
-                                marginLeft: 12,
-                                color: "#374151",
-                                textDecoration: "none",
-                            }}
-                        >
-                            الصفحة الرئيسية
-                        </a>
-                        <span style={{ color: "#6b7280" }}> - </span>
-                        <span style={{ marginRight: 12, color: "#374151" }}>
-                            التدريب في الموقع
-                        </span>
-                    </Typography>
-                </Box>
-            </Box>
-
-            <Container
+                        الصفحة الرئيسية
+                    </a>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <span style={{ color: '#374151', marginRight: '8px' }}>التدريب في الموقعة</span>
+                </div>
+            </div>            <Container
                 maxWidth="lg"
                 sx={{
                     pt: { xs: 18, md: 20 },
@@ -137,7 +112,7 @@ const OnsiteTraining = () => {
                     <Typography
                         variant="h3"
                         sx={{
-                            fontFamily: '"Droid Arabic Kufi", serif',
+                            fontFamily: '"Noto Kufi Arabic", serif',
                             fontWeight: 'bold',
                             mb: 2,
                             color: '#000000',
@@ -180,7 +155,7 @@ const OnsiteTraining = () => {
                             <Typography
                                 variant="body1"
                                 sx={{
-                                    fontFamily: '"Droid Arabic Kufi", serif',
+                                    fontFamily: '"Noto Kufi Arabic", serif',
                                     lineHeight: 1.9,
                                     flex: 1,
                                     color: '#000000',
@@ -197,7 +172,7 @@ const OnsiteTraining = () => {
                     <Typography
                         variant="h5"
                         sx={{
-                            fontFamily: '"Droid Arabic Kufi", serif',
+                            fontFamily: '"Noto Kufi Arabic", serif',
                             fontWeight: 'bold',
                             color: '#0865a8',
                             fontSize: { xs: "1.25rem", md: "1.5rem" }
@@ -303,7 +278,7 @@ const OnsiteTraining = () => {
                                         <Typography
                                             variant="h6"
                                             sx={{
-                                                fontFamily: '"Droid Arabic Kufi", serif',
+                                                fontFamily: '"Noto Kufi Arabic", serif',
                                                 textAlign: 'center',
                                                 fontWeight: 'bold',
                                                 width: '100%',
@@ -532,7 +507,7 @@ const OnsiteTraining = () => {
                             <Typography
                                 variant="h6"
                                 sx={{
-                                    fontFamily: '"Droid Arabic Kufi", serif',
+                                    fontFamily: '"Noto Kufi Arabic", serif',
                                     color: '#0865a8',
                                     textAlign: 'center',
                                     fontSize: { xs: "0.95rem", md: "1.1rem" }
@@ -543,7 +518,7 @@ const OnsiteTraining = () => {
                             <Typography
                                 variant="body2"
                                 sx={{
-                                    fontFamily: '"Droid Arabic Kufi", serif',
+                                    fontFamily: '"Noto Kufi Arabic", serif',
                                     color: '#6b7280',
                                     textAlign: 'center',
                                     mt: 0.5,

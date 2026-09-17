@@ -38,7 +38,6 @@ namespace Institute.Application.Services
             string? bankName, string? accountNumber,
             string? accountHolder, string? iban)
         {
-            // ── 1. جيب الكورس وتحقق من تاريخ البداية ─────────────────
             var planwork = (await _planworkRepo.GetAllWithSpecAsync(
                 new BaseSpecification<Planwork>(p => p.ChildId == planworkId)))
                 .FirstOrDefault();
@@ -49,7 +48,6 @@ namespace Institute.Application.Services
             if (!TryParseCourseStartDate(planwork.CourseDate, out var courseStartDate))
                 throw new InvalidOperationException("تاريخ بدء الكورس غير محدد أو غير صحيح.");
 
-            // ── 2. طبّق سياسة الاسترداد ───────────────────────────────
             var daysLeft = (courseStartDate.Date - DateTime.UtcNow.Date).TotalDays;
 
             if (daysLeft < 2)
@@ -57,9 +55,8 @@ namespace Institute.Application.Services
                     "لا يمكن طلب الاسترداد. تبقى أقل من يومين على بدء الكورس.");
 
             if (daysLeft <= 7)
-                amount = amount * 0.75m;  // خصم 25%
+                amount = amount * 0.75m;
 
-            // ── 3. منع التكرار ─────────────────────────────────────────
             var existing = (await _refundRepo.GetAllWithSpecAsync(
                 new BaseSpecification<RefundRequest>(
                     r => r.OrderId == orderId &&
@@ -71,14 +68,13 @@ namespace Institute.Application.Services
                 throw new InvalidOperationException(
                     "يوجد طلب استرداد قيد المعالجة لهذا الكورس مسبقاً.");
 
-            // ── 4. ابعت الطلب ──────────────────────────────────────────
             var refRequest = new RefundRequest
             {
                 RefNumber = GenerateRefNumber(),
                 OrderId = orderId,
                 UserId = userId,
                 PlanworkId = planworkId,
-                Amount = amount,   // بعد تطبيق الخصم لو فيه
+                Amount = amount,
                 Currency = "EGP",
                 Reason = reason,
                 Details = details,
@@ -151,7 +147,6 @@ namespace Institute.Application.Services
             request.ApprovedAt = DateTime.UtcNow;
             _refundRepo.Update(request);
 
-            // ── امسح الـ Enrollment فوراً عند الموافقة ──────────────────
             var enrollSpec = new BaseSpecification<Enrollment>(
                 e => e.UserId == request.UserId && e.PlanworkId == request.PlanworkId);
             var enrollment = (await _enrollmentRepo.GetAllWithSpecAsync(enrollSpec)).FirstOrDefault();
@@ -235,26 +230,25 @@ namespace Institute.Application.Services
         }
 
         // ─── Helpers ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// W7 FIX: collision-resistant ref number using CSPRNG.
+        /// Old: REF-{date}-{Random(1000,9999)}  →  only 9,000 values/day
+        /// New: REF-{date}-{8 hex chars}         →  4,294,967,296 values/day
+        /// </summary>
         private static string GenerateRefNumber()
         {
             var date = DateTime.UtcNow.ToString("yyyyMMdd");
-            var rand = Random.Shared.Next(1000, 9999);
-            return $"REF-{date}-{rand}";
+            var suffix = Convert.ToHexString(
+                System.Security.Cryptography.RandomNumberGenerator.GetBytes(4));
+            return $"REF-{date}-{suffix}";
         }
 
-        /// <summary>
-        /// بتفسر تاريخ البداية من الـ CourseDate المخزن في الـ DB.
-        /// بيدعم:
-        ///   - Range:  "yyyy/MM/dd - yyyy/MM/dd"  ← بياخد الجزء الأول فقط
-        ///   - Single: "yyyy/MM/dd" | "dd/MM/yyyy" | "yyyy-MM-dd" | "d/M/yyyy"
-        /// </summary>
         private static bool TryParseCourseStartDate(string? courseDateStr, out DateTime result)
         {
             result = DateTime.MinValue;
             if (string.IsNullOrWhiteSpace(courseDateStr)) return false;
 
-            // لو فيه range "2026/02/01 - 2026/02/20" — خد الجزء الأول فقط
-            // نستخدم " - " كـ separator عشان نفرق بين الـ range separator والـ date separator
             var parts = courseDateStr.Split(new[] { " - " }, StringSplitOptions.None);
             var raw = parts[0].Trim();
 

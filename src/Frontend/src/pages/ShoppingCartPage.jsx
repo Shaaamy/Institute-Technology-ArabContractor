@@ -27,6 +27,20 @@ const CartItemFull = ({ item, onRemove }) => {
                         </h3>
                     </div>
 
+                    {/* ── UPDATED: Mode badge (online / onsite) ── */}
+                    {item.isOnline !== undefined && (
+                        <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '5px',
+                            padding: '3px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+                            backgroundColor: item.isOnline ? '#ede9fe' : '#e0f2fe',
+                            color: item.isOnline ? '#7c3aed' : '#0865a8',
+                            marginBottom: '10px', alignSelf: 'flex-start',
+                            fontFamily: '"Noto Kufi Arabic", serif',
+                        }}>
+                            {item.isOnline ? '🌐 أونلاين' : '🏢 حضوري'}
+                        </span>
+                    )}
+
                     {(item.instructor || item.place) && (
                         <p className="mb-2 text-sm text-black md:mb-3">
                             <span className="font-semibold text-[#0865a8]">
@@ -118,6 +132,7 @@ export default function ShoppingCartPage() {
                     const token = await getToken();
                     if (!token) throw new Error("No token");
 
+                    // ── GET /api/Cart ──
                     const response = await fetch(`${API_BASE}/cart`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -140,10 +155,13 @@ export default function ShoppingCartPage() {
                         originalPrice: item.cost ?? item.price ?? 0,
                         slug: item.slug || "",
                         quantity: 1,
+                        // ── UPDATED: carry isOnline from API response ──
+                        isOnline: item.isOnline ?? item.IsOnline ?? false,
                     }));
 
                     setItems(transformedItems);
                 } else {
+                    // Guest: read from localStorage (CourseDetails stores isOnline there too)
                     const localCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
                     setItems(localCart);
                 }
@@ -172,6 +190,7 @@ export default function ShoppingCartPage() {
             if (isSignedIn) {
                 const token = await getToken();
                 if (token) {
+                    // ── DELETE /api/Cart/remove/{planworkId} ──
                     await fetch(`${API_BASE}/cart/remove/${planworkId}`, {
                         method: "DELETE",
                         headers: { Authorization: `Bearer ${token}` },
@@ -189,8 +208,8 @@ export default function ShoppingCartPage() {
     if (loading) {
         return (
             <>
-                <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
-                <style>{`* { font-family: "Droid Arabic Kufi", serif !important; } @media (max-width: 640px) { .cart-main { padding-top: 100px !important; } } @media (min-width: 641px) and (max-width: 1024px) { .cart-main { padding-top: 120px !important; } } @media (min-width: 1025px) { .cart-main { padding-top: 130px !important; } }`}</style>
+                <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet" />
+                <style>{`* { font-family: "Noto Kufi Arabic", serif !important; } @media (max-width: 640px) { .cart-main { padding-top: 100px !important; } } @media (min-width: 641px) and (max-width: 1024px) { .cart-main { padding-top: 120px !important; } } @media (min-width: 1025px) { .cart-main { padding-top: 130px !important; } }`}</style>
                 <div className="fixed left-0 z-40 w-full border-b border-gray-300 bg-[#F5F7E1] px-5 py-2" style={{ top: 70 }}>
                     <div className="text-center">
                         <span className="text-sm">
@@ -213,21 +232,26 @@ export default function ShoppingCartPage() {
 
     return (
         <>
-            <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet" />
             <style>{`
-                * { font-family: "Droid Arabic Kufi", serif !important; }
+                * { font-family: "Noto Kufi Arabic", serif !important; }
                 @media (max-width: 640px) { .cart-main { padding-top: 100px !important; } }
                 @media (min-width: 641px) and (max-width: 1024px) { .cart-main { padding-top: 120px !important; } }
                 @media (min-width: 1025px) { .cart-main { padding-top: 130px !important; } }
             `}</style>
 
-            <div className="fixed left-0 z-40 w-full border-b border-gray-300 bg-[#F5F7E1] px-5 py-2" style={{ top: 70 }}>
-                <div className="text-center">
-                    <span className="text-sm md:text-base">
-                        <a href="/" className="ml-3 text-gray-700 transition-colors hover:text-gray-900">الصفحة الرئيسية</a>
-                        <span className="text-gray-500"> - </span>
-                        <span className="mr-3 font-semibold text-gray-900">سلة التسوق</span>
-                    </span>
+            <div style={{ position: 'fixed', top: 70, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: '8px 20px' }}>
+                <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic  ", serif', fontSize: '1rem' }}>
+                    <a
+                        href="/"
+                        style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                        onMouseEnter={e => e.target.style.color = '#f57c00'}
+                        onMouseLeave={e => e.target.style.color = '#0865a8'}
+                    >
+                        الصفحة الرئيسية
+                    </a>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <span style={{ color: '#374151', marginRight: '8px' }}>سلة التسوق</span>
                 </div>
             </div>
 

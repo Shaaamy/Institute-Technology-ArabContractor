@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle, XCircle, Loader2, Home, BookOpen, Sparkles, RefreshCw } from "lucide-react";
 
-const API_BASE = "https://localhost:7177";
+const API_BASE = "https://acwebsite-icmet-test.azurewebsites.net";
 
 export default function PaymentResultPage() {
     const [searchParams] = useSearchParams();
@@ -81,9 +81,9 @@ export default function PaymentResultPage() {
     if (status === "loading") {
         return (
             <>
-                <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
+                <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet" />
                 <style>{`
-                    * { font-family: "Droid Arabic Kufi", serif !important; }
+                    * { font-family: "Noto Kufi Arabic", serif !important; }
                     @keyframes pulse-ring {
                         0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(8,101,168,0.4); }
                         70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(8,101,168,0); }
@@ -110,8 +110,8 @@ export default function PaymentResultPage() {
     if (status === "failed") {
         return (
             <>
-                <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
-                <style>{`* { font-family: "Droid Arabic Kufi", serif !important; }`}</style>
+                <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet" />
+                <style>{`* { font-family: "Noto Kufi Arabic", serif !important; }`}</style>
                 <div dir="rtl" className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-slate-50 px-4 py-16">
                     <div className="mx-auto w-full max-w-md">
                         <div className="overflow-hidden rounded-3xl bg-white shadow-xl">
@@ -149,9 +149,9 @@ export default function PaymentResultPage() {
     // ══════════════════════════════════
     return (
         <>
-            <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet" />
             <style>{`
-                * { font-family: "Droid Arabic Kufi", serif !important; }
+                * { font-family: "Noto Kufi Arabic", serif !important; }
                 @keyframes float {
                     0%, 100% { transform: translateY(0px); }
                     50% { transform: translateY(-8px); }

@@ -11,6 +11,7 @@ namespace Institute.Application.DTOs.AdminDtos
         public int EnrollmentId { get; set; } 
         public string Title { get; set; }
         public DateTime EnrolledAt { get; set; }
+        public decimal? CoursePrice { get; set; }
         public bool Attended { get; set; } 
     }
 }

@@ -14,6 +14,7 @@ namespace Institute.Domain.Entities
         public int PlanworkId { get; set; }
         public Planwork Planwork { get; set; }        // Navigation
         public decimal Price { get; set; }
+        public bool IsOnline { get; set; }
 
     }
 }

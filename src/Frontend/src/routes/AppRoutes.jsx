@@ -1,94 +1,121 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import PublicLayout from "../layouts/PublicLayout";
-import Home from "../pages/Home";
-import Overview from "../pages/overview";
-import Vision_goals from "../pages/vision_and_goals/vision_goals";
-import News from '../pages/News';
-import CoursesPage from "../pages/CoursesPage";
-import Library from "../pages/Library";
-import CustomersPage from '../pages/CustomersPage'; // Adjust path accordingly
-import VocationalTraining from '../pages/VocationalTraining';
-import GesrElSuezPage from '../pages/GesrElSuezPage';
-import ShobraTrainingPage from '../pages/ShobraTrainingPage';
-import Certifications from '../pages/Certifications'; 
-import Team from '../pages/Team'; 
-import OnlineTrainingPage from "../pages/OnlineTrainingPage";
-import TechnicalSchoolPage from "../pages/TechnicalSchoolPage";
-import Protocols from '../pages/Protocols';
-import TechnicalEducation from '../pages/TechnicalEducation';
-import TestsSection from '../pages/TestsSection';
-import ContactPage from '../pages/ContactPage'; // Path where you saved the contact code
-import ShoppingCartPage from '../pages/ShoppingCartPage';
-import Galery from '../pages/Galary';
-import FutureLeadersCouncil from '../pages/Leaders';
-import Instructors from '../pages/Instructors';
-import CheckoutPage from "../pages/CheckoutPage";
-import NewsDetails from '../pages/newsDetails.jsx';
-import CourseDetails from '../pages/CourseDetails';
-import TrainingMethods from '../pages/TrainingMethods';
-import OnsiteTraining from '../pages/OnsiteTraining_fixed';
-import CEAProgram from '../pages/CEAProgram';
-import ScrollToTop from '../components/ScrollToTop'
-import SearchPage from '../pages/Searchpage';
-import Mycourses from '../pages/Mycourses';
-import AdminDashboard from '../pages/AdminDashboard';   // أو المسار الصحيح
-import PaymentResultPage from '../pages/Paymentresultpage.jsx';
+import ScrollToTop from '../components/ScrollToTop';
 
+// ─── Public Pages ────────────────────────────────────────────────────────────
+const Home = lazy(() => import('../pages/Home'));
+const Overview = lazy(() => import('../pages/overview'));
+const Vision_goals = lazy(() => import('../pages/vision_and_goals/vision_goals'));
+const News = lazy(() => import('../pages/News'));
+const NewsDetails = lazy(() => import('../pages/newsDetails.jsx'));
+const CoursesPage = lazy(() => import('../pages/CoursesPage'));
+const CourseDetails = lazy(() => import('../pages/CourseDetails'));
+const Library = lazy(() => import('../pages/Library'));
+const CustomersPage = lazy(() => import('../pages/CustomersPage'));
+const Certifications = lazy(() => import('../pages/Certifications'));
+const Team = lazy(() => import('../pages/Team'));
+const Instructors = lazy(() => import('../pages/Instructors'));
+const FutureLeadersCouncil = lazy(() => import('../pages/Leaders'));
+const Protocols = lazy(() => import('../pages/Protocols'));
+const ContactPage = lazy(() => import('../pages/ContactPage'));
+const Galery = lazy(() => import('../pages/Galary'));
+const SearchPage = lazy(() => import('../pages/Searchpage'));
 
+// ─── Training Pages ──────────────────────────────────────────────────────────
+const VocationalTraining = lazy(() => import('../pages/VocationalTraining'));
+const GesrElSuezPage = lazy(() => import('../pages/GesrElSuezPage'));
+const ShobraTrainingPage = lazy(() => import('../pages/ShobraTrainingPage'));
+const OnlineTrainingPage = lazy(() => import('../pages/OnlineTrainingPage'));
+const TechnicalSchoolPage = lazy(() => import('../pages/TechnicalSchoolPage'));
+const TechnicalEducation = lazy(() => import('../pages/TechnicalEducation'));
+const TrainingMethods = lazy(() => import('../pages/TrainingMethods'));
+const OnsiteTraining = lazy(() => import('../pages/OnsiteTraining_fixed'));
+const CEAProgram = lazy(() => import('../pages/CEAProgram'));
+const TestsSection = lazy(() => import('../pages/TestsSection'));
 
-   
+// ─── Cart / Checkout / Payment ───────────────────────────────────────────────
+const ShoppingCartPage = lazy(() => import('../pages/ShoppingCartPage'));
+const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
+const PaymentResultPage = lazy(() => import('../pages/Paymentresultpage.jsx'));
+const Mycourses = lazy(() => import('../pages/Mycourses'));
+
+// ─── Admin Pages ─────────────────────────────────────────────────────────────
+const AdminDashboard = lazy(() => import('../pages/admin/Admin'));
+const Mohadren = lazy(() => import('../pages/admin/mohadren'));
+const NewsTab = lazy(() => import('../pages/admin/NewsTab'));
+const BooksTab = lazy(() => import('../pages/admin/BooksTab'));
+const PlanworkTab = lazy(() => import('../pages/admin/PlanworkTab'));
+
+// ─── Loading Fallback ─────────────────────────────────────────────────────────
+const PageLoader = () => (
+    <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '60vh',
+        fontSize: '1rem',
+        color: '#888',
+    }}>
+        Loading...
+    </div>
+);
+
+// ─── Routes ──────────────────────────────────────────────────────────────────
 const AppRoutes = () => {
     return (
-    <>
-   
-    <ScrollToTop />
-    <Routes>
+        <>
+            <ScrollToTop />
+            <Suspense fallback={<PageLoader />}>
+                <Routes>
 
-      {/* <Route element={<PublicLayout />}> */}
-            <Route index element={<Home />} />
-            <Route path="/vocational-training" element={<VocationalTraining />} />
-                <Route path="gesr-el-suez" element={<GesrElSuezPage />} />
-                <Route path="shobra" element={<ShobraTrainingPage />} />
-        <Route path="/overview" element={<Overview />} />
-        <Route path="/mission" element={<Vision_goals />} />
-        <Route path="/news" element={<News />} />
-            <Route path="/courses/:slug" element={<CoursesPage />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/customers" element={<CustomersPage />} />
-            <Route path="/certifications" element={<Certifications />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/online-training" element={<OnlineTrainingPage />} /> 
-            <Route path="/Technical_Schools" element={<TechnicalSchoolPage />} />
-            <Route path="/protocols" element={<Protocols />} />
-            <Route path="/technical-education" element={<TechnicalEducation />} />
-            <Route path="/tests" element={<TestsSection />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/cart" element={<ShoppingCartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/gallery" element={<Galery />} />
-            <Route path="/future-leaders" element={<FutureLeadersCouncil />} />
-            <Route path="/instructors" element={<Instructors />} />
-            <Route path="/news/:id" element={<NewsDetails />} />
-            <Route path="/course/:slug" element={<CourseDetails />} />
-            <Route path="/training-methods" element={<TrainingMethods />} />
-            <Route path="/cea-program" element={<CEAProgram />} />
-            <Route path="/onsite-training" element={<OnsiteTraining />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/my-courses" element={<Mycourses />} />    
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/payment/result" element={<PaymentResultPage />} />
+                    {/* Public */}
+                    <Route index element={<Home />} />
+                    <Route path="/overview" element={<Overview />} />
+                    <Route path="/mission" element={<Vision_goals />} />
+                    <Route path="/news" element={<News />} />
+                    <Route path="/news/:id" element={<NewsDetails />} />
+                    <Route path="/courses/:slug" element={<CoursesPage />} />
+                    <Route path="/course/:slug" element={<CourseDetails />} />
+                    <Route path="/library" element={<Library />} />
+                    <Route path="/customers" element={<CustomersPage />} />
+                    <Route path="/certifications" element={<Certifications />} />
+                    <Route path="/team" element={<Team />} />
+                    <Route path="/instructors" element={<Instructors />} />
+                    <Route path="/future-leaders" element={<FutureLeadersCouncil />} />
+                    <Route path="/protocols" element={<Protocols />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/gallery" element={<Galery />} />
+                    <Route path="/search" element={<SearchPage />} />
 
-            
+                    {/* Training */}
+                    <Route path="/vocational-training" element={<VocationalTraining />} />
+                    <Route path="/gesr-el-suez" element={<GesrElSuezPage />} />
+                    <Route path="/shobra" element={<ShobraTrainingPage />} />
+                    <Route path="/online-training" element={<OnlineTrainingPage />} />
+                    <Route path="/Technical_Schools" element={<TechnicalSchoolPage />} />
+                    <Route path="/technical-education" element={<TechnicalEducation />} />
+                    <Route path="/training-methods" element={<TrainingMethods />} />
+                    <Route path="/onsite-training" element={<OnsiteTraining />} />
+                    <Route path="/cea-program" element={<CEAProgram />} />
+                    <Route path="/tests" element={<TestsSection />} />
 
+                    {/* Cart / Checkout / Payment */}
+                    <Route path="/cart" element={<ShoppingCartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/payment/result" element={<PaymentResultPage />} />
+                    <Route path="/my-courses" element={<Mycourses />} />
 
+                    {/* Admin */}
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/mohadren" element={<Mohadren />} />
+                    <Route path="/admin/news" element={<NewsTab />} />
+                    <Route path="/admin/books" element={<BooksTab />} />
+                    <Route path="/admin/planwork" element={<PlanworkTab />} />
 
-
-
-            
-    </Routes>
-    </>
-  );
+                </Routes>
+            </Suspense>
+        </>
+    );
 };
 
 export default AppRoutes;

@@ -10,6 +10,7 @@
         public string Currency { get; set; }
         public string ReturnUrl { get; set; }
         public string WebhookSecret { get; set; }
+        public string CancelUrl { get; set; }
         public bool RequireWebhookVerification { get; set; }
     }
 }

@@ -1,5 +1,5 @@
-﻿/* Import Droid Arabic Kufi Font */
-@import url('https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap');
+﻿/* Import Noto Kufi Arabic Font */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap');
 
 /* ==============================================
    BASE STYLES
@@ -16,7 +16,7 @@
     padding-top: 70px;
     padding-bottom: 60px;
     direction: rtl;
-    font-family: 'Droid Arabic Kufi', serif;
+    font-family: 'Noto Kufi Arabic', serif;
     width: 100%;
 }
 
@@ -216,7 +216,7 @@
     font-weight: 600;
     text-align: center;
     border-radius: 4px 4px 0 0;
-    font-family: 'Droid Arabic Kufi', serif;
+    font-family: 'Noto Kufi Arabic', serif;
 }
 
 /* Image */
@@ -257,7 +257,7 @@
     font-weight: 500;
     display: block;
     transition: color 0.3s;
-    font-family: 'Droid Arabic Kufi', serif;
+    font-family: 'Noto Kufi Arabic', serif;
 }
 
     .news-title-link:hover {
@@ -275,7 +275,7 @@
     width: 100%;
     padding: 50px 20px;
     font-size: 18px;
-    font-family: 'Droid Arabic Kufi', serif;
+    font-family: 'Noto Kufi Arabic', serif;
     grid-column: 1 / -1;
 }
 
@@ -325,7 +325,7 @@
     font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
-    font-family: 'Droid Arabic Kufi', serif;
+    font-family: 'Noto Kufi Arabic', serif;
 }
 
     .pagination-dot:hover,

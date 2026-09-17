@@ -213,7 +213,7 @@ const SearchPage = () => {
             <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
 
             <style>{`
-                * { font-family: "Droid Arabic Kufi", serif !important; }
+                * { font-family: "Noto Kufi Arabic", serif !important; }
 
                 @media (max-width: 640px) {
                     .search-main-container { margin-top: 100px !important; }

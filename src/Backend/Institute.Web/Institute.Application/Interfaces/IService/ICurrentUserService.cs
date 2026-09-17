@@ -9,5 +9,7 @@ namespace Institute.Application.Interfaces.IService
     public interface ICurrentUserService
     {
         string? UserId { get; }
+        Task<bool> IsManagerAsync();
+
     }
 }

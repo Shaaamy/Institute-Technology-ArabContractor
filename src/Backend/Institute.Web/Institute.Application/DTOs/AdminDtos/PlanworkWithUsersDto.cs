@@ -11,6 +11,7 @@ namespace Institute.Application.DTOs.AdminDtos
         public int Id { get; set; }
         public string? ServiceTitle { get; set; }
         public int UsersCount { get; set; }
+        public decimal TotalRevenue { get; set; }
         public List<UserEnrollmentDto> Users { get; set; } = new();
     }
 }

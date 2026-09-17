@@ -2,10 +2,13 @@ name: Build and deploy ASP+React to Azure Web App - acwebsite
 
 on:
   push:
-    branches:
+   branches:
       - main
   workflow_dispatch:
-
+  
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  
 jobs:
   build:
     runs-on: windows-latest
@@ -34,15 +37,15 @@ jobs:
 
       # ------------------ Frontend ------------------
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
 
       - name: Install frontend dependencies
         shell: pwsh
         run: |
           cd src/Frontend
-          npm install
+          npm ci
 
       # ✅ Write .env file with secrets before build
       - name: Create .env file for frontend

@@ -34,7 +34,9 @@ public partial class Planwork
     public string? PlanPass { get; set; }
 
     public decimal? PlanCost { get; set; }
-
+    public bool IsOnline { get; set; }      //added this 
+    public string OnlineLink { get; set; }      //added this 
+    public decimal? OnlineCost { get; set; }      //added this 
     public string? Slug { get; set; }
     public string? SKU { get; set; }
 

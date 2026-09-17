@@ -1,24 +1,49 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8" />
-    <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-    <link rel="icon" type="image/png" href="/images/logo-removebg-preview.png" />
+
+    <!-- Preconnect (تسريع تحميل الخط) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Font (optimized load) -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;700;900&display=swap">
+
+    <link rel="icon" type="image/webp" href="/images/white.webp" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <title>icemt-lms-frontend</title> -->
+
     <title>المعهد التكنولوجي لهندسة التشييد والإدارة</title>
 
+    <meta name="description"
+          content="الموقع الرسمي للمعهد التكنولوجي لهندسة التشييد والإدارة" />
 </head>
-
 <body style="background-color: #ffffff;">
     <div id="root"></div>
-    <script src="https://banquemisr.gateway.mastercard.com/static/checkout/checkout.min.js" data-error="errorCallback"
-        data-cancel="cancelCallback" data-complete="completeCallback">
-        </script>
+    <script>
+        function completeCallback(resultIndicator) {
+            if (window.completeCallbackReact) {
+                window.completeCallbackReact(resultIndicator);
+            }
+        }
+        function errorCallback(error) {
+            if (window.errorCallbackReact) {
+                window.errorCallbackReact(error);
+            }
+        }
+        function cancelCallback() {
+            if (window.cancelCallbackReact) {
+                window.cancelCallbackReact();
+            }
+        }
+    </script>
+    <script src="https://banquemisr.gateway.mastercard.com/static/checkout/checkout.min.js"
+            data-error="errorCallback"
+            data-cancel="cancelCallback"
+            data-complete="completeCallback">
+    </script>
     <script type="module" src="/src/main.jsx"></script>
 </body>
-
 </html>

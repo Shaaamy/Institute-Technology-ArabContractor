@@ -89,8 +89,8 @@ export default function RefundManagementPage() {
 
     return (
         <>
-            <link href="https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap" rel="stylesheet" />
-            <style>{`* { font-family: "Droid Arabic Kufi", serif !important; }`}</style>
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet" />
+            <style>{`* { font-family: "Noto Kufi Arabic", serif !important; }`}</style>
 
             {/* Toast */}
             {toast && (

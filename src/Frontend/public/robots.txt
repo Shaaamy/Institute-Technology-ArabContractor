@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://acwebsite-icmet-test.azurewebsites.net/sitemap.xml

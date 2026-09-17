@@ -36,18 +36,24 @@ namespace Institute.API.Controllers
                     Place = i.Planwork?.CoursePlace,
                     Date = i.Planwork?.CourseDate,
                     Days = i.Planwork?.CourseDays,
-                    Cost = i.Planwork?.PlanCost,
                     Slug = i.Planwork?.Slug,
+                    IsOnline = i.IsOnline,                                          // ✅
+                    Cost = i.Planwork?.PlanCost,  // ← السعر الأصلي دايماً
+                    OnlineCost = i.Planwork?.OnlineCost,                            // ✅
                 }).ToList()
             };
 
             return Ok(result);
         }
 
+        /// <summary>
+        /// POST /api/cart/add/{planworkId}
+        /// Body: { "isOnline": true/false }
+        /// </summary>
         [HttpPost("add/{planworkId}")]
-        public async Task<IActionResult> AddToCart(int planworkId)
+        public async Task<IActionResult> AddToCart(int planworkId, [FromBody] AddToCartDto dto)
         {
-            await _cartService.AddToCartAsync(_currentUser.UserId, planworkId);
+            await _cartService.AddToCartAsync(_currentUser.UserId, planworkId, dto.IsOnline);
             return Ok();
         }
 
@@ -57,5 +63,10 @@ namespace Institute.API.Controllers
             await _cartService.RemoveFromCartAsync(_currentUser.UserId, planworkId);
             return Ok();
         }
+    }
+
+    public class AddToCartDto
+    {
+        public bool IsOnline { get; set; }
     }
 }

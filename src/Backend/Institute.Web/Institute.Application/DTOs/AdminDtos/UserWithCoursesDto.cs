@@ -9,7 +9,6 @@ namespace Institute.API.DTOs.AdminDtos
         public string Email { get; set; }
 
         public int CoursesCount { get; set; }
-
         public List<UserCourseDto> Courses { get; set; }
     }
 }

@@ -11,7 +11,7 @@ public partial class Dailynews
     public string? ADetails { get; set; }
     public int? MainPagePeriority { get; set; }
     public bool? Approved { get; set; }
-
+    public bool? ShowFlag { get; set; }
     public virtual ICollection<NewsPic> NewsPics { get; set; } = new List<NewsPic>();
 }
 

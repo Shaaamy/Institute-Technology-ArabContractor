@@ -9,5 +9,7 @@
         public string? Date { get; set; }
         public string? Description { get; set; }
         public decimal? Cost { get; set; }
+        public bool IsOnline { get; set; }
+        public decimal? OnlineCost { get; set; }
     }
 }

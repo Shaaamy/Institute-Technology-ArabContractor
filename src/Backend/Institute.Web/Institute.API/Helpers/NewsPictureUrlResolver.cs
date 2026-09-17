@@ -31,7 +31,7 @@ namespace Institute.API.Helpers
             if (string.IsNullOrEmpty(imageName))
                 return null;
 
-            return $"{_configuration["ApiUrl"]}/images/news/{imageName}";
+            return $"{_configuration["AzureStorage:BaseUrl"]}/news/{imageName}";
         }
     }
 

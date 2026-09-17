@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Check, Search, Calendar, Tag, ChevronLeft, ChevronRight, Sparkles, TrendingUp, Clock, Award } from 'lucide-react';
+import { BookOpen, Check, Search, Calendar, Tag, ChevronLeft, ChevronRight, Sparkles, TrendingUp, Clock, Award, Star, Globe, Users, Building } from 'lucide-react';
 
 export default function ModernLibrary() {
-    const [windowWidth, setWindowWidth] = useState(
-        typeof window !== 'undefined' ? window.innerWidth : 1200
-    );
-    const [scrollY, setScrollY] = useState(0);
+    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
     const [scrollProgress, setScrollProgress] = useState(0);
 
     useEffect(() => {
@@ -13,1511 +10,557 @@ export default function ModernLibrary() {
     }, []);
 
     useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        const handleScroll = () => {
-            setScrollY(window.scrollY);
-            const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const progress = (window.scrollY / totalHeight) * 100;
-            setScrollProgress(progress);
+        const hash = window.location.hash;
+        if (!hash) return;
+        const id = hash.replace('#', '');
+        const attempt = (tries = 0) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            else if (tries < 10) setTimeout(() => attempt(tries + 1), 150);
         };
-
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('scroll', handleScroll);
-        };
+        attempt();
     }, []);
 
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        const handleScroll = () => {
+            const total = document.documentElement.scrollHeight - window.innerHeight;
+            if (total > 0) setScrollProgress((window.scrollY / total) * 100);
+        };
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('scroll', handleScroll);
+        return () => { window.removeEventListener('resize', handleResize); window.removeEventListener('scroll', handleScroll); };
+    }, []);
+
+    const isTiny = windowWidth < 400;
     const isMobile = windowWidth <= 640;
-    const isTablet = windowWidth <= 1024 && windowWidth > 640;
+    const isTablet = windowWidth > 640 && windowWidth <= 1024;
+    const isDesktop = windowWidth > 1024;
 
     const stats = [
-        { icon: BookOpen, label: 'كتاب متاح', value: '4000+', color: '#0865a8' },
-        { icon: TrendingUp, label: 'دورية علمية', value: '17', color: '#f57c00' },
-        { icon: Clock, label: 'مواد علمية', value: '2500+', color: '#0865a8' },
-        { icon: Award, label: 'سنوات خبرة', value: '49', color: '#f57c00' }
+        { icon: BookOpen, label: 'كتاب متاح', value: '4200+', color: '#0865a8' },
+        { icon: TrendingUp, label: 'مجال علمي', value: '23', color: '#f57c00' },
+        { icon: Clock, label: 'مادة علمية', value: '2500+', color: '#0865a8' },
+        { icon: Award, label: 'سنوات خبرة', value: '55+', color: '#f57c00' },
     ];
 
     const features = [
-        {
-            text: "تضم المكتبة تخبه من الكتب المتميزة والتي تزيد عن أربعة ألف كتاباً في جميع مجالات العلوم الهندسية المختلفة (مدنية – معمارية – ميكانيكا – كهرباء – صحي – مساحة .....) الى جانب العلوم الاخرى (الادارة – الاقتصاد – القانون – المحاسبة – الحاسب الآلي...)",
-            color: '#0865a8'
-        },
-        {
-            text: "تشترك المكتبة في 17 دورية علمية متخصصة تغطي معظم المجالات المختلفة والتي تخدم جميع مشروعات الشركة",
-            color: '#f57c00'
-        },
-        {
-            text: "3 مواقع متخصصة (موقع global render – موقع خلاصات كتب المدير وملفات المختار الإداري – موقع بوابة الخدمات القانونية)",
-            color: '#0865a8'
-        },
-        {
-            text: "تحتوي المكتبة على أكثر من 2500 مادة علمية متخصصة بها خلاصة الخبرات العلمية لمشروعات الشركة والتي تم اعدادها من قبل الخبراء والمتخصصين بالشركة بهدف نقل الخبرات المختلفة الى جميع العاملين من خلال العملية التدريبية.",
-            color: '#f57c00'
-        }
+        { text: "تضم المكتبة أكثر من 4200 كتاب في جميع مجالات العلوم الهندسية (مدنية – معمارية – ميكانيكا – كهرباء – صحي – مساحة – طرق – مائية) إلى جانب العلوم الأخرى (الإدارة – الاقتصاد – القانون – المحاسبة – السلامة والصحة المهنية – البيئة – الحاسب الآلي).", color: '#0865a8' },
+        { text: "تحتوي المكتبة على أكثر من 2500 مادة علمية متخصصة تغطي 23 مجالاً وفق مصفوفة المجالات التدريبية، تم إعدادها من قبل خبراء الشركة بهدف نقل الخبرات المختلفة إلى جميع العاملين.", color: '#f57c00' },
+        { text: "جميع كتب المكتبة مصنفة وفقاً لتصنيف ديوي العشري العالمي، مع قاعدة بيانات متكاملة تتيح أنظمة البحث والاسترجاع لجميع المستفيدين.", color: '#0865a8' },
+        { text: "تصدر المكتبة أدلة علمية متخصصة يُعدّها المتخصصون في مجالات الهندسة المدنية والعمارة والميكانيكا والمساحة والهندسة الصحية والمهارات الإدارية والمالية.", color: '#f57c00' },
+    ];
+
+    const platforms = [
+        { name: 'Le Moniteur', icon: Globe, desc: 'منصة الإنشاء والبناء الفرنسية' },
+        { name: 'Global Tenders', icon: TrendingUp, desc: 'منصة المناقصات العالمية' },
+        { name: 'Construct Africa', icon: Building, desc: 'منصة التشييد الأفريقية' },
+        { name: 'بوابة قوانين الشرق', icon: BookOpen, desc: '5 منظومات قانونية متخصصة لـ 3 إدارات' },
+    ];
+
+    const subscriptionInfo = [
+        { label: 'خدمات لموظفي الشركة', value: 'مجاناً', color: '#0865a8' },
+        { label: 'اشتراك شهري (خارجي)', value: '40 جنيه', color: '#f57c00' },
+        { label: 'اشتراك سنوي (خارجي)', value: '400 جنيه', color: '#0865a8' },
+        { label: 'حد الاستعارة', value: '3 كتب / 15 يوم', color: '#f57c00' },
     ];
 
     const books = [
-        {
-            title: "Capture and reuse of project knowledge in construction",
-            publisher: "Willy-Blackwell",
-            image: "https://www.arabcont.com/icemt/assets/images/Book01.jpg",
-            url: "https://online.fliphtml5.com/cvhml/vzfl/#p=1",
-            color: '#0865a8'
-        },
-        {
-            title: "ICE manual of highway design and management",
-            publisher: "Second Edition",
-            image: "https://www.arabcont.com/icemt/assets/images/Book02.jpg",
-            url: "https://online.fliphtml5.com/cvhml/qzxx/#p=1",
-            color: '#f57c00'
-        },
-        {
-            title: "Construction Dewatering and Groundwater Control",
-            publisher: "Third Edition",
-            image: "https://www.arabcont.com/icemt/assets/images/Book03.jpg",
-            url: "https://online.fliphtml5.com/cvhml/wdbx/#p=1",
-            color: '#0865a8'
-        }
+        { title: "Capture and reuse of project knowledge in construction", publisher: "Willy-Blackwell", image: "https://www.arabcont.com/icemt/assets/images/Book01.jpg", url: "https://online.fliphtml5.com/cvhml/vzfl/#p=1", color: '#0865a8' },
+        { title: "ICE manual of highway design and management", publisher: "Second Edition", image: "https://www.arabcont.com/icemt/assets/images/Book02.jpg", url: "https://online.fliphtml5.com/cvhml/qzxx/#p=1", color: '#f57c00' },
+        { title: "Construction Dewatering and Groundwater Control", publisher: "Third Edition", image: "https://www.arabcont.com/icemt/assets/images/Book03.jpg", url: "https://online.fliphtml5.com/cvhml/wdbx/#p=1", color: '#0865a8' },
     ];
 
-    const handleBookClick = (url) => {
-        window.open(url, '_blank', 'noopener,noreferrer');
-    };
+    const embassyGoals = [
+        'تطوير مهارات البحث العلمي لرواد السفارة',
+        'تشجيع التعلم الذاتي وتنمية المهارات في شتى المجالات',
+        'تنظيم ورش عمل تفاعلية في مجالات علمية وأدبية وفنية',
+        'ربط المكتبة بالتدريب وتطوير المنظومة التدريبية',
+        'تزويد المتدربين بأحدث الكتب والمراجع العلمية',
+        'البث المباشر للفعاليات والمؤتمرات من مكتبة الإسكندرية',
+    ];
+
+    // ── Embassy definition images (horizontal scroll) ──
+    const embassyDefImages = [
+        { src: '/images/library/im1.jpeg' },
+        { src: '/images/library/im2.jpeg' },
+        { src: '/images/library/im3.jpeg' },
+    ];
+
+    const pad = isTiny ? '28px 10px' : isMobile ? '40px 14px' : isTablet ? '60px 24px' : '80px 40px';
+    const containerStyle = { maxWidth: '1400px', margin: '0 auto', width: '100%' };
+    const sectionStyle = (bg = 'white') => ({ padding: pad, background: bg, boxSizing: 'border-box' });
+    const sectionHeaderStyle = { textAlign: 'center', marginBottom: isMobile ? '28px' : '48px' };
+    const sectionTitleStyle = { fontSize: isTiny ? '22px' : isMobile ? '26px' : isTablet ? '32px' : '38px', fontWeight: '800', color: '#000', marginBottom: '10px', lineHeight: 1.2 };
+    const sectionSubStyle = { fontSize: isMobile ? '14px' : '17px', color: '#6b7280' };
+    const cardBase = { background: 'white', borderRadius: isMobile ? '14px' : '20px', border: '2px solid #e5e7eb', padding: isTiny ? '14px' : isMobile ? '18px' : '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', boxSizing: 'border-box' };
+    const cols = (tiny, mob, tab, desk) => isTiny ? tiny : isMobile ? mob : isTablet ? tab : desk;
 
     return (
-        <div style={styles.page}>
-            {/* Progress Bar */}
-            <div style={styles.progressBar}>
-                <div style={{ ...styles.progressFill, width: `${scrollProgress}%` }} />
+        <div style={{ minHeight: '100vh', background: 'white', fontFamily: '"Noto Kufi Arabic", serif', direction: 'rtl', overflowX: 'hidden' }}>
+
+            {/* Progress bar */}
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '4px', background: '#e5e7eb', zIndex: 9999 }}>
+                <div style={{ height: '100%', background: 'linear-gradient(to right, #f57c00, #0865a8)', width: `${scrollProgress}%`, transition: 'width 0.3s ease' }} />
             </div>
 
-            {/* Fixed Overview Bar */}
-            <div className="fixed left-0 z-30 w-full border-b border-gray-300 bg-[#F5F7E1] px-5 py-2" style={{ top: '70px' }}>
-                <div className="text-center">
-                    <span className="text-base">
-                        <a href="/" className="ml-3 text-gray-700 hover:text-gray-900">الصفحة الرئيسية</a>
-                        <span className="text-gray-500">-</span>
-                        <span className="mr-3 text-gray-700">المكــتبة</span>
-                    </span>
+            {/* Nav */}
+            <div style={{ position: 'fixed', top: 4, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: isMobile ? '8px 12px' : '8px 20px', boxSizing: 'border-box' }}>
+                <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic", serif', fontSize: isTiny ? '13px' : '1rem' }}>
+                    <a href="/" style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}>الصفحة الرئيسية</a>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <span style={{ color: '#374151' }}>المكتبة</span>
                 </div>
             </div>
 
-            {/* Hero Section */}
-            <section style={{ ...styles.heroSection, paddingTop: isMobile ? '140px' : '160px' }}>
-                <div style={styles.heroContent}>
-                    <div style={styles.heroIcon}>
-                        <BookOpen style={styles.heroIconSvg} />
+            {/* ══ HERO ══ */}
+            <section style={{ ...sectionStyle('white'), paddingTop: isMobile ? '72px' : '120px', textAlign: 'center' }}>
+                <div style={containerStyle}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? '72px' : '100px', height: isMobile ? '72px' : '100px', background: 'linear-gradient(135deg, #0865a8, #f57c00)', borderRadius: isMobile ? '20px' : '28px', marginBottom: '20px', boxShadow: '0 16px 48px rgba(8,101,168,0.35)' }}>
+                        <BookOpen style={{ width: isMobile ? '34px' : '48px', height: isMobile ? '34px' : '48px', color: 'white' }} />
                     </div>
-                    <h1 style={{ ...styles.heroTitle, fontSize: isMobile ? '36px' : isTablet ? '48px' : '64px' }}>
-                        المكتبة 
-                    </h1>
-                    <div style={styles.heroUnderline}>
-                        <div style={styles.underlineAnimate}></div>
+                    <h1 style={{ fontSize: isTiny ? '28px' : isMobile ? '36px' : isTablet ? '48px' : '60px', fontWeight: '800', color: '#000', marginBottom: '14px', lineHeight: 1.15 }}>المكتبة الرئيسية</h1>
+                    <div style={{ width: isMobile ? '120px' : '180px', height: '5px', background: '#e5e7eb', borderRadius: '999px', margin: '0 auto 20px', overflow: 'hidden' }}>
+                        <div style={{ width: '40%', height: '100%', background: 'linear-gradient(90deg, #0865a8, #f57c00)', borderRadius: '999px', animation: 'slide 2s infinite ease-in-out' }} />
                     </div>
-                    <p style={{ ...styles.heroSubtitle, fontSize: isMobile ? '16px' : '20px' }}>
-                        رحلة معرفية تبدأ منذ 1975 • مكتبة عريقة • محتوى متجدد
+                    {/* ── UPDATED: larger subtitle font ── */}
+                    <p style={{ fontSize: isTiny ? '15px' : isMobile ? '17px' : isTablet ? '20px' : '22px', color: '#6b7280', lineHeight: 1.7 }}>
+                        مكتبة متخصصة في التشييد والبناء • تأسست 1970 • سفارة معرفة مكتبة الإسكندرية
                     </p>
                 </div>
             </section>
 
-            {/* Stats Cards */}
-            <section style={{ ...styles.statsSection, padding: isMobile ? '40px 16px' : '60px 32px' }}>
-                <div style={styles.container}>
-                    <div style={{
-                        ...styles.statsGrid,
-                        gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)'
-                    }}>
-                        {stats.map((stat, index) => (
-                            <StatCard key={index} stat={stat} index={index} isMobile={isMobile} />
-                        ))}
+            {/* ══ STATS ══ */}
+            <section style={sectionStyle('#f9fafb')}>
+                <div style={containerStyle}>
+                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols('2', '2', '4', '4')}, 1fr)`, gap: isTiny ? '10px' : isMobile ? '14px' : '20px' }}>
+                        {stats.map((s, i) => {
+                            const Icon = s.icon;
+                            return (
+                                <div key={i} style={{ ...cardBase, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '10px' }}>
+                                    <div style={{ width: isTiny ? '40px' : '56px', height: isTiny ? '40px' : '56px', borderRadius: '14px', background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <Icon size={isTiny ? 18 : 26} color="white" />
+                                    </div>
+                                    <div style={{ fontSize: isTiny ? '20px' : isMobile ? '24px' : '32px', fontWeight: '800', color: '#000' }}>{s.value}</div>
+                                    <div style={{ fontSize: isTiny ? '13px' : '15px', color: '#6b7280' }}>{s.label}</div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
 
-            {/* Description with Image */}
-            <section style={{ ...styles.descriptionSection, padding: isMobile ? '40px 16px' : '80px 32px' }}>
-                <div style={styles.container}>
-                    <div style={{
-                        ...styles.descriptionGrid,
-                        gridTemplateColumns: isMobile || isTablet ? '1fr' : '1fr 1fr',
-                        gap: isMobile ? '32px' : '64px'
-                    }}>
-                        <div style={styles.descriptionContent}>
-                            <div style={styles.sectionBadge}>
-                                <Sparkles size={16} />
-                                <span>نبذة عن المكتبة</span>
+            {/* ══ ABOUT ══ */}
+            <section style={sectionStyle('white')}>
+                <div style={containerStyle}>
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', '1fr', '1fr 1fr'), gap: isMobile ? '28px' : '48px', alignItems: 'center' }}>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '7px 16px', border: '2px solid #0865a8', borderRadius: '999px', color: '#0865a8', fontSize: isTiny ? '13px' : '15px', marginBottom: '16px' }}>
+                                <Sparkles size={14} /> نبذة عن المكتبة
                             </div>
-                            <h2 style={{ ...styles.sectionTitle, fontSize: isMobile ? '28px' : '42px' }}>
-                                مكتبة عريقة منذ 1975
-                            </h2>
-                            <p style={{ ...styles.descriptionText, fontSize: isMobile ? '16px' : '18px' }}>
-دينا مكتبة عريقة تم إنشاؤها منذ عام 1975 وذلك إيماناً من شركة المقاولون العرب بأهمية القراءة والاطلاع المستمر ومعرفة كل ما هو حديث وجديد بسوق العمل                            </p>
-                            <div style={styles.descriptionFeatures}>
-                                <DescriptionFeature icon={Check} text="محتوى محدث باستمرار" color="#0865a8" />
-                                <DescriptionFeature icon={Check} text="تغطية شاملة لجميع التخصصات" color="#f57c00" />
-                                <DescriptionFeature icon={Check} text="وصول سهل وسريع" color="#000000" />
-                            </div>
-                        </div>
-                        <div style={styles.imageWrapper}>
-                            <div style={styles.imageFrame}>
-                                <img
-                                    src="https://www.arabcont.com/icemt/assets/images/library-02.jpg"
-                                    alt="المكتبة"
-                                    style={{ ...styles.mainImage, height: isMobile ? '300px' : '400px' }}
-                                />
-                                <div style={styles.imageOverlay}></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Features Grid */}
-            <section style={{ ...styles.featuresSection, padding: isMobile ? '40px 16px' : '80px 32px' }}>
-                <div style={styles.container}>
-                    <div style={styles.sectionHeader}>
-                        <h2 style={{ ...styles.sectionTitle, fontSize: isMobile ? '28px' : '42px' }}>
-                            مميزات المكتبة
-                        </h2>
-                        <p style={styles.sectionSubtitle}>
-                            اكتشف ما يميز مكتبتنا عن غيرها
-                        </p>
-                    </div>
-                    <div style={{
-                        ...styles.featuresGrid,
-                        gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr' : 'repeat(2, 1fr)'
-                    }}>
-                        {features.map((feature, index) => (
-                            <ModernFeatureCard
-                                key={index}
-                                feature={feature}
-                                index={index}
-                                isMobile={isMobile}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Books Showcase */}
-            <section style={{ ...styles.booksSection, padding: isMobile ? '40px 16px' : '80px 32px' }}>
-                <div style={styles.container}>
-                    <div style={styles.sectionHeader}>
-                        <h2 style={{ ...styles.sectionTitle, fontSize: isMobile ? '28px' : '42px' }}>
-                            أمثلة من الكتب
-                        </h2>
-                        <p style={styles.sectionSubtitle}>
-                            تصفح مجموعة مختارة من أفضل الكتب
-                        </p>
-                    </div>
-                    <div style={{
-                        ...styles.booksGrid,
-                        gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)'
-                    }}>
-                        {books.map((book, index) => (
-                            <ModernBookCard
-                                key={index}
-                                book={book}
-                                onClick={() => handleBookClick(book.url)}
-                                index={index}
-                                isMobile={isMobile}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Search Section */}
-            <LibrarySearchSection isMobile={isMobile} isTablet={isTablet} />
-
-            
-
-            {/* Font Import */}
-            <style>
-                {`
-                    @import url('https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi&display=swap');
-                `}
-            </style>
-        </div>
-    );
-}
-
-function StatCard({ stat, index, isMobile }) {
-    const [isVisible, setIsVisible] = useState(false);
-    const Icon = stat.icon;
-
-    useEffect(() => {
-        const timer = setTimeout(() => setIsVisible(true), index * 100);
-        return () => clearTimeout(timer);
-    }, [index]);
-
-    return (
-        <div style={{
-            ...styles.statCard,
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: `all 0.6s ease ${index * 0.1}s`
-        }}>
-            <div style={{ ...styles.statIcon, background: stat.color }}>
-                <Icon size={isMobile ? 24 : 28} color="white" />
-            </div>
-            <div style={styles.statContent}>
-                <div style={{ ...styles.statValue, fontSize: isMobile ? '28px' : '36px' }}>
-                    {stat.value}
-                </div>
-                <div style={styles.statLabel}>{stat.label}</div>
-            </div>
-        </div>
-    );
-}
-
-function DescriptionFeature({ icon: Icon, text, color }) {
-    return (
-        <div style={styles.descFeature}>
-            <div style={{ ...styles.descFeatureIcon, background: 'white', border: `2px solid ${color}` }}>
-                <Icon size={20} color={color} />
-            </div>
-            <span style={styles.descFeatureText}>{text}</span>
-        </div>
-    );
-}
-
-function ModernFeatureCard({ feature, index, isMobile }) {
-    const [isHovered, setIsHovered] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setIsVisible(true), index * 150);
-        return () => clearTimeout(timer);
-    }, [index]);
-
-    return (
-        <div
-            style={{
-                ...styles.modernFeatureCard,
-                background: isHovered ? feature.color : 'white',
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible
-                    ? (isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0)')
-                    : 'translateY(30px)',
-                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                transitionDelay: `${index * 0.1}s`
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <div style={styles.featureNumber}>
-                <span style={{
-                    ...styles.featureNumberText,
-                    color: isHovered ? 'white' : feature.color
-                }}>
-                    {index + 1}
-                </span>
-            </div>
-            <div style={styles.featureCheckIcon}>
-                <div style={{
-                    ...styles.checkIconCircle,
-                    background: isHovered ? 'rgba(255,255,255,0.2)' : feature.color
-                }}>
-                    <Check size={isMobile ? 18 : 22} color="white" />
-                </div>
-            </div>
-            <p style={{
-                ...styles.modernFeatureText,
-                color: isHovered ? 'white' : '#000000',
-                fontSize: isMobile ? '15px' : '17px'
-            }}>
-                {feature.text}
-            </p>
-        </div>
-    );
-}
-
-function ModernBookCard({ book, onClick, index, isMobile }) {
-    const [isHovered, setIsHovered] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setIsVisible(true), index * 150);
-        return () => clearTimeout(timer);
-    }, [index]);
-
-    return (
-        <div
-            style={{
-                ...styles.modernBookCard,
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible
-                    ? (isHovered ? 'translateY(-12px) scale(1.03)' : 'translateY(0)')
-                    : 'translateY(30px)',
-                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                transitionDelay: `${index * 0.1}s`
-            }}
-            onClick={onClick}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <div style={styles.bookImageContainer}>
-                <img
-                    src={book.image}
-                    alt={book.title}
-                    style={{
-                        ...styles.bookImage,
-                        transform: isHovered ? 'scale(1.1)' : 'scale(1)'
-                    }}
-                />
-                <div style={{
-                    ...styles.bookOverlay,
-                    opacity: isHovered ? 1 : 0,
-                    background: book.color
-                }}>
-                    <div style={styles.bookIcon}>
-                        <Search size={32} color="white" />
-                    </div>
-                    <div style={styles.bookAction}>اقرأ الآن</div>
-                </div>
-                <div style={{ ...styles.bookBadge, background: book.color }}>
-                    {book.publisher}
-                </div>
-            </div>
-            <div style={styles.bookDetails}>
-                <h3 style={{ ...styles.bookTitle, fontSize: isMobile ? '16px' : '18px' }}>
-                    {book.title}
-                </h3>
-                <div style={styles.bookFooter}>
-                    <div style={{ ...styles.bookCta, color: book.color }}>
-                        تصفح الكتاب
-                        <ChevronLeft size={16} />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function LibrarySearchSection({ isMobile, isTablet }) {
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
-    const [searchText, setSearchText] = useState('');
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const [booksDatabase, setBooksDatabase] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const booksPerPage = 12;
-
-    useEffect(() => {
-        let cancelled = false;
-
-        const fetchAllPages = async () => {
-            
-            try {
-                setLoading(true);
-
-                const firstResponse = await fetch(
-                    'https://acwebsite-icmet-test.azurewebsites.net/api/book/getAllBooks?pageIndex=1'
-                );
-                if (!firstResponse.ok) throw new Error('Failed to fetch books');
-                const firstData = await firstResponse.json();
-
-                const totalPages = firstData.totalPages || 1;
-                let allItems = [...(firstData.data || [])];
-
-                if (totalPages > 1) {
-                    const promises = [];
-                    for (let page = 2; page <= totalPages; page++) {
-                        promises.push(
-                            fetch(
-                                `https://acwebsite-icmet-test.azurewebsites.net/api/book/getAllBooks?pageIndex=${page}`
-                            ).then(res => {
-                                if (!res.ok) throw new Error(`Page ${page} failed`);
-                                return res.json();
-                            })
-                        );
-                    }
-                    const pages = await Promise.all(promises);
-                    pages.forEach(page => {
-                        allItems = allItems.concat(page.data || []);
-                    });
-                }
-
-                if (cancelled) return;
-
-                const placeholderImages = [
-                    'https://images.unsplash.com/photo-1589998059171-988d887df646?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=300&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=300&h=400&fit=crop'
-                ];
-
-                const transformedBooks = allItems.map((book, index) => {
-                    // Extract year from the unusual format: "0001-01-01T00:00:00.0001997"
-                    // The actual year is after the decimal point
-                    let year = '2000';
-                    if (book.bookDate) {
-                        const match = book.bookDate.match(/\.000(\d{4})$/);
-                        if (match && match[1]) {
-                            year = match[1];
-                        }
-                    }
-                    
-                    return {
-                        id: index + 1,
-                        category: book.typeName || 'غير مصنف',
-                        year: year,
-                        title: book.bookName || 'عنوان غير متوفر',
-                        author: book.author || 'مؤلف غير معروف',
-                        image: placeholderImages[index % placeholderImages.length]
-                    };
-                });
-
-                setBooksDatabase(transformedBooks);
-                setLoading(false);
-            } catch (err) {
-                if (cancelled) return;
-                console.error('Error fetching books:', err);
-                setError(err.message);
-                setLoading(false);
-            }
-        };
-
-        fetchAllPages();
-
-        return () => { cancelled = true; };
-    }, []);
-
-    const categories = React.useMemo(() => {
-        const uniqueCategories = [...new Set(booksDatabase.map(book => book.category))];
-        return uniqueCategories.map((cat, index) => ({
-            id: cat,
-            name: cat,
-            icon: ['⚖️', '📜', '📋', '📐', '🏗️', '⚡', '🏛️', '💧', '🛣️', '🚰'][index % 10]
-        }));
-    }, [booksDatabase]);
-
-    const filteredBooks = booksDatabase.filter(book => {
-        const matchesCategory = !selectedCategory || book.category === selectedCategory;
-        const matchesYear = !selectedYear || book.year === selectedYear;
-        const matchesSearch = !searchText.trim() ||
-            book.title.toLowerCase().includes(searchText.toLowerCase()) ||
-            book.author.toLowerCase().includes(searchText.toLowerCase());
-
-        return matchesCategory && matchesYear && matchesSearch;
-    });
-
-    const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
-    const startIndex = (currentPage - 1) * booksPerPage;
-    const endIndex = startIndex + booksPerPage;
-    const currentBooks = filteredBooks.slice(startIndex, endIndex);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedCategory, selectedYear, searchText]);
-
-    // FIXED: Calculate available years based on whether a category is selected
-    const availableYears = React.useMemo(() => {
-        if (!selectedCategory) {
-            // If no category selected, show all available years
-            const years = [...new Set(booksDatabase.map(book => book.year))];
-            return years.sort((a, b) => b.localeCompare(a));
-        }
-        // If category selected, show years for that category
-        const years = [...new Set(
-            booksDatabase
-                .filter(book => book.category === selectedCategory)
-                .map(book => book.year)
-        )];
-        return years.sort((a, b) => b.localeCompare(a));
-    }, [selectedCategory, booksDatabase]);
-
-    const isFiltering = selectedCategory || selectedYear || searchText.trim();
-    const resultMessage = isFiltering
-        ? `تم العثور على ${filteredBooks.length} نتيجة`
-        : `عرض جميع الكتب (${filteredBooks.length})`;
-
-    return (
-        <section style={{ ...styles.searchSection, padding: isMobile ? '40px 16px' : '80px 32px' }}>
-            <div style={styles.container}>
-                <div style={styles.searchContainer}>
-                    <div style={styles.sectionHeader}>
-                        <h2 style={{ ...styles.sectionTitle, fontSize: isMobile ? '28px' : '42px' }}>
-                            ابحث في المكتبة
-                        </h2>
-                        <p style={styles.sectionSubtitle}>
-                            اعثر على الكتاب المناسب بسهولة
-                        </p>
-                    </div>
-
-                    <div style={{
-                        ...styles.searchForm,
-                        gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : '2fr 1fr 1fr'
-                    }}>
-                        <div style={styles.searchInputWrapper}>
-                            <input
-                                type="text"
-                                placeholder="ابحث عن كتاب أو مؤلف..."
-                                value={searchText}
-                                onChange={(e) => setSearchText(e.target.value)}
-                                onFocus={() => setIsSearchFocused(true)}
-                                onBlur={() => setIsSearchFocused(false)}
-                                style={{
-                                    ...styles.searchInput,
-                                    borderColor: isSearchFocused ? '#0865a8' : '#e5e7eb',
-                                    boxShadow: isSearchFocused ? '0 0 0 3px rgba(8, 101, 168, 0.1)' : 'none'
-                                }}
-                                disabled={loading}
-                            />
-                            <Search
-                                style={{
-                                    ...styles.inputIcon,
-                                    color: isSearchFocused ? '#0865a8' : '#9ca3af'
-                                }}
-                            />
-                        </div>
-
-                        <div style={styles.selectWrapper}>
-                            <select
-                                value={selectedCategory}
-                                onChange={(e) => {
-                                    setSelectedCategory(e.target.value);
-                                    // Don't reset selectedYear - allow independent filtering
-                                }}
-                                style={styles.modernSelect}
-                                disabled={loading}
-                            >
-                                <option value="">التصنيف</option>
-                                {categories.map(cat => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.icon} {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <Tag style={styles.inputIcon} />
-                        </div>
-
-                        <div style={styles.selectWrapper}>
-                            <select
-                                value={selectedYear}
-                                onChange={(e) => setSelectedYear(e.target.value)}
-                                style={styles.modernSelect}
-                                disabled={loading}
-                            >
-                                <option value="">السنة</option>
-                                {availableYears.map(year => (
-                                    <option key={year} value={year}>{year}</option>
-                                ))}
-                            </select>
-                            <Calendar style={styles.inputIcon} />
-                        </div>
-                    </div>
-
-                    {loading ? (
-                        <div style={styles.resultsInfo}>
-                            <Sparkles size={18} />
-                            <span>جاري تحميل الكتب...</span>
-                        </div>
-                    ) : error ? (
-                        <div style={{ ...styles.resultsInfo, background: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }}>
-                            <span>حدث خطأ في تحميل الكتب: {error}</span>
-                        </div>
-                    ) : (
-                        <div style={styles.resultsInfo}>
-                            <Sparkles size={18} />
-                            <span>{resultMessage}</span>
-                        </div>
-                    )}
-                </div>
-
-                {loading ? (
-                    <div style={styles.loadingContainer}>
-                        <div style={styles.loadingSpinner}></div>
-                        <p style={styles.loadingText}>جاري التحميل...</p>
-                    </div>
-                ) : error ? (
-                    <div style={styles.noResults}>
-                        <div style={styles.noResultsIcon}>⚠️</div>
-                        <h3 style={styles.noResultsTitle}>حدث خطأ</h3>
-                        <p style={styles.noResultsText}>{error}</p>
-                    </div>
-                ) : (
-                    <>
-                        <div style={{
-                            ...styles.resultsGrid,
-                            gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)'
-                        }}>
-                            {currentBooks.map((book, index) => (
-                                <SearchResultCard key={book.id} book={book} index={index} />
+                            <h2 style={sectionTitleStyle}>مكتبة متخصصة منذ 1970</h2>
+                            <p style={{ fontSize: isTiny ? '14px' : isMobile ? '15px' : '17px', color: '#4b5563', lineHeight: '1.9', marginBottom: '22px' }}>
+                                تأسست المكتبة الرئيسية للمعهد عام 1970، وهي مكتبة متخصصة في مجال التشييد والبناء، إيماناً من شركة المقاولون العرب بأهمية القراءة والاطلاع المستمر ومعرفة كل ما هو حديث في سوق العمل. تقدم خدماتها للمجتمع الداخلي والخارجي على حد سواء.
+                            </p>
+                            {['محتوى محدث باستمرار', 'تغطية شاملة لجميع التخصصات', 'وصول سهل وسريع للمعلومات'].map((t, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                                    <div style={{ width: isTiny ? '28px' : '36px', height: isTiny ? '28px' : '36px', borderRadius: '10px', border: `2px solid ${i % 2 === 0 ? '#0865a8' : '#f57c00'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <Check size={isTiny ? 14 : 18} color={i % 2 === 0 ? '#0865a8' : '#f57c00'} />
+                                    </div>
+                                    <span style={{ color: '#000', fontSize: isTiny ? '14px' : '16px' }}>{t}</span>
+                                </div>
                             ))}
                         </div>
+                        <div style={{ borderRadius: '20px', overflow: 'hidden', border: '3px solid #e5e7eb', boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}>
+                            <img src="https://www.arabcont.com/icemt/assets/images/library-02.jpg" alt="المكتبة" style={{ width: '100%', height: isTiny ? '200px' : isMobile ? '240px' : '380px', objectFit: 'cover', display: 'block' }} />
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                        {filteredBooks.length === 0 && (
-                            <div style={styles.noResults}>
-                                <div style={styles.noResultsIcon}>📚</div>
-                                <h3 style={styles.noResultsTitle}>لا توجد نتائج</h3>
-                                <p style={styles.noResultsText}>جرب تغيير معايير البحث</p>
+            {/* ══ FEATURES ══ */}
+            <section style={sectionStyle('#f9fafb')}>
+                <div style={containerStyle}>
+                    <div style={sectionHeaderStyle}>
+                        <h2 style={sectionTitleStyle}>مميزات المكتبة</h2>
+                        <p style={sectionSubStyle}>اكتشف ما يميز مكتبتنا</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(2,1fr)'), gap: isTiny ? '12px' : '20px' }}>
+                        {features.map((f, i) => <FeatureCard key={i} feature={f} index={i} isTiny={isTiny} isMobile={isMobile} />)}
+                    </div>
+                </div>
+            </section>
+
+            {/* ══ BOOKS ══ */}
+            <section style={sectionStyle('white')}>
+                <div style={containerStyle}>
+                    <div style={sectionHeaderStyle}>
+                        <h2 style={sectionTitleStyle}>أمثلة من الكتب</h2>
+                        <p style={sectionSubStyle}>تصفح مجموعة مختارة من أفضل الكتب</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(3,1fr)'), gap: isTiny ? '14px' : isMobile ? '18px' : '28px' }}>
+                        {books.map((book, i) => <BookCard key={i} book={book} onClick={() => window.open(book.url, '_blank')} isMobile={isMobile} isTiny={isTiny} />)}
+                    </div>
+                </div>
+            </section>
+
+            {/* ══ SUBSCRIPTION ══ */}
+            <section style={sectionStyle('white')}>
+                <div style={containerStyle}>
+                    <div style={sectionHeaderStyle}>
+                        <h2 style={sectionTitleStyle}>خدمات واشتراكات المكتبة</h2>
+                        <p style={sectionSubStyle}>خدمات متنوعة للعاملين والباحثين</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr 1fr', '1fr 1fr', 'repeat(4,1fr)', 'repeat(4,1fr)'), gap: isTiny ? '10px' : '16px', marginBottom: '32px' }}>
+                        {subscriptionInfo.map((s, i) => (
+                            <div key={i} style={{ ...cardBase, textAlign: 'center' }}>
+                                <div style={{ fontSize: isTiny ? '15px' : isMobile ? '17px' : '22px', fontWeight: '800', color: s.color, marginBottom: '6px' }}>{s.value}</div>
+                                <div style={{ fontSize: isTiny ? '12px' : '14px', color: '#6b7280' }}>{s.label}</div>
                             </div>
-                        )}
+                        ))}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(3,1fr)'), gap: isTiny ? '12px' : '18px' }}>
+                        {[
+                            { title: 'خدمة البحث والاسترجاع', desc: 'البحث في قاعدة البيانات عن الكتب العلمية وفق احتياجات المستفيد من خلال استمارة خدمات المستفيدين.', icon: Search },
+                            { title: 'خدمة الاستعارة والاطلاع', desc: 'استعارة حتى 3 كتب لمدة 15 يوماً للعاملين، والاطلاع داخل المكتبة لجميع المشتركين.', icon: BookOpen },
+                            { title: 'الاستفسارات والتصوير', desc: 'الرد على الاستفسارات عبر الهاتف أو البريد الإلكتروني Library@arabcont.com وخدمة التصوير بحد 20 صفحة.', icon: Users },
+                        ].map((s, i) => {
+                            const Icon = s.icon;
+                            return (
+                                <div key={i} style={{ ...cardBase, textAlign: 'right' }}>
+                                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: i % 2 === 0 ? '#0865a8' : '#f57c00', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                                        <Icon size={20} color="white" />
+                                    </div>
+                                    <h3 style={{ fontSize: isTiny ? '14px' : '16px', fontWeight: '700', color: '#000', marginBottom: '6px' }}>{s.title}</h3>
+                                    <p style={{ fontSize: isTiny ? '13px' : '15px', color: '#4b5563', lineHeight: '1.7' }}>{s.desc}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
 
-                        {filteredBooks.length > 0 && totalPages > 1 && (
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={setCurrentPage}
-                                isMobile={isMobile}
-                            />
-                        )}
-                    </>
-                )}
-            </div>
-        </section>
+            {/* ══ PLATFORMS ══ */}
+            <section style={sectionStyle('#f9fafb')}>
+                <div style={containerStyle}>
+                    <div style={sectionHeaderStyle}>
+                        <h2 style={sectionTitleStyle}>المنصات والمواقع الإلكترونية</h2>
+                        <p style={sectionSubStyle}>اشتراكات في منصات علمية متخصصة</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(2,1fr)'), gap: isTiny ? '12px' : '18px' }}>
+                        {platforms.map((p, i) => {
+                            const Icon = p.icon;
+                            return (
+                                <div key={i} style={{ ...cardBase, display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: i % 2 === 0 ? 'rgba(8,101,168,0.1)' : 'rgba(245,124,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <Icon size={20} color={i % 2 === 0 ? '#0865a8' : '#f57c00'} />
+                                    </div>
+                                    <div>
+                                        <h3 style={{ fontSize: isTiny ? '14px' : '16px', fontWeight: '700', color: '#000', marginBottom: '4px' }}>{p.name}</h3>
+                                        <p style={{ fontSize: isTiny ? '13px' : '14px', color: '#6b7280' }}>{p.desc}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* ══ KNOWLEDGE EMBASSY ══ */}
+            <section id="embassy" style={{ ...sectionStyle('white'), borderTop: '4px solid #0865a8' }}>
+                <div style={containerStyle}>
+
+                    <div style={sectionHeaderStyle}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', background: 'linear-gradient(135deg, #0865a8, #f57c00)', borderRadius: '999px', color: 'white', fontSize: isTiny ? '12px' : '14px', fontWeight: '700', marginBottom: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <Star size={14} /> أول سفارة معرفة لشركة مقاولات في مصر
+                        </div>
+                        <h2 style={sectionTitleStyle}>سفارة المعرفة — مكتبة الإسكندرية</h2>
+                    </div>
+
+                    {/* Definition */}
+                    <div style={{ ...cardBase, marginBottom: '20px', borderRight: '5px solid #0865a8', textAlign: 'right' }}>
+                        <h3 style={{ fontSize: isTiny ? '15px' : '18px', fontWeight: '700', color: '#0865a8', marginBottom: '10px' }}>تعريف سفارة المعرفة</h3>
+                        <p style={{ fontSize: isTiny ? '13px' : '15px', color: '#374151', lineHeight: '1.9' }}>
+                            تسعى مكتبة الإسكندرية الجديدة إلى استعادة روح الانفتاح والبحث التي ميّزت المكتبة القديمة، فهي ليست مكتبة فحسب، بل مجمع ثقافي يقوم على نشر العلم والمعرفة. وتتلخص رسالتها في أن تكون مركزاً للتميز في إنتاج ونشر المعرفة، ومكاناً للتفاعل بين الشعوب والحضارات.
+                        </p>
+                    </div>
+
+                    {/* ── NEW: Embassy definition image scroll strip ── */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', gap: isTiny ? '10px' : '14px', overflowX: 'auto', paddingBottom: '10px', WebkitOverflowScrolling: 'touch', scrollSnapType: 'x mandatory', justifyContent: 'center' }}>                            {embassyDefImages.map((img, i) => (
+                                <EmbassyDefImage key={i} img={img} isTiny={isTiny} isMobile={isMobile} />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Concept */}
+                    <div style={{ ...cardBase, marginBottom: '24px', borderRight: '5px solid #f57c00', textAlign: 'right' }}>
+                        <h3 style={{ fontSize: isTiny ? '15px' : '18px', fontWeight: '700', color: '#f57c00', marginBottom: '10px' }}>مفهوم سفارات المعرفة</h3>
+                        <p style={{ fontSize: isTiny ? '13px' : '15px', color: '#374151', lineHeight: '1.9', marginBottom: '14px' }}>
+                            في عام <strong>2014</strong> جاء التفكير في إنشاء سفارات لمكتبة الإسكندرية في جميع المحافظات، حتى تتمكن المكتبة من تخطي البُعد الجغرافي والتوسع لتوصيل خدماتها إلى أكبر عدد ممكن من المستفيدين.
+                        </p>
+                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                            <div style={{ background: 'rgba(8,101,168,0.08)', border: '2px solid rgba(8,101,168,0.2)', borderRadius: '14px', padding: '12px 18px', textAlign: 'center', minWidth: '90px' }}>
+                                <div style={{ fontSize: isTiny ? '22px' : '28px', fontWeight: '800', color: '#0865a8' }}>24</div>
+                                <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '3px' }}>سفارة معرفة حالياً</div>
+                            </div>
+                            <div style={{ background: 'rgba(245,124,0,0.08)', border: '2px solid rgba(245,124,0,0.2)', borderRadius: '14px', padding: '12px 18px', textAlign: 'center', minWidth: '90px' }}>
+                                <div style={{ fontSize: isTiny ? '22px' : '28px', fontWeight: '800', color: '#f57c00' }}>2014</div>
+                                <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '3px' }}>سنة التأسيس</div>
+                            </div>
+                            <div style={{ background: 'rgba(0,0,0,0.04)', border: '2px solid rgba(0,0,0,0.1)', borderRadius: '14px', padding: '12px 18px', flex: 1, minWidth: '180px', textAlign: 'center' }}>
+                                <div style={{ fontSize: isTiny ? '13px' : '15px', fontWeight: '700', color: '#000', lineHeight: '1.5' }}>سفارة المعرفة للمكتبة الرئيسية لشركة المقاولون العرب هي <span style={{ color: '#0865a8' }}>أول سفارة معرفة لإحدى كبرى شركات المقاولات</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Goals */}
+                    <div style={{ ...cardBase, marginBottom: '24px', background: 'rgba(8,101,168,0.02)', border: '2px solid rgba(8,101,168,0.12)' }}>
+                        <h3 style={{ fontSize: isTiny ? '15px' : '18px', fontWeight: '700', color: '#0865a8', marginBottom: '18px', textAlign: 'center' }}>أهداف سفارات المعرفة ودورها داخل مكتبة المعهد</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(2,1fr)'), gap: '10px' }}>
+                            {embassyGoals.map((g, i) => (
+                                <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                                    <div style={{ width: '24px', height: '24px', borderRadius: '7px', background: i % 2 === 0 ? '#0865a8' : '#f57c00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                                        <Check size={12} color="white" />
+                                    </div>
+                                    <span style={{ fontSize: isTiny ? '13px' : '15px', color: '#1a1a1a', lineHeight: '1.75' }}>{g}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Gallery */}
+                    <InaugurationGallery isMobile={isMobile} isTiny={isTiny} />
+
+                    {/* Digital services heading */}
+                    <h3 style={{ fontSize: isTiny ? '17px' : '22px', fontWeight: '700', color: '#000', textAlign: 'center', marginBottom: '6px' }}>الخدمات المعرفية التي تقدمها سفارة المعرفة بالمعهد</h3>
+                    <p style={{ fontSize: isTiny ? '14px' : '16px', color: '#6b7280', textAlign: 'center', marginBottom: '24px' }}>يضم موقع سفارة المعرفة الرقمي لمكتبة الإسكندرية الأقسام الآتية</p>
+
+                    {/* DAR */}
+                    <div style={{ ...cardBase, marginBottom: '18px', borderTop: '4px solid #0865a8', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+                            <h4 style={{ fontSize: isTiny ? '14px' : '16px', fontWeight: '700', color: '#0865a8', margin: 0 }}>مستودع الأصول الرقمية DAR</h4>
+                            <span style={{ fontSize: isTiny ? '16px' : '20px', fontWeight: '800', color: '#0865a8', background: 'rgba(8,101,168,0.08)', padding: '3px 12px', borderRadius: '10px' }}>509,089 وعاء رقمي</span>
+                        </div>
+                        <p style={{ fontSize: isTiny ? '13px' : '15px', color: '#4b5563', lineHeight: '1.8', marginBottom: '12px' }}>يضم هذا المستودع الرقمي وعاءً رقمياً يشمل كافة التخصصات العلمية في شتى فروع المعرفة البشرية، بالإضافة إلى:</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: cols('1fr 1fr', '1fr 1fr', 'repeat(4,1fr)', 'repeat(4,1fr)'), gap: '10px' }}>
+                            {[
+                                { label: 'صور ووثائق تاريخية', value: '2,052 صورة' },
+                                { label: 'ملفات صوتية', value: '2,447 ملف' },
+                                { label: 'كتب صوتية', value: '17 كتاب' },
+                                { label: 'خرائط رقمية', value: '2,777 خريطة' },
+                            ].map((item, i) => (
+                                <div key={i} style={{ background: 'rgba(8,101,168,0.06)', borderRadius: '10px', padding: '10px', textAlign: 'center' }}>
+                                    <div style={{ fontSize: isTiny ? '14px' : '16px', fontWeight: '800', color: '#0865a8', marginBottom: '3px' }}>{item.value}</div>
+                                    <div style={{ fontSize: isTiny ? '12px' : '13px', color: '#6b7280' }}>{item.label}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Historical archives grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(2,1fr)'), gap: '16px', marginBottom: '16px' }}>
+                        {[
+                            { title: 'ذاكرة مصر المعاصرة', color: '#f57c00', text: 'إتاحة كافة المعلومات التاريخية الهامة لمصر منذ تولي محمد علي حكم مصر سنة 1805 وحتى نهاية عصر الرئيس الراحل محمد أنور السادات سنة 1981.' },
+                            { title: 'كتاب وصف مصر', color: '#0865a8', text: 'من أعظم الكتب التاريخية في عهد الحملة الفرنسية — 20 جزءاً: منها 11 جزء رسومات وخرائط، و9 أجزاء تصف مصر باللغة الفرنسية.' },
+                            { title: 'الأرشيف الرقمي للرئيس جمال عبد الناصر', color: '#f57c00', text: 'كافة المعلومات التاريخية بأشكالها المختلفة من كتب ومقالات ورسائل ومذكرات وصور وفيديوهات في فترة رئاسة الرئيس جمال عبد الناصر.' },
+                            { title: 'الأرشيف الرقمي للرئيس محمد أنور السادات', color: '#0865a8', text: 'كافة المعلومات التاريخية وأفلام تسجيلية وملفات صوتية ومقتطفات من نصر حرب أكتوبر ومعلومات موثقة في فترة رئاسته.' },
+                        ].map((item, i) => (
+                            <div key={i} style={{ ...cardBase, borderTop: `4px solid ${item.color}`, textAlign: 'right' }}>
+                                <h4 style={{ fontSize: isTiny ? '13px' : '15px', fontWeight: '700', color: item.color, marginBottom: '8px' }}>{item.title}</h4>
+                                <p style={{ fontSize: isTiny ? '12px' : '14px', color: '#4b5563', lineHeight: '1.8' }}>{item.text}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Press archive + internet archive */}
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(2,1fr)'), gap: '16px', marginBottom: '24px' }}>
+                        <div style={{ ...cardBase, borderRight: '5px solid #f57c00', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+                                <h4 style={{ fontSize: isTiny ? '13px' : '15px', fontWeight: '700', color: '#f57c00', margin: 0 }}>أرشيف الصحافة المصرية</h4>
+                                <span style={{ fontSize: '13px', fontWeight: '800', color: '#f57c00', background: 'rgba(245,124,0,0.1)', padding: '2px 8px', borderRadius: '8px' }}>17,500,000 مقالة</span>
+                            </div>
+                            <p style={{ fontSize: isTiny ? '12px' : '14px', color: '#4b5563', lineHeight: '1.8' }}>مقالات صحفية رقمية باللغات العربية والإنجليزية والفرنسية على مدار 67 عاماً من 1950 حتى 2017.</p>
+                        </div>
+                        <div style={{ ...cardBase, borderRight: '5px solid #0865a8', textAlign: 'right' }}>
+                            <h4 style={{ fontSize: isTiny ? '13px' : '15px', fontWeight: '700', color: '#0865a8', marginBottom: '8px' }}>أرشيف صفحات الإنترنت</h4>
+                            <p style={{ fontSize: isTiny ? '12px' : '14px', color: '#4b5563', lineHeight: '1.8' }}>أرشيف شامل يضم صوراً لكافة صفحات المواقع وتطورها وتغيُّر شكلها ومحتوياتها عبر الزمن.</p>
+                        </div>
+                    </div>
+
+                    {/* Beneficiaries */}
+                    <div style={{ display: 'grid', gridTemplateColumns: cols('1fr', '1fr', 'repeat(2,1fr)', 'repeat(2,1fr)'), gap: '16px' }}>
+                        <div style={{ ...cardBase, textAlign: 'right' }}>
+                            <h3 style={{ fontSize: isTiny ? '14px' : '16px', fontWeight: '700', color: '#0865a8', marginBottom: '14px' }}>الفئات المستفيدة من سفارة المعرفة</h3>
+                            {['موظفو الشركة', 'طلبة الجامعات', 'الباحثون لرسائل الماجستير والدكتوراه (داخل وخارج الشركة)'].map((f, i) => (
+                                <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: i % 2 === 0 ? '#0865a8' : '#f57c00', flexShrink: 0 }} />
+                                    <span style={{ fontSize: isTiny ? '13px' : '15px', color: '#374151' }}>{f}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ ...cardBase, textAlign: 'right' }}>
+                            <h3 style={{ fontSize: isTiny ? '14px' : '16px', fontWeight: '700', color: '#f57c00', marginBottom: '14px' }}>آليات الاستفادة من سفارة المعرفة</h3>
+                            <p style={{ fontSize: isTiny ? '13px' : '15px', color: '#4b5563', lineHeight: '1.85' }}>
+                                يتم حضور المستفيدين إلى مقر المكتبة الرئيسية مع تقديم كارنيه الاشتراك وتسجيل بياناتهم باستمارة خدمات المستفيدين، ثم يُوجَّهون من قبل مسؤول المكتبة للتدريب على استخدام أجهزة الحاسب الآلي الخاصة بالسفارة.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi&display=swap');
+                @keyframes slide { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
+                @keyframes spin  { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                input::placeholder{color:#9ca3af}
+                *{box-sizing:border-box}
+                img{max-width:100%}
+                ::-webkit-scrollbar{height:4px}
+                ::-webkit-scrollbar-track{background:#f1f1f1;border-radius:4px}
+                ::-webkit-scrollbar-thumb{background:#0865a8;border-radius:4px}
+            `}</style>
+        </div>
     );
 }
 
-function Pagination({ currentPage, totalPages, onPageChange, isMobile }) {
-    const [isVisible, setIsVisible] = useState(false);
+/* ── Embassy definition image card (horizontal scroll strip) ── */
+function EmbassyDefImage({ img, isTiny, isMobile }) {
+    const [err, setErr] = useState(false);
+    const w = isTiny ? '200px' : isMobile ? '240px' : '300px';
+    const h = isTiny ? '140px' : isMobile ? '170px' : '210px';
+    return (
+        <div style={{ flexShrink: 0, width: w, scrollSnapAlign: 'start', borderRadius: '14px', overflow: 'hidden', border: '2px solid #e5e7eb', boxShadow: '0 2px 10px rgba(0,0,0,0.07)' }}>
+            {err ? (
+                <div style={{ width: '100%', height: h, background: '#f3f4f6', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#9ca3af' }}>
+                    <BookOpen size={28} color="#d1d5db" />
+                    <span style={{ fontSize: '12px' }}>الصورة غير متاحة</span>
+                </div>
+            ) : (
+                <img src={img.src} alt={img.caption} onError={() => setErr(true)}
+                    style={{ width: '100%', height: h, objectFit: 'cover', display: 'block' }} />
+            )}
+            <div style={{ padding: '8px 12px', background: 'white', textAlign: 'center' }}>
+                <span style={{ fontSize: isTiny ? '11px' : '13px', color: '#374151', fontWeight: '600' }}>{img.caption}</span>
+            </div>
+        </div>
+    );
+}
 
-    useEffect(() => {
-        setIsVisible(true);
-    }, []);
+/* ── BookOpen needed in EmbassyDefImage ── */
+const { BookOpen: _BO } = { BookOpen };
 
-    const getPageNumbers = () => {
-        const pages = [];
-        const maxVisible = isMobile ? 3 : 5;
+/* ─────────────────────────────────────────────────────────────── */
+function FeatureCard({ feature, index, isTiny, isMobile }) {
+    const [hovered, setHovered] = useState(false);
+    return (
+        <div style={{ borderRadius: '16px', border: `2px solid ${hovered ? feature.color : '#e5e7eb'}`, overflow: 'hidden', cursor: 'pointer', boxShadow: hovered ? `0 10px 28px ${feature.color}22` : '0 2px 6px rgba(0,0,0,0.04)', transition: 'all 0.4s ease', background: 'white', transform: hovered ? 'translateY(-4px)' : 'none' }}
+            onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+            <div style={{ height: '4px', background: feature.color, width: hovered ? '100%' : '35%', transition: 'width 0.4s ease' }} />
+            <div style={{ padding: isTiny ? '14px' : isMobile ? '16px 18px' : '22px 26px', display: 'flex', gap: '14px', alignItems: 'flex-start', direction: 'rtl' }}>
+                <div style={{ flexShrink: 0, width: isTiny ? '30px' : '38px', height: isTiny ? '30px' : '38px', borderRadius: '10px', background: hovered ? feature.color : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}>
+                    <span style={{ fontSize: isTiny ? '13px' : '15px', fontWeight: '800', color: hovered ? 'white' : feature.color }}>{index + 1}</span>
+                </div>
+                <p style={{ fontSize: isTiny ? '13px' : isMobile ? '14px' : '16px', lineHeight: '1.85', color: '#1a1a1a', margin: 0, flex: 1, textAlign: 'right' }}>{feature.text}</p>
+            </div>
+        </div>
+    );
+}
 
-        if (totalPages <= maxVisible + 2) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            pages.push(1);
+/* ─────────────────────────────────────────────────────────────── */
+function BookCard({ book, onClick, isMobile, isTiny }) {
+    const [hovered, setHovered] = useState(false);
+    const imgH = isTiny ? '180px' : isMobile ? '220px' : '300px';
+    return (
+        <div style={{ background: 'white', borderRadius: '18px', overflow: 'hidden', border: '2px solid #e5e7eb', cursor: 'pointer', transform: hovered ? 'translateY(-8px) scale(1.02)' : 'none', transition: 'all 0.4s ease', boxShadow: hovered ? '0 20px 40px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.04)' }} onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+            <div style={{ position: 'relative', height: imgH, overflow: 'hidden' }}>
+                <img src={book.image} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.08)' : 'scale(1)', transition: 'transform 0.5s ease' }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: book.color, opacity: hovered ? 0.82 : 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'opacity 0.4s ease' }}>
+                    <Search size={28} color="white" />
+                    <div style={{ padding: '8px 22px', background: 'white', color: '#000', borderRadius: '999px', fontSize: '14px', fontWeight: '700' }}>اقرأ الآن</div>
+                </div>
+                <div style={{ position: 'absolute', top: '12px', right: '12px', padding: '4px 12px', background: book.color, borderRadius: '999px', color: 'white', fontSize: '12px', fontWeight: '700' }}>{book.publisher}</div>
+            </div>
+            <div style={{ padding: isTiny ? '14px' : '18px' }}>
+                <h3 style={{ fontSize: isTiny ? '13px' : isMobile ? '14px' : '16px', fontWeight: '700', color: '#000', lineHeight: '1.45', marginBottom: '12px' }}>{book.title}</h3>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '14px', color: book.color, fontWeight: '600' }}>تصفح الكتاب <ChevronLeft size={14} /></span>
+                </div>
+            </div>
+        </div>
+    );
+}
 
-            let start = Math.max(2, currentPage - Math.floor(maxVisible / 2));
-            let end = Math.min(totalPages - 1, start + maxVisible - 1);
+/* ─────────────────────────────────────────────────────────────── */
+function InaugurationGallery({ isMobile, isTiny }) {
+    const images = Array.from({ length: 16 }, (_, i) => ({
+        src: `/images/library/IMG-20241012-WA00${10 + i}.jpg`,
+        caption: `افتتاح سفارة المعرفة - ${i + 1}`,
+    }));
 
-            if (end === totalPages - 1) {
-                start = Math.max(2, end - maxVisible + 1);
-            }
-
-            if (start > 2) {
-                pages.push('...');
-            }
-
-            for (let i = start; i <= end; i++) {
-                pages.push(i);
-            }
-
-            if (end < totalPages - 1) {
-                pages.push('...');
-            }
-
-            pages.push(totalPages);
-        }
-
-        return pages;
-    };
-
-    const pageNumbers = getPageNumbers();
-
-    const handlePrevious = () => {
-        if (currentPage > 1) {
-            onPageChange(currentPage - 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    const handleNext = () => {
-        if (currentPage < totalPages) {
-            onPageChange(currentPage + 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    const handlePageClick = (page) => {
-        if (page !== '...' && page !== currentPage) {
-            onPageChange(page);
-        }
+    const [current, setCurrent] = useState(0);
+    const [imgError, setImgError] = useState({});
+    const prev = () => setCurrent(c => (c - 1 + images.length) % images.length);
+    const next = () => setCurrent(c => (c + 1) % images.length);
+    const maxDots = isTiny ? 4 : isMobile ? 5 : 8;
+    const visibleDots = () => {
+        if (images.length <= maxDots) return images.map((_, i) => i);
+        let s = Math.max(0, current - Math.floor(maxDots / 2));
+        let e = s + maxDots;
+        if (e > images.length) { e = images.length; s = Math.max(0, e - maxDots); }
+        return images.slice(s, e).map((_, i) => s + i);
     };
 
     return (
-        <div style={{
-            ...styles.paginationContainer,
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'all 0.6s ease'
-        }}>
-            <button
-                onClick={handlePrevious}
-                disabled={currentPage === 1}
-                style={{
-                    ...styles.paginationButton,
-                    ...styles.paginationArrow,
-                    opacity: currentPage === 1 ? 0.3 : 1,
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
-                }}
-            >
-                <ChevronRight size={20} />
-            </button>
-
-            <div style={styles.paginationNumbers}>
-                {pageNumbers.map((page, index) => (
-                    page === '...' ? (
-                        <span key={`ellipsis-${index}`} style={styles.paginationEllipsis}>
-                            ...
-                        </span>
+        <div style={{ marginBottom: '28px' }}>
+            <h3 style={{ fontSize: isTiny ? '16px' : '20px', fontWeight: '700', color: '#000', textAlign: 'center', marginBottom: '16px' }}>صور افتتاح سفارة المعرفة بالمعهد</h3>
+            <div style={{ background: 'white', borderRadius: '18px', border: '2px solid #e5e7eb', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
+                <div style={{ position: 'relative', width: '100%', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: isTiny ? '170px' : isMobile ? '220px' : '380px' }}>
+                    {imgError[current] ? (
+                        <div style={{ width: '100%', height: isMobile ? '220px' : '380px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', gap: '10px' }}>
+                            <BookOpen size={40} color="#d1d5db" />
+                            <span style={{ fontSize: '13px' }}>الصورة غير متاحة</span>
+                        </div>
                     ) : (
-                        <button
-                            key={page}
-                            onClick={() => handlePageClick(page)}
-                            style={{
-                                ...styles.paginationButton,
-                                ...styles.paginationNumber,
-                                ...(page === currentPage ? styles.paginationNumberActive : {})
-                            }}
-                        >
-                            {page}
-                        </button>
-                    )
-                ))}
-            </div>
-
-            <button
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-                style={{
-                    ...styles.paginationButton,
-                    ...styles.paginationArrow,
-                    opacity: currentPage === totalPages ? 0.3 : 1,
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
-                }}
-            >
-                <ChevronLeft size={20} />
-            </button>
-        </div>
-    );
-}
-
-function SearchResultCard({ book, index }) {
-    const [isHovered, setIsHovered] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setIsVisible(true), index * 100);
-        return () => clearTimeout(timer);
-    }, [index]);
-
-    const getCategoryInfo = (categoryName) => {
-        const colors = ['#0865a8', '#f57c00', '#000000'];
-        const colorIndex = categoryName.length % colors.length;
-        return { name: categoryName, color: colors[colorIndex] };
-    };
-
-    const categoryInfo = getCategoryInfo(book.category);
-
-    return (
-        <div
-            style={{
-                ...styles.resultCard,
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible
-                    ? (isHovered ? 'translateY(-8px)' : 'translateY(0)')
-                    : 'translateY(20px)',
-                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                transitionDelay: `${index * 0.1}s`
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            
-            <div style={styles.resultContent}>
-                <div style={{ ...styles.resultCategory, background: categoryInfo.color }}>
-                    {categoryInfo.name}
+                        <img key={current} src={images[current].src} alt={images[current].caption}
+                            onError={() => setImgError(e => ({ ...e, [current]: true }))}
+                            style={{ width: '100%', height: 'auto', maxHeight: isTiny ? '260px' : isMobile ? '360px' : '560px', objectFit: 'contain', display: 'block', transition: 'opacity 0.3s ease' }} />
+                    )}
+                    <button onClick={prev} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', width: isTiny ? '32px' : '40px', height: isTiny ? '32px' : '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.9)', border: '2px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', outline: 'none', zIndex: 2 }}>
+                        <ChevronRight size={isTiny ? 16 : 20} color="#0865a8" />
+                    </button>
+                    <button onClick={next} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', width: isTiny ? '32px' : '40px', height: isTiny ? '32px' : '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.9)', border: '2px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', outline: 'none', zIndex: 2 }}>
+                        <ChevronLeft size={isTiny ? 16 : 20} color="#0865a8" />
+                    </button>
+                    <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'rgba(0,0,0,0.55)', borderRadius: '20px', padding: '3px 10px', color: 'white', fontSize: '13px', fontWeight: '600', zIndex: 2 }}>
+                        {current + 1} / {images.length}
+                    </div>
                 </div>
-                <h4 style={styles.resultTitle}>{book.title}</h4>
-                <p style={styles.resultAuthor}>{book.author}</p>
-                <div style={styles.resultFooter}>
-                    <span style={styles.resultYear}>{book.year}</span>
-                    <div style={{ ...styles.resultDot, background: categoryInfo.color }}></div>
+                <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', textAlign: 'center' }}>
+                    <span style={{ fontSize: isTiny ? '13px' : '15px', color: '#374151', fontWeight: '600' }}>{images[current].caption}</span>
+                </div>
+                <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        {visibleDots().map(i => (
+                            <button key={i} onClick={() => setCurrent(i)} style={{ width: i === current ? '22px' : '7px', height: '7px', borderRadius: '4px', background: i === current ? '#0865a8' : '#d1d5db', border: 'none', cursor: 'pointer', outline: 'none', transition: 'all 0.3s ease', padding: 0 }} />
+                        ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', width: '100%', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+                        {images.map((img, i) => (
+                            <button key={i} onClick={() => setCurrent(i)} style={{ flexShrink: 0, width: isTiny ? '44px' : isMobile ? '52px' : '64px', height: isTiny ? '34px' : isMobile ? '40px' : '48px', borderRadius: '7px', overflow: 'hidden', border: i === current ? '2px solid #0865a8' : '2px solid #e5e7eb', cursor: 'pointer', padding: 0, outline: 'none', background: '#f3f4f6', opacity: i === current ? 1 : 0.65, transition: 'all 0.2s' }}>
+                                {imgError[i] ? (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <BookOpen size={12} color="#d1d5db" />
+                                    </div>
+                                ) : (
+                                    <img src={img.src} alt="" onError={() => setImgError(e => ({ ...e, [i]: true }))} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                )}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
-
-const styles = {
-    page: {
-        minHeight: '100vh',
-        background: 'white',
-        fontFamily: '"Droid Arabic Kufi", serif',
-        position: 'relative',
-        overflow: 'hidden'
-    },
-    progressBar: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '4px',
-        background: '#e5e7eb',
-        zIndex: 9999
-    },
-    progressFill: {
-        height: '100%',
-        background: 'linear-gradient(to right, #f57c00, #0865a8)',
-        transition: 'width 0.3s ease'
-    },
-    heroSection: {
-        position: 'relative',
-        zIndex: 1,
-        padding: '160px 32px 80px',
-        textAlign: 'center',
-        background: 'white'
-    },
-    heroContent: {
-        maxWidth: '900px',
-        margin: '0 auto'
-    },
-    heroIcon: {
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '120px',
-        height: '120px',
-        background: 'linear-gradient(135deg, #0865a8 0%, #f57c00 100%)',
-        borderRadius: '30px',
-        marginBottom: '32px',
-        boxShadow: '0 20px 60px rgba(8, 101, 168, 0.4)'
-    },
-    heroIconSvg: {
-        width: '56px',
-        height: '56px',
-        color: 'white',
-        position: 'relative',
-        zIndex: 2
-    },
-    heroTitle: {
-        fontSize: '64px',
-        fontWeight: '800',
-        color: '#000000',
-        marginBottom: '24px',
-        lineHeight: '1.2'
-    },
-    heroUnderline: {
-        width: '200px',
-        height: '6px',
-        background: '#e5e7eb',
-        borderRadius: '999px',
-        margin: '0 auto 32px',
-        overflow: 'hidden',
-        position: 'relative'
-    },
-    underlineAnimate: {
-        width: '40%',
-        height: '100%',
-        background: 'linear-gradient(90deg, #0865a8 0%, #f57c00 100%)',
-        borderRadius: '999px',
-        animation: 'slide 2s infinite ease-in-out'
-    },
-    heroSubtitle: {
-        fontSize: '20px',
-        color: '#6b7280',
-        fontWeight: '500',
-        letterSpacing: '0.5px'
-    },
-    container: {
-        maxWidth: '1400px',
-        margin: '0 auto',
-        position: 'relative',
-        zIndex: 1
-    },
-    statsSection: {
-        padding: '60px 32px',
-        background: 'white'
-    },
-    statsGrid: {
-        display: 'grid',
-        gap: '24px'
-    },
-    statCard: {
-        background: 'white',
-        borderRadius: '20px',
-        padding: '32px',
-        border: '2px solid #e5e7eb',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '20px',
-        position: 'relative',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        transition: 'all 0.4s ease',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
-    },
-    statIcon: {
-        width: '64px',
-        height: '64px',
-        borderRadius: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0
-    },
-    statContent: {
-        flex: 1,
-        textAlign: 'right'
-    },
-    statValue: {
-        fontSize: '36px',
-        fontWeight: '800',
-        color: '#000000',
-        marginBottom: '4px'
-    },
-    statLabel: {
-        fontSize: '16px',
-        color: '#6b7280',
-        fontWeight: '500'
-    },
-    descriptionSection: {
-        padding: '80px 32px',
-        background: 'white'
-    },
-    descriptionGrid: {
-        display: 'grid',
-        gap: '64px',
-        alignItems: 'center'
-    },
-    descriptionContent: {
-        textAlign: 'right'
-    },
-    sectionBadge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '10px 20px',
-        background: 'white',
-        border: '2px solid #0865a8',
-        borderRadius: '999px',
-        color: '#0865a8',
-        fontSize: '14px',
-        fontWeight: '600',
-        marginBottom: '24px'
-    },
-    sectionTitle: {
-        fontSize: '42px',
-        fontWeight: '800',
-        color: '#000000',
-        marginBottom: '24px',
-        lineHeight: '1.2'
-    },
-    descriptionText: {
-        fontSize: '18px',
-        color: '#4b5563',
-        lineHeight: '1.8',
-        marginBottom: '32px'
-    },
-    descriptionFeatures: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px'
-    },
-    descFeature: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
-    },
-    descFeatureIcon: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    descFeatureText: {
-        color: '#000000',
-        fontSize: '16px',
-        fontWeight: '500'
-    },
-    imageWrapper: {
-        position: 'relative'
-    },
-    imageFrame: {
-        position: 'relative',
-        borderRadius: '24px',
-        overflow: 'hidden',
-        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1)',
-        border: '3px solid #e5e7eb'
-    },
-    mainImage: {
-        width: '100%',
-        height: '400px',
-        objectFit: 'cover',
-        display: 'block'
-    },
-    imageOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(135deg, rgba(8, 101, 168, 0.2) 0%, rgba(245, 124, 0, 0.2) 100%)',
-        pointerEvents: 'none'
-    },
-    featuresSection: {
-        padding: '80px 32px',
-        background: '#f9fafb'
-    },
-    sectionHeader: {
-        textAlign: 'center',
-        marginBottom: '64px'
-    },
-    sectionSubtitle: {
-        fontSize: '18px',
-        color: '#6b7280',
-        marginTop: '12px'
-    },
-    featuresGrid: {
-        display: 'grid',
-        gap: '32px'
-    },
-    modernFeatureCard: {
-        padding: '40px',
-        borderRadius: '24px',
-        border: '2px solid #e5e7eb',
-        position: 'relative',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
-    },
-    featureNumber: {
-        position: 'absolute',
-        top: '24px',
-        left: '24px',
-        width: '48px',
-        height: '48px',
-        borderRadius: '50%',
-        background: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        border: '2px solid #e5e7eb'
-    },
-    featureNumberText: {
-        fontSize: '20px',
-        fontWeight: '800'
-    },
-    featureCheckIcon: {
-        marginBottom: '24px'
-    },
-    checkIconCircle: {
-        width: '56px',
-        height: '56px',
-        borderRadius: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    modernFeatureText: {
-        fontSize: '17px',
-        lineHeight: '1.8',
-        textAlign: 'right',
-        position: 'relative',
-        zIndex: 1
-    },
-    booksSection: {
-        padding: '80px 32px',
-        background: 'white'
-    },
-    booksGrid: {
-        display: 'grid',
-        gap: '32px'
-    },
-    modernBookCard: {
-        background: 'white',
-        borderRadius: '24px',
-        overflow: 'hidden',
-        border: '2px solid #e5e7eb',
-        cursor: 'pointer',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-        transition: 'all 0.3s ease'
-    },
-    bookImageContainer: {
-        position: 'relative',
-        height: '320px',
-        overflow: 'hidden'
-    },
-    bookImage: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-    },
-    bookOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '16px',
-        transition: 'opacity 0.4s ease'
-    },
-    bookIcon: {
-        width: '80px',
-        height: '80px',
-        borderRadius: '50%',
-        background: 'rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(10px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    bookAction: {
-        padding: '12px 32px',
-        background: 'white',
-        color: '#000000',
-        borderRadius: '999px',
-        fontSize: '16px',
-        fontWeight: '700'
-    },
-    bookBadge: {
-        position: 'absolute',
-        top: '16px',
-        right: '16px',
-        padding: '8px 16px',
-        borderRadius: '999px',
-        color: 'white',
-        fontSize: '12px',
-        fontWeight: '700',
-        textTransform: 'uppercase'
-    },
-    bookDetails: {
-        padding: '24px'
-    },
-    bookTitle: {
-        fontSize: '18px',
-        fontWeight: '700',
-        color: '#000000',
-        lineHeight: '1.4',
-        marginBottom: '16px',
-        minHeight: '50px'
-    },
-    bookFooter: {
-        display: 'flex',
-        justifyContent: 'flex-end'
-    },
-    bookCta: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '14px',
-        fontWeight: '600'
-    },
-    searchSection: {
-        padding: '80px 32px',
-        background: '#f9fafb'
-    },
-    searchContainer: {
-        background: 'white',
-        borderRadius: '32px',
-        padding: '48px',
-        border: '2px solid #e5e7eb',
-        marginBottom: '48px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
-    },
-    searchForm: {
-        display: 'grid',
-        gap: '16px',
-        alignItems: 'end'
-    },
-    searchInputWrapper: {
-        position: 'relative'
-    },
-    searchInput: {
-        width: '100%',
-        padding: '16px 50px 16px 24px',
-        fontSize: '16px',
-        background: 'white',
-        border: '2px solid #e5e7eb',
-        borderRadius: '16px',
-        color: '#000000',
-        outline: 'none',
-        transition: 'all 0.3s ease',
-        fontFamily: 'inherit',
-        boxSizing: 'border-box'
-    },
-    selectWrapper: {
-        position: 'relative'
-    },
-    modernSelect: {
-        width: '100%',
-        padding: '16px 50px 16px 24px',
-        fontSize: '16px',
-        background: 'white',
-        border: '2px solid #e5e7eb',
-        borderRadius: '16px',
-        color: '#000000',
-        outline: 'none',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        fontFamily: 'inherit',
-        appearance: 'none',
-        boxSizing: 'border-box'
-    },
-    inputIcon: {
-        position: 'absolute',
-        right: '18px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: '#9ca3af',
-        width: '20px',
-        height: '20px',
-        pointerEvents: 'none'
-    },
-    resultsInfo: {
-        marginTop: '32px',
-        padding: '16px 24px',
-        background: 'rgba(8, 101, 168, 0.1)',
-        border: '2px solid rgba(8, 101, 168, 0.2)',
-        borderRadius: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '12px',
-        color: '#0865a8',
-        fontSize: '16px',
-        fontWeight: '600'
-    },
-    loadingContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '80px 20px',
-        background: 'white',
-        borderRadius: '24px',
-        border: '2px solid #e5e7eb'
-    },
-    loadingSpinner: {
-        width: '48px',
-        height: '48px',
-        border: '4px solid #e5e7eb',
-        borderTop: '4px solid #0865a8',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        marginBottom: '24px'
-    },
-    loadingText: {
-        fontSize: '18px',
-        color: '#6b7280',
-        fontWeight: '500'
-    },
-    resultsGrid: {
-        display: 'grid',
-        gap: '24px'
-    },
-    resultCard: {
-        background: 'white',
-        borderRadius: '20px',
-        overflow: 'hidden',
-        border: '2px solid #e5e7eb',
-        cursor: 'pointer',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-        transition: 'all 0.3s ease'
-    },
-    resultImageWrapper: {
-        position: 'relative',
-        height: '200px',
-        overflow: 'hidden'
-    },
-    resultImage: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        transition: 'transform 0.6s ease'
-    },
-    resultOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent)',
-        transition: 'opacity 0.3s ease'
-    },
-    resultContent: {
-        padding: '20px'
-    },
-    resultCategory: {
-        display: 'inline-block',
-        padding: '6px 12px',
-        borderRadius: '8px',
-        color: 'white',
-        fontSize: '11px',
-        fontWeight: '700',
-        textTransform: 'uppercase',
-        marginBottom: '12px',
-        letterSpacing: '0.5px'
-    },
-    resultTitle: {
-        fontSize: '16px',
-        fontWeight: '700',
-        color: '#000000',
-        lineHeight: '1.4',
-        marginBottom: '8px',
-        minHeight: '44px'
-    },
-    resultAuthor: {
-        fontSize: '13px',
-        color: '#6b7280',
-        marginBottom: '12px',
-        textAlign: 'right'
-    },
-    resultFooter: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        gap: '8px'
-    },
-    resultYear: {
-        fontSize: '12px',
-        fontWeight: '600',
-        color: '#9ca3af'
-    },
-    resultDot: {
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%'
-    },
-    noResults: {
-        textAlign: 'center',
-        padding: '80px 20px',
-        background: 'white',
-        borderRadius: '24px',
-        border: '2px solid #e5e7eb'
-    },
-    noResultsIcon: {
-        fontSize: '64px',
-        marginBottom: '24px'
-    },
-    noResultsTitle: {
-        fontSize: '28px',
-        fontWeight: '800',
-        color: '#000000',
-        marginBottom: '12px'
-    },
-    noResultsText: {
-        fontSize: '16px',
-        color: '#6b7280'
-    },
-    footerSection: {
-        padding: '60px 32px',
-        textAlign: 'center',
-        background: 'white'
-    },
-    footerBadge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '16px 32px',
-        background: 'white',
-        border: '2px solid #e5e7eb',
-        borderRadius: '999px',
-        color: '#6b7280',
-        fontSize: '16px',
-        fontWeight: '600'
-    },
-    paginationContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '12px',
-        marginTop: '48px',
-        padding: '24px',
-        background: 'white',
-        borderRadius: '20px',
-        border: '2px solid #e5e7eb'
-    },
-    paginationButton: {
-        background: 'transparent',
-        border: 'none',
-        color: '#000000',
-        fontFamily: 'inherit',
-        fontSize: '16px',
-        fontWeight: '600',
-        transition: 'all 0.3s ease',
-        outline: 'none'
-    },
-    paginationArrow: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'white',
-        border: '2px solid #e5e7eb',
-        cursor: 'pointer'
-    },
-    paginationNumbers: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
-    },
-    paginationNumber: {
-        minWidth: '40px',
-        height: '40px',
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'white',
-        border: '2px solid #e5e7eb',
-        cursor: 'pointer',
-        padding: '0 12px'
-    },
-    paginationNumberActive: {
-        background: 'linear-gradient(135deg, #0865a8 0%, #f57c00 100%)',
-        border: '2px solid transparent',
-        color: 'white'
-    },
-    paginationEllipsis: {
-        color: '#9ca3af',
-        fontSize: '16px',
-        fontWeight: '600',
-        padding: '0 8px'
-    }
-};
-
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    @keyframes slide {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(350%); }
-    }
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    
-    input::placeholder, select option:first-child {
-        color: #9ca3af;
-    }
-    
-    select option {
-        background: white;
-        color: #000000;
-    }
-`;
-document.head.appendChild(styleSheet);

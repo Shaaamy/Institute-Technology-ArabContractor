@@ -2,107 +2,79 @@ import React from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import GoogleIcon from '@mui/icons-material/Google';
-import PhoneIcon from '@mui/icons-material/Phone';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import { useTranslation } from 'react-i18next';
 
 const FloatingSocialBar = () => {
-  return (
-    <Box
-      sx={{
-        position: 'fixed',
-        right: 16, // مسافة من اليمين
-        top: '50%',
-        transform: 'translateY(-50%)',
-        display: 'flex',
-        flexDirection: 'column', // عمودي
-        gap: 2,
-        zIndex: 1300,
-      }}
-    >
-      <Tooltip title="تابعنا على فيسبوك" placement="right">
-        <IconButton
-          component="a"
-                  href="https://ar-ar.facebook.com/arabcont2017/" // غيري بالرابط الرسمي
-          target="_blank"
-          sx={{
-            bgcolor: 'white',
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === 'ar';
+
+    const socials = [
+        {
+            titleKey: 'social.facebook',
+            href: 'https://www.facebook.com/arabcont.icemt',
+            icon: <FacebookIcon fontSize="large" />,
             color: '#1877F2',
-            boxShadow: 3,
-            width: 50,
-            height: 50,
-            '&:hover': {
-              bgcolor: '#1877F2',
-              color: 'white',
-            },
-          }}
-        >
-          <FacebookIcon fontSize="large" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title="تابعنا على يوتيوب" placement="right">
-        <IconButton
-          component="a"
-                  href="https://www.youtube.com/user/arabcontCompany" // غيري بالرابط الرسمي
-          target="_blank"
-          sx={{
-            bgcolor: 'white',
+        },
+        {
+            titleKey: 'social.youtube',
+            href: 'https://youtube.com/@ac-icemt?si=dS7CixRAX08votqw',
+            icon: <YouTubeIcon fontSize="large" />,
             color: '#FF0000',
-            boxShadow: 3,
-            width: 50,
-            height: 50,
-            '&:hover': {
-              bgcolor: '#FF0000',
-              color: 'white',
-            },
-          }}
-        >
-          <YouTubeIcon fontSize="large" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title="تابعنا على جوجل" placement="right">
-        <IconButton
-          component="a"
-                  href="https://acwebsite-icmet-test.azurewebsites.net/" // أو رابط Google Business
-          target="_blank"
-          sx={{
-            bgcolor: 'white',
-            color: '#4285F4',
-            boxShadow: 3,
-            width: 50,
-            height: 50,
-            '&:hover': {
-              bgcolor: '#4285F4',
-              color: 'white',
-            },
-          }}
-        >
-          <GoogleIcon fontSize="large" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title="اتصل بنا: +2 02 23892120" placement="right">
-        <IconButton
-          component="a"
-          href="tel:+20223892120"
-          sx={{
-            bgcolor: 'white',
+        },
+        {
+            titleKey: 'social.whatsapp',
+            href: 'https://wa.me/201109754459',
+            icon: <WhatsAppIcon fontSize="large" />,
             color: '#25D366',
-            boxShadow: 3,
-            width: 50,
-            height: 50,
-            '&:hover': {
-              bgcolor: '#25D366',
-              color: 'white',
-            },
-          }}
-        >
-          <PhoneIcon fontSize="large" />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  );
+        },
+        {
+            titleKey: 'social.linkedin',
+            href: 'https://www.linkedin.com/company/arabcont-icemt/posts/?feedView=all',
+            icon: <LinkedInIcon fontSize="large" />,
+            color: '#0A66C2',
+        },
+    ];
+
+    return (
+        <Box sx={{
+            position: 'fixed',
+            right: isRTL ? 16 : 'auto',
+            left: isRTL ? 'auto' : 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            zIndex: 1300,
+        }}>
+            {socials.map(({ titleKey, href, icon, color }) => (
+                <Tooltip
+                    key={titleKey}
+                    title={t(titleKey)}
+                    placement={isRTL ? 'left' : 'right'}
+                >
+                    <IconButton
+                        component="a"
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                            bgcolor: 'white',
+                            color,
+                            boxShadow: 3,
+                            width: 50,
+                            height: 50,
+                            '&:hover': { bgcolor: color, color: 'white' },
+                        }}
+                    >
+                        {icon}
+                    </IconButton>
+                </Tooltip>
+            ))}
+        </Box>
+    );
 };
 
 export default FloatingSocialBar;

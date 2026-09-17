@@ -96,7 +96,7 @@ const ShobraTrainingPage = () => {
                 @import url('https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap');
 
                 .shobra-container * {
-                    font-family: 'Droid Arabic Kufi', serif;
+                    font-family: 'Noto Kufi Arabic', serif;
                 }
 
                 .shobra-accordion-button {
@@ -339,43 +339,19 @@ const ShobraTrainingPage = () => {
                 textAlign: 'right'
             }}>
                 {/* Fixed Overview Bar */}
-                <div
-                    className="shobra-fixed-bar"
-                    style={{
-                        position: 'fixed',
-                        top: '70px',
-                        left: 0,
-                        zIndex: 40,
-                        width: '100%',
-                        borderBottom: '2px solid #e0e0e0',
-                        backgroundColor: '#F5F7E1',
-                        padding: '0.5rem 1.25rem'
-                    }}
-                >
-                    <div style={{ textAlign: 'center' }}>
-                        <span
-                            className="shobra-fixed-bar-text"
-                            style={{ fontSize: '15px' }}
+                
+                <div style={{ position: 'fixed', top: 70, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: '8px 20px' }}>
+                    <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic", serif', fontSize: '1rem' }}>
+                        <a
+                            href="/"
+                            style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                            onMouseEnter={e => e.target.style.color = '#f57c00'}
+                            onMouseLeave={e => e.target.style.color = '#0865a8'}
                         >
-                            <a
-                                href="/"
-                                style={{
-                                    marginLeft: '0.75rem',
-                                    color: '#000000',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                    transition: 'color 0.3s'
-                                }}
-                                onMouseEnter={(e) => e.target.style.color = '#f57c00'}
-                                onMouseLeave={(e) => e.target.style.color = '#000000'}
-                            >
-                                الصفحة الرئيسية
-                            </a>
-                            <span style={{ color: '#666666', margin: '0 0.5rem' }}>-</span>
-                            <span style={{ marginRight: '0.75rem', color: '#000000' }}>
-                                مركز تدريب شبرا
-                            </span>
-                        </span>
+                            الصفحة الرئيسية
+                        </a>
+                        <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                        <span style={{ color: '#374151', marginRight: '8px' }}> مركز تدريب شبرا</span>
                     </div>
                 </div>
 

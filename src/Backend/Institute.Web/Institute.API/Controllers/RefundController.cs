@@ -33,10 +33,7 @@ namespace Institute.API.Controllers
         //  USER ENDPOINTS
         // ═══════════════════════════════════════════════════════════════
 
-        /// <summary>
         /// POST /api/refund
-        /// Authenticated user submits a refund request for one course in a paid order.
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateRefundRequest([FromBody] CreateRefundRequestDto dto)
         {
@@ -48,7 +45,6 @@ namespace Institute.API.Controllers
             if (user == null)
                 return BadRequest(new { success = false, message = "المستخدم غير موجود." });
 
-            // Verify the order belongs to this user and is Paid
             var order = await _checkoutService.GetOrderByIdAsync(dto.OrderId);
             if (order == null || order.UserId != user.Id)
                 return NotFound(new { success = false, message = "الطلب غير موجود." });
@@ -56,7 +52,6 @@ namespace Institute.API.Controllers
             if (order.Status != Domain.Enums.OrderStatus.Paid)
                 return BadRequest(new { success = false, message = "يمكن طلب الاسترداد فقط للطلبات المدفوعة." });
 
-            // Get the price for this course from the order
             var orderItem = order.Items.FirstOrDefault(i => i.PlanworkId == dto.PlanworkId);
             if (orderItem == null)
                 return BadRequest(new { success = false, message = "الكورس غير موجود في هذا الطلب." });
@@ -89,43 +84,33 @@ namespace Institute.API.Controllers
             }
         }
 
-        /// <summary>
         /// GET /api/refund/my
-        /// Returns all refund requests submitted by the current user.
-        /// </summary>
         [HttpGet("my")]
         public async Task<IActionResult> GetMyRefunds()
         {
-            var clerkUserId = _currentUser.UserId;
-            var user = await _checkoutService.GetUserByClerkIdAsync(clerkUserId ?? "");
+            var user = await _checkoutService.GetUserByClerkIdAsync(_currentUser.UserId ?? "");
             if (user == null)
                 return Unauthorized();
 
             var requests = await _refundService.GetByUserIdAsync(user.Id);
-            return Ok(new
-            {
-                success = true,
-                data = requests.Select(MapToDto)
-            });
+            return Ok(new { success = true, data = requests.Select(MapToDto) });
         }
 
-        /// <summary>
         /// GET /api/refund/{id}
-        /// Returns a single refund request (owner or admin only).
-        /// </summary>
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var clerkUserId = _currentUser.UserId;
-            var user = await _checkoutService.GetUserByClerkIdAsync(clerkUserId ?? "");
+            var user = await _checkoutService.GetUserByClerkIdAsync(_currentUser.UserId ?? "");
+            if (user == null)
+                return Unauthorized();
 
             var request = await _refundService.GetByIdAsync(id);
             if (request == null)
                 return NotFound(new { success = false, message = "الطلب غير موجود." });
 
-            // Only owner or admin may view
-            // Any authenticated user can view any request for now
-            // (admin restriction will be added later)
+            // ✅ Owner check — بس صاحب الطلب يقدر يشوفه
+            if (request.UserId != user.Id)
+                return Forbid();
 
             return Ok(new { success = true, data = MapToDto(request) });
         }
@@ -134,12 +119,9 @@ namespace Institute.API.Controllers
         //  ADMIN ENDPOINTS
         // ═══════════════════════════════════════════════════════════════
 
-        /// <summary>
         /// GET /api/refund/admin/all?status=Pending
-        /// Admin — list all refund requests, optionally filtered by status.
-        /// </summary>
         [HttpGet("admin/all")]
-        [Authorize]
+      //  [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> GetAll([FromQuery] string? status = null)
         {
             var requests = await _refundService.GetAllAsync(status);
@@ -151,12 +133,9 @@ namespace Institute.API.Controllers
             });
         }
 
-        /// <summary>
         /// PUT /api/refund/{id}/approve
-        /// Admin approves a pending refund request → Status: Approved
-        /// </summary>
         [HttpPut("{id:int}/approve")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> Approve(int id, [FromBody] ApproveRefundDto dto)
         {
             var (isSuccess, message) = await _refundService.ApproveAsync(id, dto.AdminNote);
@@ -167,12 +146,9 @@ namespace Institute.API.Controllers
             return Ok(new { success = true, message, data = MapToDto(request!) });
         }
 
-        /// <summary>
         /// PUT /api/refund/{id}/reject
-        /// Admin rejects a pending refund request → Status: Rejected
-        /// </summary>
         [HttpPut("{id:int}/reject")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> Reject(int id, [FromBody] RejectRefundDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.RejectionReason))
@@ -186,15 +162,13 @@ namespace Institute.API.Controllers
             return Ok(new { success = true, message, data = MapToDto(request!) });
         }
 
-        /// <summary>
         /// PUT /api/refund/{id}/sent
-        /// Admin marks money as transferred → Status: Sent + cancels enrollment
-        /// </summary>
         [HttpPut("{id:int}/sent")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> MarkAsSent(int id, [FromBody] MarkSentDto dto)
         {
-            var (isSuccess, message) = await _refundService.MarkAsSentAsync(id, dto.AdminNote, _bankPaymentService);
+            var (isSuccess, message) = await _refundService.MarkAsSentAsync(
+                id, dto.AdminNote, _bankPaymentService);
             if (!isSuccess)
                 return BadRequest(new { success = false, message });
 

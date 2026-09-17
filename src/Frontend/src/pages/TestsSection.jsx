@@ -1,4 +1,4 @@
-﻿import React, { useState , useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 
 export default function ICMETTests() {
     const [selectedImg, setSelectedImg] = useState(null);
@@ -20,11 +20,6 @@ export default function ICMETTests() {
         'تعيين'
     ];
 
-    const testTypes = [
-        'قياسات سيكومترية ( القياسات الشخصية )',
-        'قياسات أخري ( لغة - كمبيوتر- فني -.... )'
-    ];
-
     const news = [
         'في اطار التعاون مع وزارة الاسكان والمرافق والمجتمعات العمرانية ، ولخلق كوادر للقيادات الشابة من موظفي هيئة المجتمعات العمرانية الجديدة ، تم تتعيم عدد 226 موظف لشغل وظيفة معاون نائب رئيس الهيئة او معاون رئيس جهاز مدينة ، حيث تم التقييم لمهارات ( اللغة – الحاسب الآلي – القياسات الشخصية والذكاءات ).',
         'نظرا لاسناد مشروعات جديدة للشركة وحرصا من قيادات الشركة لاتاحة فرص عمل لشباب المهندسين ، يجري حاليا عمل التقييمات اللازمة لتعيين عدد من المهندسين حديثي التخرج للانضمام لاسرة الشركة ، فتم خلال العام 2019-2020 عمل التقييمات لعدد 663 مهندس في تخصصات ( مدني – عمارة – ميكانكيكا – كهرباء – مساحة ) وذلك في قدرات ومهارات استخدام الحاسب الآلي ، وتحديد درجة اجادة اللغة ، بالاضافة الى تقييم معلومات التخصص و القياسات الشخصية والذكاءات.',
@@ -33,514 +28,403 @@ export default function ICMETTests() {
     ];
 
     useEffect(() => {
-      document.title = '   الاختبارات - المعهد التكنولوجي لهندسة التشييد والإدارة';
-  }, []);
+        document.title = 'الاختبارات - المعهد التكنولوجي لهندسة التشييد والإدارة';
+    }, []);
 
     return (
         <div className="rtl-layout" dir="rtl">
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
-        @import url('https://fonts.googleapis.com/earlyaccess/droidarabickufi.css');
-        
-        :root {
-          --primary: #0865a8;
-          --secondary: #f57c00;
-          --accent: #000000;
-          --dark: #000000;
-          --light: #ffffff;
-          --gold: #d4af37;
-        }
+                @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+                @import url('https://fonts.googleapis.com/earlyaccess/droidarabickufi.css');
 
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+                :root {
+                    --primary: #0865a8;
+                    --secondary: #f57c00;
+                    --dark: #000000;
+                    --light: #ffffff;
+                }
 
-       body {
-          font-family: 'Droid Arabic Kufi', serif;
-          background: #ffffff;
-          color: var(--dark);
-          line-height: 1.8;
-        }
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
 
+                body {
+                    background: #ffffff;
+                    color: var(--dark);
+                    line-height: 1.6;
+                    font-size: 16px;
+                    font-family: 'Noto Kufi Arabic', sans-serif;
+                }
 
-        .rtl-layout {
-          text-align: right;
-          direction: rtl;
-          min-height: 100vh;
-          padding-top: 130px; 
-        }
+                .rtl-layout {
+                    text-align: right;
+                    direction: rtl;
+                    min-height: 100vh;
+                    padding-top: 0;
+                    font-family: 'Noto Kufi Arabic', sans-serif;
+                }
 
-        /* Hero Section */
-        .hero-section {
-          max-width: 1200px;
-          margin: 1rem auto;
-          animation: fadeInUp 0.8s ease-out;
+                .fixed-nav {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    background-color: #f5f5f5;
+                    border-bottom: 1px solid #d1d5db;
+                    padding: 8px 16px;
+                    z-index: 1000;
+                    text-align: center;
+                    font-size: 0.9rem;
+                }
 
-          /* ✅ ADD ONLY THIS */
-          background: #ffffff;
-          padding: 2rem;
-          border-radius: 24px;
-        }
+                .main-content {
+                    padding-top: 45px;
+                }
 
-        .hero-title {
-          font-family: 'Droid Arabic Kufi', serif;
-          font-size: 3.5rem;
-          font-weight: 800;
-          color: var(--primary);
-          text-align: center;
-          margin-bottom: 2rem;
-          position: relative;
-          display: inline-block;
-          width: 100%;
-          animation: fadeInScale 1s ease-out;
-        }
+                .hero-section {
+                    max-width: 1200px;
+                    margin: 0.5rem auto 1rem auto;
+                    background: #ffffff;
+                    padding: 1.5rem;
+                    border-radius: 24px;
+                }
 
-        .hero-title::after {
-          content: '';
-          position: absolute;
-          bottom: -15px;
-          right: 50%;
-          transform: translateX(50%);
-          width: 120px;
-          height: 5px;
-          background: linear-gradient(90deg, transparent, var(--secondary), transparent);
-          border-radius: 3px;
-        }
+                .hero-title {
+                    font-family: 'Noto Kufi Arabic', sans-serif;
+                    font-size: clamp(1.6rem, 5vw, 2.2rem);
+                    font-weight: 800;
+                    color: var(--primary);
+                    text-align: center;
+                    margin-bottom: 1.5rem;
+                    position: relative;
+                    line-height: 1.3;
+                }
 
-        @keyframes fadeInScale {
-          0% { opacity: 0; transform: scale(0.9); }
-          100% { opacity: 1; transform: scale(1); }
-        }
+                .hero-title::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -12px;
+                    right: 50%;
+                    transform: translateX(50%);
+                    width: 100px;
+                    height: 4px;
+                    background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+                    border-radius: 2px;
+                }
 
-        @keyframes fadeInUp {
-          0% { opacity: 0; transform: translateY(30px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
+                .hero-description {
+                    font-size: 1rem;
+                    line-height: 1.7;
+                    color: var(--dark);
+                    margin-bottom: 1.2rem;
+                    padding: 1.2rem;
+                    background: #f9f9f9;
+                    border-radius: 16px;
+                    border-right: 4px solid var(--secondary);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                }
 
-        @keyframes fadeInRight {
-          0% { opacity: 0; transform: translateX(30px); }
-          100% { opacity: 1; transform: translateX(0); }
-        }
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                    gap: 1.5rem;
+                    margin: 2rem auto;
+                    max-width: 1200px;
+                    padding: 0 1.5rem;
+                }
 
-        .hero-description {
-          font-size: 1.2rem;
-          line-height: 2;
-          color: var(--dark);
-          margin-bottom: 1.5rem;
-          padding: 2rem;
-          background: #f9f9f9;
-          border-radius: 16px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-          border-right: 5px solid var(--secondary);
-          animation: fadeInUp 0.8s ease-out 0.2s both;
-        }
+                .stat-card {
+                    background: white;
+                    padding: 1.2rem 0.5rem;
+                    border-radius: 20px;
+                    text-align: center;
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+                    transition: all 0.3s ease;
+                    aspect-ratio: 1/1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                }
 
-        /* Stats Grid */
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 2rem;
-          margin: 4rem auto;
-          max-width: 1200px;
-          padding: 0 2rem;
-        }
+                .stat-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 15px 30px rgba(8,101,168,0.15);
+                }
 
-        .stat-card {
-          background: white;
-          padding: 1.5rem 1rem;
-          border-radius: 20px;
-          text-align: center;
-          box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          position: relative;
-          overflow: hidden;
-          animation: fadeInUp 0.8s ease-out;
-          aspect-ratio: 1 / 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-        }
+                .stat-icon { font-size: 2rem; color: var(--secondary); }
+                .stat-title { font-size: 1rem; font-weight: 700; color: var(--dark); }
+                .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--primary); }
 
-        .stat-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 100%;
-          height: 5px;
-          background: var(--primary);
-          transform: scaleX(0);
-          transform-origin: right;
-          transition: transform 0.5s ease;
-        }
+                .content-section {
+                    max-width: 1200px;
+                    margin: 3rem auto;
+                    padding: 0 1.5rem;
+                }
 
-        .stat-card:hover::before { transform: scaleX(1); }
+                .content-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 2rem;
+                    align-items: center;
+                    margin-bottom: 2rem;
+                }
 
-        .stat-card:hover {
-          transform: translateY(-12px) scale(1.03);
-          box-shadow: 0 25px 70px rgba(8, 101, 168, 0.25);
-        }
+                @media (max-width: 768px) {
+                    .content-grid { grid-template-columns: 1fr; }
+                    .image-grid { grid-template-columns: 1fr; }
+                }
 
-        .stat-icon {
-          font-size: 2rem;
-          color: var(--secondary);
-          margin-bottom: 0.5rem;
-          animation: pulse 2s ease-in-out infinite;
-        }
+                .content-image {
+                    border-radius: 20px;
+                    overflow: hidden;
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+                    cursor: pointer;
+                    background: #fff;
+                }
 
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
+                .content-image img {
+                    width: 100%;
+                    height: auto;
+                    display: block;
+                    transition: transform 0.3s ease;
+                }
 
-        .stat-title {
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: var(--dark);
-          margin-bottom: 0.3rem;
-        }
+                .content-image:hover img { transform: scale(1.02); }
 
-        .stat-number {
-          font-size: 2rem;
-          font-weight: 800;
-          color: var(--primary);
-        }
+                .list-container {
+                    background: white;
+                    padding: 1.2rem;
+                    border-radius: 20px;
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+                    border: 1px solid #eee;
+                }
 
-        /* Content Sections */
-        .content-section {
-          max-width: 1200px;
-          margin: 5rem auto;
-          padding: 0 2rem;
-        }
+                .custom-list { list-style: none; padding: 0; }
 
-        .content-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 3rem;
-          align-items: center;
-          margin-bottom: 4rem;
-        }
+                .custom-list > li {
+                    margin-bottom: 1.2rem;
+                    padding-right: 2.2rem;
+                    position: relative;
+                    font-size: 1rem;
+                    line-height: 1.6;
+                }
 
-        @media (max-width: 968px) {
-          .content-grid { grid-template-columns: 1fr; }
-        }
+                .custom-list > li::before {
+                    content: '✓';
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    width: 24px;
+                    height: 24px;
+                    background: var(--secondary);
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.8rem;
+                }
 
-        .content-text { animation: fadeInRight 0.8s ease-out; }
+                .nested-list { list-style: none; margin-top: 0.8rem; padding-right: 1.2rem; }
 
-        .content-image {
-          border-radius: 24px;
-          overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-          position: relative;
-          animation: fadeInUp 0.8s ease-out 0.2s both;
-          cursor: pointer;
-          background: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
+                .nested-list li {
+                    margin-bottom: 0.6rem;
+                    padding-right: 1.5rem;
+                    position: relative;
+                    font-size: 0.95rem;
+                    color: #333;
+                }
 
-        .content-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain; /* Prevents zooming, fits perfectly */
-          transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+                .nested-list li::before {
+                    content: '◆';
+                    position: absolute;
+                    right: 0;
+                    color: var(--primary);
+                    font-size: 0.8rem;
+                }
 
-        .content-image:hover img { transform: scale(1.05); }
+                .image-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 1.5rem;
+                    margin: 2rem 0;
+                }
 
-        .list-container {
-          background: white;
-          padding: 2.5rem;
-          border-radius: 20px;
-          box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
-          border: 1px solid #eee;
-        }
+                .large-stats-section {
+                    background: var(--primary);
+                    padding: 2rem 1rem;
+                    margin: 3rem 0;
+                    text-align: center;
+                }
 
-        .custom-list { list-style: none; padding: 0; }
+                .large-stats-title { font-size: 1.6rem; color: white; margin-bottom: 1rem; font-weight: 700; }
 
-        .custom-list > li {
-          margin-bottom: 1.5rem;
-          padding-right: 2.5rem;
-          position: relative;
-          font-size: 1.1rem;
-          animation: fadeInRight 0.6s ease-out both;
-        }
+                .large-stat-icon {
+                    font-size: 2.5rem;
+                    color: var(--secondary);
+                    animation: bounce 2s infinite;
+                }
 
-        .custom-list > li::before {
-          content: '✓';
-          position: absolute;
-          right: 0;
-          top: 0;
-          width: 28px;
-          height: 28px;
-          background: var(--secondary);
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          font-size: 0.9rem;
-        }
+                @keyframes bounce {
+                    0%,100% { transform: translateY(0); }
+                    50% { transform: translateY(-8px); }
+                }
 
-        .nested-list { list-style: none; margin-top: 1rem; padding-right: 1.5rem; }
+                .large-stat-number { font-size: 3.2rem; font-weight: 900; color: white; line-height: 1.2; }
+                .large-stat-label { font-size: 1.3rem; color: white; font-weight: 600; }
 
-        .nested-list li {
-          margin-bottom: 0.8rem;
-          padding-right: 2rem;
-          position: relative;
-          color: #333;
-        }
+                .news-section {
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 24px;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+                    margin-top: 2rem;
+                }
 
-        .nested-list li::before {
-          content: '◆';
-          position: absolute;
-          right: 0;
-          color: var(--primary);
-        }
+                .section-title { color: var(--primary); font-size: 1.6rem; font-weight: bold; margin-bottom: 1.5rem; }
 
-        /* Large Stats Section - UPDATED TO BE SMALLER */
-        .large-stats-section {
-          background: var(--primary);
-          padding: 2rem 2rem; /* Reduced from 3rem */
-          position: relative;
-          margin: 5rem 0;
-        }
+                .news-item {
+                    padding: 1rem 2rem 1rem 1rem;
+                    margin-bottom: 1.2rem;
+                    background: #fcfcfc;
+                    border-radius: 16px;
+                    border-right: 4px solid var(--primary);
+                    position: relative;
+                    line-height: 1.7;
+                    font-size: 0.95rem;
+                }
 
-        .large-stats-title {
-          font-family: 'Droid Arabic Kufi', serif;
-          font-size: 1.8rem; /* Reduced from 2.8rem */
-          color: white;
-          margin-bottom: 1.5rem; /* Reduced from 2rem */
-          font-weight: 700;
-          text-align: center;
-        }
+                .news-item::before {
+                    content: '✓';
+                    position: absolute;
+                    right: 0.8rem;
+                    top: 1rem;
+                    width: 20px;
+                    height: 20px;
+                    background: var(--secondary);
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.7rem;
+                }
 
-        .large-stat-display {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem; /* Reduced from 1rem */
-        }
+                .modal-overlay {
+                    position: fixed;
+                    top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.85);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 2000;
+                    cursor: pointer;
+                }
 
-        .large-stat-icon { 
-          font-size: 2.5rem; /* Reduced from 3.5rem */
-          color: var(--secondary); 
-          animation: bounce 2s ease-in-out infinite; 
-        }
+                .modal-content { max-width: 90%; max-height: 90%; position: relative; }
+                .modal-content img { width: 100%; height: auto; border-radius: 12px; }
+                .close-modal { position: absolute; top: -35px; left: 0; color: white; font-size: 2rem; cursor: pointer; }
+            `}</style>
 
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); } /* Reduced from -20px */
-        }
+            {/* Fixed navigation bar */}
+            <div className="fixed-nav">
+                <a href="/" style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                    onMouseEnter={e => e.target.style.color = '#f57c00'}
+                    onMouseLeave={e => e.target.style.color = '#0865a8'}>
+                    الصفحة الرئيسية
+                </a>
+                <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                <span style={{ color: '#374151' }}>الاختبارات</span>
+            </div>
 
-        .large-stat-number { 
-          font-size: 4rem; /* Reduced from 6rem */
-          font-weight: 900; 
-          color: white; 
-        }
+            <div className="main-content">
+                <section className="hero-section">
+                    <h1 className="hero-title">الاختبارات</h1>
+                    <p className="hero-description">
+                        تم انشاء قسم الاختبارات بالمعهد مواكبة لاحد النظم في اختيار الموارد البشرية وايماناً من الشركة بأهمية اختيار افضل العناصر لشغل الوظائف المختلفة بالشركة وفقاً للضوابط والمعايير المطلوبة لكل وظيفة
+                    </p>
+                    <p className="hero-description">
+                        يعد معهد الإدارة والتكنولوجيا- المقاولون العرب واحد من أوائل المعاهد في جمهورية مصر العربية ، حيث يقوم هذا القسم  باجراء عدد كبير من الاختبارات المقننة الى العملاء الخارجيين طبقا للتعاقد وجميع الفروع والإدارات داخل الشركة
+                    </p>
+                    <p className="hero-description">
+                        كما يقوم القسم بعمل التقييمات اللازمة لتحديد مدى صلاحية الموظف لشغل الوظيفة ، معتمداً على خبرة السادة المحاضرين في عمل فنية تقييمات مناسبة لكافة الوظائف والمهن المختلفة ذات مرجعية لاختبارات الشهادات الدولية مثل ( ICDL & Toefl ) ، كذلك مستويات المهارات القومية ، واصدار النتيجة المعتمدة والمحددة لصلاحية شغل الوظيفة
+                    </p>
+                </section>
 
-        .large-stat-label { 
-          font-size: 1.5rem; /* Reduced from 2rem */
-          color: white; 
-          font-weight: 600; 
-        }
+                <h1 className="hero-title" style={{ fontSize: '1.7rem', marginTop: '0' }}>ولم يقتصر العمل في قسم الاختبارات على العاملين بالشركة فقط ، بل امتد عمل التقييمات ليشمل العملاء خارجيين ايضاً</h1>
 
-        /* News Section */
-        .news-section {
-          background: white;
-          padding: 3rem;
-          border-radius: 24px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-          margin-top: 3rem;
-        }
-
-        .news-item {
-          padding: 2rem;
-          margin-bottom: 2rem;
-          background: #fcfcfc;
-          border-radius: 16px;
-          border-right: 4px solid var(--primary);
-          position: relative;
-          padding-right: 3rem;
-          line-height: 2;
-          animation: fadeInRight 0.6s ease-out both;
-        }
-
-        .news-item::before {
-          content: '✓';
-          position: absolute;
-          right: 1rem;
-          top: 2rem;
-          width: 24px;
-          height: 24px;
-          background: var(--secondary);
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.8rem;
-        }
-
-        .image-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 2rem;
-          margin: 4rem 0;
-        }
-
-        /* Modal Dialog Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            cursor: pointer;
-        }
-
-        .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            position: relative;
-        }
-
-        .modal-content img {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 5px 30px rgba(0,0,0,0.5);
-        }
-
-        .close-modal {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-          .image-grid { grid-template-columns: 1fr; }
-          .hero-title { font-size: 2.5rem; }
-          .large-stats-title { font-size: 1.5rem; }
-          .large-stat-number { font-size: 3rem; }
-          .large-stat-label { font-size: 1.2rem; }
-          .large-stat-icon { font-size: 2rem; }
-        }
-      `}</style>
-
-            {/* Fixed Overview Bar - Exactly as requested */}
-            <div className="top-100 fixed left-0 z-50 w-full border-b border-gray-300 bg-[#F5F7E1] px-5 py-2" style={{ top: '70px' }}>
-                <div className="text-center">
-                    <span className="text-base">
-                        <a href="/" className="ml-3 text-gray-700 hover:text-gray-900">الصفحة الرئيسية</a>
-                        <span className="text-gray-500">-</span>
-                        <span className="mr-3 text-gray-700">الاختبارات</span>
-                    </span>
+                <div className="stats-grid">
+                    {externalClients.map((client, idx) => (
+                        <div key={idx} className="stat-card">
+                            <div className="stat-icon">📊</div>
+                            <h3 className="stat-title">{client.name}</h3>
+                            <div className="stat-number">{client.count}</div>
+                        </div>
+                    ))}
                 </div>
-            </div>
 
-            {/* Hero Section */}
-            <section className="hero-section">
-                <h1 className="hero-title">الاختبارات</h1>
-                <p className="hero-description">
-                    تم انشاء قسم الاختبارات بالمعهد مواكبة لاحد النظم في اختيار الموارد البشرية وايماناً من الشركة بأهمية اختيار افضل العناصر لشغل الوظائف المختلفة بالشركة وفقاً للضوابط والمعايير المطلوبة لكل وظيفة
-                </p>
-                <p className="hero-description">
-                    يعد معهد الإدارة والتكنولوجيا- المقاولون العرب واحد من أوائل المعاهد في جمهورية مصر العربية ، حيث يقوم هذا القسم  باجراء عدد كبير من الاختبارات المقننة الى العملاء الخارجيين طبقا للتعاقد وجميع الفروع والإدارات داخل الشركة
-                </p>
-                <p className="hero-description">
-                    كما يقوم القسم بعمل التقييمات اللازمة لتحديد مدى صلاحية الموظف لشغل الوظيفة ، معتمداً على خبرة السادة المحاضرين في عمل فنية تقييمات مناسبة لكافة الوظائف والمهن المختلفة ذات مرجعية لاختبارات الشهادات الدولية مثل ( ICDL & Toefl ) ، كذلك مستويات المهارات القومية ، واصدار النتيجة المعتمدة والمحددة لصلاحية شغل الوظيفة                </p>
-            </section>
-            <h1 className="hero-title" style={{ fontSize: '2rem' }}>ولم يقتصر العمل في قسم الاختبارات على العاملين بالشركة فقط ، بل امتد عمل التقييمات ليشمل العملاء خارجيين ايضاً</h1>
-
-            {/* External Clients Stats */}
-            <div className="stats-grid" >
-                {externalClients.map((client, index) => (
-                    <div key={index} className="stat-card">
-
-                        <div className="stat-icon">📊</div>
-                        <h3 className="stat-title">{client.name}</h3>
-                        <div className="stat-number">{client.count}</div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Internal Tests Section */}
-            <section className="content-section">
-                <div className="content-grid">
-                    <div className="content-text">
-                        <div className="list-container">
-                            <ul className="custom-list">
-                                <li>
-                                    الاختبارات الخاصة بالعاملين بالشركة
-                                    <ul className="nested-list">
-                                        {internalTests.map((test, index) => (
-                                            <li key={index}>{test}</li>
-                                        ))}
-                                    </ul>
-                                </li>
-                            </ul>
+                <section className="content-section">
+                    <div className="content-grid">
+                        <div className="content-text">
+                            <div className="list-container">
+                                <ul className="custom-list">
+                                    <li>
+                                        الاختبارات الخاصة بالعاملين بالشركة
+                                        <ul className="nested-list">
+                                            {internalTests.map((test, idx) => (
+                                                <li key={idx}>{test}</li>
+                                            ))}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="content-image" onClick={() => setSelectedImg('/images/test-01.jpg')}>
+                            <img src="/images/test-01.jpg" alt="Testing facilities" />
                         </div>
                     </div>
-                    <div className="content-image" onClick={() => setSelectedImg('/images/test-01.jpg')}>
-                        <img src="/images/test-01.jpg" alt="Testing facilities" />
-                    </div>
-                </div>
 
-                <div className="image-grid">
-                    <div className="content-image" onClick={() => setSelectedImg('/images/test-02.jpg')}>
-                        <img src="/images/test-02.jpg" alt="Testing environment" />
+                    <div className="image-grid">
+                        <div className="content-image" onClick={() => setSelectedImg('/images/test-02.jpg')}>
+                            <img src="/images/test-02.jpg" alt="Testing environment" />
+                        </div>
+                        <div className="content-image" onClick={() => setSelectedImg('/images/test-03.jpg')}>
+                            <img src="/images/test-03.jpg" alt="Testing sessions" />
+                        </div>
                     </div>
-                    <div className="content-image" onClick={() => setSelectedImg('/images/test-03.jpg')}>
-                        <img src="/images/test-03.jpg" alt="Testing sessions" />
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Large Stats Section */}
-            <section className="large-stats-section">
-                <div className="large-stats-content">
+                <section className="large-stats-section">
                     <h2 className="large-stats-title">ما تم اختباره في عام 2020-2021</h2>
                     <div className="large-stat-display">
                         <div className="large-stat-icon">👥</div>
                         <div className="large-stat-number">2315</div>
                         <div className="large-stat-label">مهندس</div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* News Section */}
-            <section className="content-section">
-                <div className="news-section">
-                    <h2 className="section-title" style={{ color: 'var(--primary)', fontWeight: 'bold', fontSize: '2rem', marginBottom: '20px' }}>من اخبار قسم الاختبارات</h2>
-                    {news.map((item, index) => (
-                        <div key={index} className="news-item">
-                            {item}
-                        </div>
-                    ))}
-                </div>
-            </section>
+                <section className="content-section">
+                    <div className="news-section">
+                        <h2 className="section-title">من اخبار قسم الاختبارات</h2>
+                        {news.map((item, idx) => (
+                            <div key={idx} className="news-item">
+                                {item}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            </div>
 
-            {/* Modal Dialog */}
             {selectedImg && (
                 <div className="modal-overlay" onClick={() => setSelectedImg(null)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <span className="close-modal">&times;</span>
-                        <img src={selectedImg} alt="Larger View" />
+                        <img src={selectedImg} alt="Enlarged view" />
                     </div>
                 </div>
             )}

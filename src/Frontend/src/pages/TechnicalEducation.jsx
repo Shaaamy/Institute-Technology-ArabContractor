@@ -20,7 +20,6 @@ export default function TechnicalEducationAlt() {
     return (
         <div className="tech-page-wrapper">
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Droid+Arabic+Kufi:wght@400;700&display=swap');
 
                 :root {
                     --primary-color: #0865a8;
@@ -35,16 +34,15 @@ export default function TechnicalEducationAlt() {
                     direction: rtl;
                     background: #ffffff;
                     min-height: 100vh;
-                    font-family: 'Droid Arabic Kufi', serif;
+                    font-family: 'Noto Kufi Arabic', serif;
                     color: var(--text-dark);
                 }
 
                 .tech-page-wrapper * {
-                    font-family: 'Droid Arabic Kufi', serif;
+                    font-family: 'Noto Kufi Arabic', serif;
                     box-sizing: border-box;
                 }
 
-                /* Fixed Navigation Bar */
                 .tech-fixed-bar {
                     position: fixed;
                     top: 0;
@@ -82,14 +80,12 @@ export default function TechnicalEducationAlt() {
                     color: #666;
                 }
 
-                /* Main Content Container */
                 .tech-main-container {
                     max-width: 1400px;
                     margin: 0 auto;
-                    padding: 120px 5% 60px; /* Top padding accounts for fixed bar */
+                    padding: 120px 5% 60px;
                 }
 
-                /* Cards General Styling */
                 .tech-card {
                     background: #fff;
                     border-radius: 18px;
@@ -100,7 +96,6 @@ export default function TechnicalEducationAlt() {
                     transition: transform var(--transition-speed), box-shadow var(--transition-speed);
                 }
 
-                /* Header Card */
                 .tech-header-card {
                     padding: 40px 30px;
                     text-align: center;
@@ -134,7 +129,6 @@ export default function TechnicalEducationAlt() {
                     margin: 0 auto;
                 }
 
-                /* Axis/Role Card */
                 .tech-role-card {
                     padding: 30px;
                 }
@@ -168,7 +162,7 @@ export default function TechnicalEducationAlt() {
                     margin-top: 4px;
                 }
 
-                /* Grid Layouts */
+                /* ✅ FIXED: Always 2 columns grid */
                 .tech-grid {
                     display: grid;
                     gap: 25px;
@@ -176,14 +170,14 @@ export default function TechnicalEducationAlt() {
                 }
 
                 .tech-grid-2 {
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    grid-template-columns: repeat(2, 1fr);
                 }
 
-                /* School Cards */
                 .school-card {
                     padding: 25px;
                     border-top: 4px solid var(--primary-color);
                     height: 100%;
+                    margin-bottom: 0;
                 }
 
                 .school-card:hover {
@@ -205,7 +199,6 @@ export default function TechnicalEducationAlt() {
                     margin: 0;
                 }
 
-                /* Image Cards */
                 .image-card {
                     height: clamp(250px, 40vh, 450px);
                     cursor: pointer;
@@ -222,7 +215,6 @@ export default function TechnicalEducationAlt() {
                     transform: scale(1.05);
                 }
 
-                /* Modal Styles */
                 .tech-modal-overlay {
                     position: fixed;
                     inset: 0;
@@ -284,20 +276,16 @@ export default function TechnicalEducationAlt() {
                     text-align: center;
                 }
 
-                /* Media Queries for Specific Adjustments */
-                
-                /* Large Screens (1920px+) */
                 @media (min-width: 1920px) {
                     .tech-main-container {
                         max-width: 1600px;
                     }
                     .tech-grid-2 {
-                        grid-template-columns: repeat(2, 1fr);
                         gap: 40px;
                     }
                 }
 
-                /* Tablets and below (768px) */
+                /* ✅ Stack to 1 column on mobile */
                 @media (max-width: 768px) {
                     .tech-main-container {
                         padding-top: 100px;
@@ -310,7 +298,6 @@ export default function TechnicalEducationAlt() {
                     }
                 }
 
-                /* Small Phones (300px - 480px) */
                 @media (max-width: 480px) {
                     .tech-main-container {
                         padding: 90px 15px 40px;
@@ -331,7 +318,6 @@ export default function TechnicalEducationAlt() {
                     }
                 }
 
-                /* Ultra Small Screens (300px) */
                 @media (max-width: 320px) {
                     .tech-title {
                         font-size: 1.3rem;
@@ -342,13 +328,21 @@ export default function TechnicalEducationAlt() {
                 }
             `}</style>
 
-            <nav className="tech-fixed-bar" style={{top:70}}>
-                <div className="tech-fixed-bar-content">
-                    <a href="/" className="tech-nav-link">الصفحة الرئيسية</a>
-                    <span className="tech-nav-sep">-</span>
-                    <span className="tech-nav-current">تطوير التعليم الفني</span>
+            
+            <div style={{ position: 'fixed', top: 70, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: '8px 20px' }}>
+                <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic", serif', fontSize: '1rem' }}>
+                    <a
+                        href="/"
+                        style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                        onMouseEnter={e => e.target.style.color = '#f57c00'}
+                        onMouseLeave={e => e.target.style.color = '#0865a8'}
+                    >
+                        الصفحة الرئيسية
+                    </a>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <span style={{ color: '#374151', marginRight: '8px' }}>تطوير التعليم الفني</span>
                 </div>
-            </nav>
+            </div>
 
             <main className="tech-main-container">
                 {/* Header Section */}
@@ -380,7 +374,7 @@ export default function TechnicalEducationAlt() {
                     </ul>
                 </section>
 
-                {/* Schools Grid */}
+                {/* Schools Grid — ✅ now always 2×2 */}
                 <section className="tech-grid tech-grid-2">
                     <SchoolCard
                         title="مدرسة المعدات الثقيلة الصناعية بالإسماعيلية"
@@ -415,7 +409,6 @@ export default function TechnicalEducationAlt() {
                 </section>
             </main>
 
-            {/* Modal */}
             {modalImage && (
                 <div className="tech-modal-overlay" onClick={closeModal}>
                     <div className="tech-modal-content" onClick={e => e.stopPropagation()}>

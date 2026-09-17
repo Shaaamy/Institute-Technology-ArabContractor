@@ -29,30 +29,6 @@ namespace Institute.API.Controllers
                 _repository = repository;
             }
 
-
-
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Book>>> GetAll()
-        //    {
-        //        var spec = new Book_LoadNafigationProperty();
-        //        var books = await _bookService.GetAll();
-        //       // var books = await BaseRepository.GetAllWithSpecAsync(spec);
-        //    return Ok(books);
-        //}
-
-        //[HttpGet("getAllBooks")]
-        //public async Task<IActionResult> GetAllBooks()
-        //{
-        //    var spec = new Book_LoadNafigationProperty();
-        //    // جلب البيانات من قاعدة البيانات
-        //    var books = await _bookService.GetAllWithSpec(spec);
-
-        //    // تحويل الـ Entity للـ DTO
-        //    var booksDto = _mapper.Map<List<BookResponseDto>>(books);
-
-        //    return Ok(booksDto);
-        //}
-
         [HttpGet("getAllBooks")]
         public async Task<ActionResult<Pagination<BookResponseDto>>> GetAllBooks(
     [FromQuery] BookSpecParams bookParams)

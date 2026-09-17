@@ -58,6 +58,8 @@ public partial class AppDbContext : DbContext
 
     //// Custom DbSets for the new entities
     public virtual DbSet<AppUser> AppUsers { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<UserPermission> UserPermissions { get; set; }
     public virtual DbSet<Cart> Carts { get; set; }
     public virtual DbSet<CartItem> CartItems { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
@@ -135,7 +137,20 @@ public partial class AppDbContext : DbContext
                   .WithOne(o => o.User)
                   .HasForeignKey(o => o.UserId);
         });
+        modelBuilder.Entity<UserPermission>()
+            .HasIndex(x => new { x.AppUserId, x.PermissionId })
+            .IsUnique();
+        modelBuilder.Entity<UserPermission>()
+            .HasOne(x => x.AppUser)
+            .WithMany(x => x.Permissions)
+            .HasForeignKey(x => x.AppUserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<UserPermission>()
+            .HasOne(x => x.Permission)
+            .WithMany()
+            .HasForeignKey(x => x.PermissionId)
+            .OnDelete(DeleteBehavior.Cascade);
         // Cart
         modelBuilder.Entity<Cart>(entity =>
         {
@@ -327,6 +342,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.NewsDate)
                 .HasColumnType("datetime")
                 .HasColumnName("news_date");
+            entity.Property(e => e.ShowFlag)
+      .HasColumnName("show_flag")
+      .HasDefaultValue(true);
         });
 
         modelBuilder.Entity<ErrorDesc>(entity =>
@@ -450,7 +468,12 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.ChildId).HasColumnName("ChildID");
             entity.Property(e => e.ParentId).HasColumnName("ParentID");
-
+            entity.Property(e => e.IsOnline)
+                    .HasDefaultValue(false);
+            entity.Property(e => e.OnlineLink)
+                  .HasMaxLength(500);
+            entity.Property(e => e.OnlineCost)
+                  .HasColumnType("decimal(18,2)");
             entity.Property(e => e.CourseContent).HasColumnName("course_content");
             entity.Property(e => e.CourseDate).HasColumnName("course_date");
             entity.Property(e => e.CourseDays).HasColumnName("course_days");

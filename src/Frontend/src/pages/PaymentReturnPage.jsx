@@ -158,7 +158,7 @@ export default function PaymentReturnPage() {
                 rel="stylesheet"
             />
             <style>{`
-                * { font-family: "Droid Arabic Kufi", serif !important; box-sizing: border-box; }
+                * { font-family: "Noto Kufi Arabic", serif !important; box-sizing: border-box; }
 
                 @keyframes spin {
                     to { transform: rotate(360deg); }

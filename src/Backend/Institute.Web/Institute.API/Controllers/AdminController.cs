@@ -5,9 +5,9 @@ using Institute.Application.Interfaces.IService;
 using Institute.Domain.Entities;
 using Institute.Domain.specifications.AdminSpec.Course;
 using Institute.Domain.specifications.AdminSpec.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace Institute.API.Controllers
 {
@@ -18,32 +18,28 @@ namespace Institute.API.Controllers
         private readonly IAdminService _adminService;
         private readonly IWebHostEnvironment _env;
 
-
         public AdminController(IAdminService adminService, IWebHostEnvironment env)
         {
             _adminService = adminService;
             _env = env;
-
         }
-
-
 
         // GET: api/admin/users?keyword=ahmed
         [HttpGet("users")]
         public async Task<ActionResult<IReadOnlyList<UserWithCoursesDto>>> GetUsers(
-                 [FromQuery] UserSpecParams param)
-
+            [FromQuery] UserSpecParams param)
         {
             return Ok(await _adminService.GetAllUsersAsync(param));
         }
 
-
+        // GET: api/admin/planworks
         [HttpGet("planworks")]
         public async Task<ActionResult<IReadOnlyList<PlanworkWithUsersDto>>> GetPlanworks(
-     [FromQuery] PlanworkSpecParams param)
+            [FromQuery] PlanworkSpecParams param)
         {
             return Ok(await _adminService.GetAllPlanworksAsync(param));
         }
+
         // GET: api/admin/stats
         [HttpGet("stats")]
         public async Task<ActionResult<AdminStatsDto>> GetStatistics()
@@ -52,54 +48,23 @@ namespace Institute.API.Controllers
             return Ok(stats);
         }
 
-        //[HttpPost("upload")]
-        //public async Task<IActionResult> UploadCertificate([FromForm] UploadCertificateDto dto)
-        //{
-        //    if (dto.File == null || dto.File.Length == 0)
-        //        return BadRequest("File is required");
+        // ── جديد ──────────────────────────────────────────────────────────────
+        /// <summary>
+        /// GET /api/admin/paid-orders
+        /// كل الأوردرات المدفوعة (Status = 1) من النهارده للمستقبل
+        /// </summary>
+        [HttpGet("paid-orders")]
+        public async Task<ActionResult<IReadOnlyList<PaidOrderDto>>> GetPaidOrders()
+        {
+            var result = await _adminService.GetPaidOrdersFromTodayAsync();
+            return Ok(result);
+        }
 
-        //    var exists = await _context.Certificates
-        //        .AnyAsync(x => x.UserId == dto.UserId && x.PlanworkId == dto.PlanworkId);
-
-        //    if (exists)
-        //        return BadRequest("Certificate already uploaded");
-
-        //    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/certificates");
-
-        //    if (!Directory.Exists(uploadsFolder))
-        //        Directory.CreateDirectory(uploadsFolder);
-
-        //    var fileName = Guid.NewGuid() + Path.GetExtension(dto.File.FileName);
-
-        //    var filePath = Path.Combine(uploadsFolder, fileName);
-
-        //    using (var stream = new FileStream(filePath, FileMode.Create))
-        //    {
-        //        await dto.File.CopyToAsync(stream);
-        //    }
-
-        //    var certificate = new Certificate
-        //    {
-        //        UserId = dto.UserId,
-        //        PlanworkId = dto.PlanworkId,
-        //        FileUrl = "/certificates/" + fileName,
-        //        FileName = dto.File.FileName,
-        //        FileSizeBytes = dto.File.Length,
-        //        UploadedAt = DateTime.UtcNow
-        //    };
-
-        //    _context.Certificates.Add(certificate);
-        //    await _context.SaveChangesAsync();
-
-        //    return Ok(new { message = "Certificate uploaded successfully" });
-        //}
-
+        // ── Certificates ──────────────────────────────────────────────────────
         [HttpPost("upload")]
         public async Task<IActionResult> UploadCertificate([FromForm] UploadCertificateDto dto)
         {
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "certificates");
-
-            var result = await _adminService.UploadCertificateAsync(dto, uploadsFolder);
+            var result = await _adminService.UploadCertificateAsync(dto, "");
 
             if (!result)
                 return BadRequest("Certificate already uploaded");
@@ -108,7 +73,7 @@ namespace Institute.API.Controllers
         }
 
         [HttpGet("enrollments-with-certificates")]
-        public async Task<ActionResult<IReadOnlyList<EnrollmentWithCertificateDto>>>GetEnrollmentsWithCertificates()
+        public async Task<ActionResult<IReadOnlyList<EnrollmentWithCertificateDto>>> GetEnrollmentsWithCertificates()
         {
             var result = await _adminService.GetEnrollmentsWithCertificatesAsync();
             return Ok(result);
@@ -141,6 +106,7 @@ namespace Institute.API.Controllers
 
             return Ok(result);
         }
+
         [HttpGet("certificates/{planworkId}")]
         public async Task<IActionResult> GetMyCertificate(int planworkId)
         {
@@ -149,8 +115,7 @@ namespace Institute.API.Controllers
             if (string.IsNullOrEmpty(clerkId))
                 return Unauthorized();
 
-            var cert = await _adminService
-                .GetCertificateByClerkIdAsync(clerkId, planworkId);
+            var cert = await _adminService.GetCertificateByClerkIdAsync(clerkId, planworkId);
 
             if (cert == null)
                 return NotFound();
@@ -161,27 +126,51 @@ namespace Institute.API.Controllers
         [HttpPut("certificates")]
         public async Task<IActionResult> UpdateCertificate([FromForm] UpdateCertificateDto dto)
         {
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "certificates");
-
-            var result = await _adminService.UpdateCertificateAsync(dto, uploadsFolder);
-
+            var result = await _adminService.UpdateCertificateAsync(dto, "");
             if (!result)
                 return NotFound("Certificate not found");
 
             return Ok(new { message = "Certificate updated successfully" });
         }
+
         [HttpDelete("certificates/{id}")]
         public async Task<IActionResult> DeleteCertificate(int id)
         {
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "certificates");
-
-            var result = await _adminService.DeleteCertificateAsync(id, uploadsFolder);
+            var result = await _adminService.DeleteCertificateAsync(id, "");
 
             if (!result)
                 return NotFound("Certificate not found");
 
-            return Ok(new { message = "Certificate deleted successfully" });
+            return Ok(new
+            {
+                message = "Certificate deleted successfully"
+            });
         }
 
+        //[HttpGet("certificates/download/{fileName}")]
+        //[AllowAnonymous]
+        //public IActionResult DownloadCertificate(string fileName)
+        //{
+        //    var filePath = Path.Combine(
+        //        "D:\\home\\site\\userfiles\\certificates",
+        //        fileName
+        //    );
+
+        //    if (!System.IO.File.Exists(filePath))
+        //        return NotFound();
+
+        //    var contentType = Path.GetExtension(fileName).ToLower() switch
+        //    {
+        //        ".pdf" => "application/pdf",
+        //        ".png" => "image/png",
+        //        ".jpg" => "image/jpeg",
+        //        ".jpeg" => "image/jpeg",
+        //        _ => "application/octet-stream"
+        //    };
+
+        //    Response.Headers.Add("Content-Disposition", $"inline; filename={fileName}");
+        //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+        //    return File(fileBytes, contentType);
+        //}
     }
 }

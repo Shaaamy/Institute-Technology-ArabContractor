@@ -1,183 +1,17 @@
-//using AutoMapper;
-//using Institute.API.DTOs;
-//using Institute.API.Helpers;
-//using Institute.Application.Interfaces;
-//using Institute.Application.Interfaces.IService;
-//using Institute.Application.Services;
-//using Institute.Infrastructure;
-//using Institute.Infrastructure.Repositories;
-//using Microsoft.AspNetCore.Authentication.JwtBearer;
-//using Microsoft.EntityFrameworkCore;
-//using Microsoft.Extensions.DependencyInjection;
-//using Microsoft.Extensions.FileProviders;
-//using Microsoft.IdentityModel.Tokens;
-//using System;
-//using System.Text;
-//using System.Text.Json;
-
-//var builder = WebApplication.CreateBuilder(args);
-
-//// ======= DbContext =======
-//builder.Services.AddDbContext<AppDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-//// ======= Controllers & Swagger =======
-//builder.Services.AddControllers();
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-//    {
-//        Name = "Authorization",
-//        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-//        Scheme = "Bearer",
-//        BearerFormat = "JWT",
-//        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-//        Description = "أدخل الـ JWT token هنا"
-//    });
-
-//    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-//    {
-//        {
-//            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-//            {
-//                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-//                {
-//                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            Array.Empty<string>()
-//        }
-//    });
-//});
-
-//#region (CORS)
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowLocalhost",
-//        builder => builder
-//            .WithOrigins(
-//                "http://localhost:5173",
-//                "https://acwebsite-icmet-test.azurewebsites.net"
-//            )
-//            .AllowAnyHeader()
-//            .AllowAnyMethod());
-//});
-//#endregion
-
-//#region (Dependency Injection)
-//builder.Services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
-//builder.Services.AddScoped(typeof(IReadOnlyService<>), typeof(ReadOnlyService<>));
-//builder.Services.AddScoped<ICategoryService, CategoryService>();
-//builder.Services.AddScoped<NewsPictureUrlResolver<NewsListDto>>();
-//builder.Services.AddScoped<NewsPictureUrlResolver<NewsDetailsDto>>();
-//builder.Services.AddControllers()
-//    .AddJsonOptions(options =>
-//    {
-//        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-//    });
-
-//builder.Services.AddHttpContextAccessor();
-//builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-//builder.Services.AddScoped<ILecturerService, LecturerService>();
-//builder.Services.AddHttpClient<ClerkService>();
-//builder.Services.AddScoped(typeof(IClerkService), typeof(ClerkService));
-//builder.Services.AddScoped<ICheckoutService, CheckoutService>();
-//builder.Services.AddScoped<ICartService, CartService>();
-//builder.Services.AddScoped<IAdminService, AdminService>();
-//builder.Services.AddScoped<BankPaymentService>();
-//builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("PaymentSettings"));
-//builder.Services.AddHttpClient("BankClient", client =>
-//{
-//    var paymentSettings = builder.Configuration.GetSection("PaymentSettings").Get<PaymentSettings>();
-//    if (paymentSettings == null) throw new Exception("PaymentSettings section not found in configuration.");
-
-//    client.BaseAddress = new Uri(paymentSettings.BaseUrl);
-//    client.DefaultRequestHeaders.Add("Accept", "application/json");
-
-//    var authValue = Convert.ToBase64String(
-//        Encoding.ASCII.GetBytes($"merchant.{paymentSettings.MerchantId}:{paymentSettings.ApiPassword}")
-//    );
-//    client.DefaultRequestHeaders.Authorization =
-//        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authValue);
-//});
-//#endregion
-
-//#region (Authentication And Authorization)
-//builder.Services
-//    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.Authority = builder.Configuration["Clerk:Authority"];
-//        options.RequireHttpsMetadata = true;
-//        options.MapInboundClaims = false;
-
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = false,
-//            ValidateAudience = false,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            NameClaimType = "sub"
-//        };
-
-//        options.Events = new JwtBearerEvents
-//        {
-//            OnAuthenticationFailed = context =>
-//            {
-//                Console.WriteLine("❌ AUTH FAILED");
-//                Console.WriteLine(context.Exception.Message);
-//                return Task.CompletedTask;
-//            },
-//            OnTokenValidated = context =>
-//            {
-//                Console.WriteLine("✅ TOKEN VALIDATED");
-//                return Task.CompletedTask;
-//            }
-//        };
-//    });
-
-//builder.Services.AddAuthorization();
-//#endregion
-
-//// ======= AutoMapper =======
-//builder.Services.AddAutoMapper(cfg =>
-//{
-//    cfg.AddProfile<MappingProfiles>();
-//});
-
-//// ======= Build App =======
-//var app = builder.Build();
-
-//// ======= Middleware =======
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-
-//app.UseDefaultFiles();    // ← line 1
-//app.UseStaticFiles();     // ← line 2
-//app.UseCors("AllowLocalhost");
-//app.UseHttpsRedirection();
-//app.UseRouting();
-//app.UseAuthentication();
-//app.UseAuthorization();
-//app.MapControllers();
-//app.MapFallbackToFile("index.html");  // ← must be last
-
-//app.Run();
-
 using AutoMapper;
 using Institute.API.DTOs;
 using Institute.API.Helpers;
+using Institute.Application.Configurations;
 using Institute.Application.Interfaces;
 using Institute.Application.Interfaces.IService;
+using Institute.Application.Security;
 using Institute.Application.Services;
+using Institute.Domain.Entities;
 using Institute.Infrastructure;
 using Institute.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -188,13 +22,26 @@ using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
+Console.WriteLine("AzureStorage Conn = " + builder.Configuration["AzureStorage:ConnectionString"]);
 
 // ======= DbContext =======
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ======= Controllers & Swagger =======
 builder.Services.AddControllers();
+// rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("CheckoutLimit", opt =>
+    {
+        opt.PermitLimit = 3;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+        opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+    });
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -239,16 +86,42 @@ builder.Services.AddCors(options =>
 #endregion
 
 #region (Dependency Injection)
+
+builder.Services.Configure<AzureStorageSettings>(
+    builder.Configuration.GetSection("AzureStorage"));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(IReadOnlyService<>), typeof(ReadOnlyService<>));
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<NewsPictureUrlResolver<NewsListDto>>();
 builder.Services.AddScoped<NewsPictureUrlResolver<NewsDetailsDto>>();
+builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("News", policy =>
+        policy.Requirements.Add(new PermissionRequirement("News")));
+
+    options.AddPolicy("Books", policy =>
+        policy.Requirements.Add(new PermissionRequirement("Books")));
+
+    options.AddPolicy("Lecturers", policy =>
+        policy.Requirements.Add(new PermissionRequirement("Lecturers")));
+
+    options.AddPolicy("Courses", policy =>
+        policy.Requirements.Add(new PermissionRequirement("Courses")));
+
+    options.AddPolicy("ManagerOnly", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.Requirements.Add(new ManagerRequirement());
+    });
+});
+
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -257,10 +130,20 @@ builder.Services.AddHttpClient<ClerkService>();
 builder.Services.AddScoped(typeof(IClerkService), typeof(ClerkService));
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IBooksTypeService, BooksTypeService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-
+builder.Services.AddScoped<IPlanworkService, PlanworkService>();
+builder.Services.AddScoped<IPlanFileService, PlanFileService>();
+builder.Services.AddSingleton<IBlobStorage, BlobStorage>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IUserPermissionService, UserPermissionService>();
 builder.Services.AddScoped<BankPaymentService>();
 builder.Services.AddScoped<IRefundService, RefundService>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
+builder.Services.AddScoped<IAuthorizationHandler, ManagerAuthorizationHandler>();
 builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("PaymentSettings"));
 builder.Services.AddHttpClient("BankClient", client =>
 {
@@ -273,6 +156,24 @@ builder.Services.AddHttpClient("BankClient", client =>
     var authValue = Convert.ToBase64String(
         Encoding.ASCII.GetBytes($"merchant.{paymentSettings.MerchantId}:{paymentSettings.ApiPassword}")
     );
+    client.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authValue);
+});
+builder.Services.AddHttpClient("BankClient", client =>
+{
+    var paymentSettings = builder.Configuration
+        .GetSection("PaymentSettings")
+        .Get<PaymentSettings>()
+        ?? throw new InvalidOperationException("PaymentSettings section not found.");
+
+    client.BaseAddress = new Uri(paymentSettings.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);  // ← أضف ده
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+    var authValue = Convert.ToBase64String(
+        Encoding.ASCII.GetBytes(
+            $"merchant.{paymentSettings.MerchantId}:{paymentSettings.ApiPassword}"));
+
     client.DefaultRequestHeaders.Authorization =
         new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authValue);
 });
@@ -292,7 +193,7 @@ builder.Services
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            ValidateIssuerSigningKey = true,  // from true to false
             NameClaimType = "sub"
         };
 
@@ -312,7 +213,15 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ManagerOnly", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.Requirements.Add(new ManagerRequirement());
+    });
+});
 #endregion
 
 // ======= AutoMapper =======
@@ -356,6 +265,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.Map("/clerk-proxy", proxyApp =>
 {
     proxyApp.Run(async ctx =>

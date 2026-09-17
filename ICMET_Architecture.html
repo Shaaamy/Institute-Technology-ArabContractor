@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICMET — Full System Architecture Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root {
+  --bg:       #f8fafc;
+  --surface:  #ffffff;
+  --panel:    #f1f5f9;
+  --border:   #e2e8f0;
+  --border2:  #cbd5e1;
+
+  --blue:     #2563eb;
+  --blue-lt:  #dbeafe;
+  --blue-md:  #93c5fd;
+  --cyan:     #0891b2;
+  --cyan-lt:  #cffafe;
+  --green:    #059669;
+  --green-lt: #d1fae5;
+  --amber:    #d97706;
+  --amber-lt: #fef3c7;
+  --rose:     #e11d48;
+  --rose-lt:  #ffe4e6;
+  --purple:   #7c3aed;
+  --purple-lt:#ede9fe;
+  --slate:    #475569;
+  --muted:    #94a3b8;
+  --text:     #0f172a;
+  --text2:    #334155;
+
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --r:    8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── Print ── */
+@media print {
+  .sidebar { display: none; }
+  .main { margin-left: 0 !important; }
+  .page-break { page-break-before: always; }
+}
+
+/* ── Layout ── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 240px;
+  height: 100vh;
+  background: #0f172a;
+  color: #94a3b8;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 24px 0;
+}
+.sidebar-logo {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 16px;
+}
+.sidebar-logo h2 { color: #f8fafc; font-size: 15px; font-weight: 700; }
+.sidebar-logo p  { font-size: 11px; color: #475569; font-family: var(--mono); margin-top: 2px; }
+.sidebar nav a {
+  display: block;
+  padding: 7px 20px;
+  font-size: 12px;
+  color: #64748b;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.sidebar nav a:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
+.sidebar nav a.active { color: #60a5fa; border-left-color: #2563eb; background: rgba(37,99,235,0.08); }
+.sidebar nav .nav-group {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #334155;
+  padding: 14px 20px 4px;
+  font-weight: 600;
+}
+
+.main {
+  margin-left: 240px;
+  padding: 0;
+}
+
+/* ── Hero ── */
+.hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  color: white;
+  padding: 60px 60px 50px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: 200px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(8,145,178,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero-content { position: relative; z-index: 1; }
+.hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
+.hero h1 span { color: #60a5fa; }
+.hero-sub { color: #94a3b8; margin-top: 8px; font-size: 15px; }
+.hero-meta {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  margin-top: 28px; padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.hero-meta-item label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; display: block; margin-bottom: 3px; }
+.hero-meta-item span  { font-size: 13px; color: #e2e8f0; font-family: var(--mono); }
+.hero-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.hb { font-size: 11px; padding: 4px 12px; border-radius: 99px; font-weight: 600; font-family: var(--mono); }
+.hb-blue   { background: rgba(37,99,235,0.3);  color: #93c5fd; border: 1px solid rgba(96,165,250,0.3); }
+.hb-green  { background: rgba(5,150,105,0.3);  color: #6ee7b7; border: 1px solid rgba(52,211,153,0.3); }
+.hb-amber  { background: rgba(217,119,6,0.3);  color: #fcd34d; border: 1px solid rgba(252,211,77,0.3); }
+.hb-purple { background: rgba(124,58,237,0.3); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
+.hb-cyan   { background: rgba(8,145,178,0.3);  color: #67e8f9; border: 1px solid rgba(34,211,238,0.3); }
+
+/* ── Content area ── */
+.content { padding: 48px 60px; max-width: 1100px; }
+
+/* ── Section ── */
+.section { margin-bottom: 64px; scroll-margin-top: 80px; }
+.section-title {
+  font-size: 22px; font-weight: 800;
+  color: var(--text);
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title .stag {
+  font-size: 11px; font-family: var(--mono);
+  background: var(--blue-lt); color: var(--blue);
+  padding: 2px 8px; border-radius: 4px; font-weight: 600;
+}
+.subsection { margin-bottom: 32px; }
+.subsection-title {
+  font-size: 15px; font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── Description text ── */
+.desc {
+  color: var(--text2);
+  font-size: 13.5px;
+  line-height: 1.75;
+  margin-bottom: 16px;
+  background: var(--panel);
+  border-left: 3px solid var(--border2);
+  padding: 12px 16px;
+  border-radius: 0 var(--r) var(--r) 0;
+}
+.desc strong { color: var(--text); }
+
+/* ── Card / Panel ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--panel);
+}
+.card-head h3 { font-size: 14px; font-weight: 700; }
+.card-head p  { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.card-body { padding: 18px; }
+
+/* ── Grid ── */
+.g2  { display: grid; grid-template-columns: 1fr 1fr;     gap: 16px; }
+.g3  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.g21 { display: grid; grid-template-columns: 2fr 1fr;     gap: 16px; }
+.g12 { display: grid; grid-template-columns: 1fr 2fr;     gap: 16px; }
+
+/* ── Colored accent cards ── */
+.ac-card {
+  border-radius: 10px;
+  border: 1px solid;
+  padding: 16px;
+}
+.ac-blue   { background: var(--blue-lt);   border-color: #bfdbfe; }
+.ac-green  { background: var(--green-lt);  border-color: #a7f3d0; }
+.ac-amber  { background: var(--amber-lt);  border-color: #fde68a; }
+.ac-rose   { background: var(--rose-lt);   border-color: #fecdd3; }
+.ac-purple { background: var(--purple-lt); border-color: #ddd6fe; }
+.ac-cyan   { background: var(--cyan-lt);   border-color: #a5f3fc; }
+
+.ac-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+.ac-title.t-blue   { color: var(--blue);   }
+.ac-title.t-green  { color: var(--green);  }
+.ac-title.t-amber  { color: var(--amber);  }
+.ac-title.t-rose   { color: var(--rose);   }
+.ac-title.t-purple { color: var(--purple); }
+.ac-title.t-cyan   { color: var(--cyan);   }
+
+/* ── List ── */
+.doc-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.doc-list li { font-size: 12.5px; color: var(--text2); display: flex; align-items: flex-start; gap: 7px; }
+.doc-list li::before { content: '▸'; color: var(--muted); flex-shrink: 0; margin-top: 1px; }
+
+/* ── Code block ── */
+pre, .code-block {
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 16px 18px;
+  border-radius: var(--r);
+  overflow-x: auto;
+  line-height: 1.7;
+  margin: 10px 0;
+}
+.c-key    { color: #f472b6; }
+.c-str    { color: #86efac; }
+.c-num    { color: #fb923c; }
+.c-prop   { color: #7dd3fc; }
+.c-op     { color: #94a3b8; }
+.c-comment{ color: #475569; font-style: italic; }
+
+/* ── Method badge ── */
+.mb {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  min-width: 52px;
+  text-align: center;
+}
+.mb-get    { background: #dcfce7; color: #166534; }
+.mb-post   { background: #dbeafe; color: #1d4ed8; }
+.mb-put    { background: #fef3c7; color: #92400e; }
+.mb-delete { background: #ffe4e6; color: #9f1239; }
+.mb-patch  { background: #f3e8ff; color: #6b21a8; }
+
+/* ── Endpoint row ── */
+.ep-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ep-table thead th {
+  background: #0f172a; color: #94a3b8;
+  padding: 10px 12px; text-align: left;
+  font-family: var(--mono); font-size: 11px;
+  font-weight: 500; letter-spacing: 0.05em;
+}
+.ep-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.ep-table tbody tr:last-child td { border-bottom: none; }
+.ep-table tbody tr:hover td { background: var(--panel); }
+.ep-path { font-family: var(--mono); color: #6d28d9; font-size: 12px; }
+.ep-auth { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-family: var(--mono); }
+.ep-public  { background: var(--green-lt); color: var(--green); }
+.ep-user    { background: var(--blue-lt);  color: var(--blue); }
+.ep-admin   { background: var(--purple-lt);color: var(--purple); }
+
+/* ── DB table ── */
+.dbt { border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; font-family: var(--mono); font-size: 12px; }
+.dbt-head {
+  padding: 10px 14px;
+  font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dbt-head.dh-blue   { background: var(--blue-lt);   color: var(--blue); }
+.dbt-head.dh-green  { background: var(--green-lt);  color: var(--green); }
+.dbt-head.dh-amber  { background: var(--amber-lt);  color: var(--amber); }
+.dbt-head.dh-purple { background: var(--purple-lt); color: var(--purple); }
+.dbt-head.dh-cyan   { background: var(--cyan-lt);   color: var(--cyan); }
+.dbt-head.dh-rose   { background: var(--rose-lt);   color: var(--rose); }
+
+.dbt-row {
+  padding: 7px 14px;
+  display: grid;
+  grid-template-columns: 160px 130px 1fr;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  align-items: start;
+}
+.dbt-row:hover { background: var(--panel); }
+.col-name { color: #0f172a; font-weight: 500; }
+.col-name.pk { color: #b45309; font-weight: 700; }
+.col-name.fk { color: #1d4ed8; }
+.col-type { color: #6d28d9; font-size: 11px; }
+.col-desc { color: var(--muted); font-size: 11px; font-family: var(--sans); }
+.dbt-row-header {
+  padding: 6px 14px;
+  display: grid;
+  grid-template-columns: 160px 130px 1fr;
+  gap: 8px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border);
+}
+.dbt-row-header span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: var(--sans); }
+
+/* ── Flow step ── */
+.flow { display: flex; flex-direction: column; gap: 0; }
+.flow-step {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.flow-step:last-child { border-bottom: none; }
+.flow-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+  font-family: var(--mono);
+}
+.fn-blue   { background: var(--blue-lt);   color: var(--blue); }
+.fn-cyan   { background: var(--cyan-lt);   color: var(--cyan); }
+.fn-green  { background: var(--green-lt);  color: var(--green); }
+.fn-purple { background: var(--purple-lt); color: var(--purple); }
+.fn-amber  { background: var(--amber-lt);  color: var(--amber); }
+
+.flow-content h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.flow-content p  { font-size: 12px; color: var(--text2); }
+.flow-content code {
+  font-family: var(--mono); font-size: 11px;
+  background: var(--panel); padding: 2px 6px;
+  border-radius: 4px; color: #6d28d9;
+  border: 1px solid var(--border);
+}
+
+/* ── Chip ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip {
+  font-family: var(--mono); font-size: 11px;
+  padding: 3px 9px; border-radius: 6px;
+  border: 1px solid;
+}
+.chip-blue   { color: var(--blue);   border-color: #bfdbfe; background: var(--blue-lt);   }
+.chip-green  { color: var(--green);  border-color: #a7f3d0; background: var(--green-lt);  }
+.chip-amber  { color: var(--amber);  border-color: #fde68a; background: var(--amber-lt);  }
+.chip-purple { color: var(--purple); border-color: #ddd6fe; background: var(--purple-lt); }
+.chip-cyan   { color: var(--cyan);   border-color: #a5f3fc; background: var(--cyan-lt);   }
+.chip-rose   { color: var(--rose);   border-color: #fecdd3; background: var(--rose-lt);   }
+.chip-slate  { color: var(--slate);  border-color: var(--border2); background: var(--panel); }
+
+/* ── Clean architecture layers ── */
+.arch-layers { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.arch-layer {
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.arch-layer:last-child { border-bottom: none; }
+.al-label {
+  width: 160px; flex-shrink: 0;
+  font-size: 13px; font-weight: 700;
+}
+.al-detail { flex: 1; font-size: 12px; color: var(--text2); }
+.al-files { font-family: var(--mono); font-size: 11px; color: var(--purple); }
+
+/* ── Auth table ── */
+.role-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.role-table th {
+  background: #0f172a; color: #94a3b8;
+  padding: 10px 14px; text-align: left;
+  font-size: 11px; font-family: var(--mono); letter-spacing: 0.05em;
+}
+.role-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.role-table tr:hover td { background: var(--panel); }
+.check { color: var(--green); font-weight: 700; }
+.cross { color: #94a3b8; }
+
+/* ── Status flow ── */
+.status-row {
+  display: flex; align-items: center; gap: 0;
+  flex-wrap: wrap;
+}
+.status-box {
+  padding: 12px 20px; border-radius: 8px;
+  text-align: center; min-width: 120px;
+  border: 2px solid;
+}
+.sb-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; font-family: var(--mono); }
+.sb-name  { font-size: 14px; font-weight: 700; }
+.sb-pend  { background: var(--amber-lt);  border-color: #fcd34d; color: var(--amber); }
+.sb-appr  { background: var(--blue-lt);   border-color: #93c5fd; color: var(--blue); }
+.sb-sent  { background: var(--green-lt);  border-color: #6ee7b7; color: var(--green); }
+.sb-rej   { background: var(--rose-lt);   border-color: #fda4af; color: var(--rose); }
+.s-arr    { padding: 0 12px; color: var(--muted); display: flex; flex-direction: column; align-items: center; }
+.s-arr span { font-size: 20px; line-height: 1; }
+.s-arr small { font-size: 10px; font-family: var(--mono); white-space: nowrap; }
+
+/* ── Deploy pipeline ── */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pipe-step {
+  display: flex; align-items: stretch; gap: 0;
+}
+.pipe-icon {
+  width: 48px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center;
+}
+.pipe-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; border: 2px solid;
+  flex-shrink: 0;
+}
+.pipe-line {
+  width: 2px; flex: 1;
+  margin: 0 auto;
+  min-height: 20px;
+}
+.pipe-body {
+  flex: 1;
+  padding: 0 0 24px 16px;
+}
+.pipe-body h4 { font-size: 13px; font-weight: 700; color: var(--text); }
+.pipe-body p  { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+/* ── Info box ── */
+.info-box {
+  border-radius: var(--r);
+  padding: 14px 16px;
+  font-size: 12.5px;
+  display: flex; gap: 10px; align-items: flex-start;
+  margin: 12px 0;
+}
+.ib-blue   { background: var(--blue-lt);   border: 1px solid #bfdbfe; color: #1e40af; }
+.ib-amber  { background: var(--amber-lt);  border: 1px solid #fde68a; color: #92400e; }
+.ib-green  { background: var(--green-lt);  border: 1px solid #a7f3d0; color: #065f46; }
+.ib-purple { background: var(--purple-lt); border: 1px solid #ddd6fe; color: #5b21b6; }
+.ib-icon   { font-size: 16px; flex-shrink: 0; }
+
+/* ── Relation diagram ── */
+.rel-svg-wrap { background: #0f172a; border-radius: 10px; padding: 24px; }
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .content { padding: 32px 24px; }
+  .hero { padding: 40px 24px; }
+}
+@media (max-width: 700px) {
+  .g2, .g3, .g21, .g12 { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 22px; }
+  .section-title { font-size: 18px; }
+  .dbt-row { grid-template-columns: 1fr 1fr; }
+  .dbt-row .col-desc { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h2>ICMET Docs</h2>
+    <p>System Architecture v1.0</p>
+  </div>
+  <div class="nav-group">Overview</div>
+  <a href="#overview">Project Overview</a>
+  <a href="#tech-stack">Tech Stack</a>
+
+  <div class="nav-group">Frontend</div>
+  <a href="#frontend">Project Structure</a>
+  <a href="#routing">Routing & Layouts</a>
+  <a href="#pages">Pages & Components</a>
+
+  <div class="nav-group">Backend</div>
+  <a href="#clean-arch">Clean Architecture</a>
+  <a href="#api-endpoints">API Endpoints</a>
+  <a href="#auth">Authentication</a>
+
+  <div class="nav-group">Data & Files</div>
+  <a href="#database">Database Schema</a>
+  <a href="#relations">DB Relations</a>
+  <a href="#file-uploads">File Uploads</a>
+
+  <div class="nav-group">Flows</div>
+  <a href="#payment-flow">Payment Flow</a>
+  <a href="#refund-flow">Refund Flow</a>
+  <a href="#roles">Roles & Permissions</a>
+
+  <div class="nav-group">Infrastructure</div>
+  <a href="#deployment">Deployment</a>
+  <a href="#environments">Environments</a>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-content">
+    <h1>ICMET — <span>System Architecture</span><br>Documentation</h1>
+    <p class="hero-sub">المعهد التكنولوجي — Complete technical reference for developers, reviewers, and new team members</p>
+    <div class="hero-badges">
+      <span class="hb hb-blue">React 18 + Vite</span>
+      <span class="hb hb-green">ASP.NET Core 8</span>
+      <span class="hb hb-amber">SQL Server</span>
+      <span class="hb hb-purple">Azure App Service</span>
+      <span class="hb hb-cyan">JWT + Identity</span>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <label>Production URL</label>
+        <span>acwebsite-icmet-test.azurewebsites.net</span>
+      </div>
+      <div class="hero-meta-item">
+        <label>Backend Runtime</label>
+        <span>.NET 8 (net8.0)</span>
+      </div>
+      <div class="hero-meta-item">
+        <label>Architecture</label>
+        <span>Clean Architecture — 4 Layers</span>
+      </div>
+      <div class="hero-meta-item">
+        <label>Database ORM</label>
+        <span>Entity Framework Core 8</span>
+      </div>
+      <div class="hero-meta-item">
+        <label>CI/CD</label>
+        <span>GitHub Actions → Azure</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+
+
+<!-- ══════════════════════════════════
+  §1 PROJECT OVERVIEW
+══════════════════════════════════ -->
+<section class="section" id="overview">
+  <h2 class="section-title">
+    <span>📋</span> Project Overview
+    <span class="stag">INTRO</span>
+  </h2>
+
+  <div class="desc">
+    <strong>ICMET (المعهد التكنولوجي)</strong> is a full-stack web application for a technology institute that provides online and onsite training programs. The system allows students to browse, purchase, and enroll in courses, while admins manage the full operational lifecycle including courses, users, payments, refunds, attendance, and certificates.
+  </div>
+
+  <div class="g3">
+    <div class="ac-card ac-blue">
+      <div class="ac-title t-blue">🎯 Purpose</div>
+      <ul class="doc-list">
+        <li>Online course catalog & enrollment</li>
+        <li>Secure payment via Bank Misr</li>
+        <li>Certificate management & upload</li>
+        <li>Refund request & processing</li>
+        <li>Admin operations dashboard</li>
+        <li>News, library, and media management</li>
+      </ul>
+    </div>
+    <div class="ac-card ac-green">
+      <div class="ac-title t-green">👥 User Types</div>
+      <ul class="doc-list">
+        <li><strong>Public visitor</strong> — browses the site, no login needed</li>
+        <li><strong>Registered student</strong> — can purchase courses, view enrollments, request refunds</li>
+        <li><strong>Admin</strong> — full control panel for all system operations</li>
+      </ul>
+    </div>
+    <div class="ac-card ac-purple">
+      <div class="ac-title t-purple">🏗️ Architecture Pattern</div>
+      <ul class="doc-list">
+        <li>SPA (Single Page Application) frontend</li>
+        <li>REST API backend (no server-side rendering)</li>
+        <li>Clean Architecture — 4 distinct layers</li>
+        <li>JWT stateless authentication</li>
+        <li>Azure cloud-native deployment</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §2 TECH STACK
+══════════════════════════════════ -->
+<section class="section" id="tech-stack">
+  <h2 class="section-title"><span>⚙️</span> Technology Stack <span class="stag">STACK</span></h2>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div><h3>Frontend</h3><p>Client-side application</p></div></div>
+      <div class="card-body">
+        <table class="ep-table">
+          <thead><tr><th>Technology</th><th>Version / Detail</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><strong>React</strong></td><td><span class="chip chip-blue">v18</span></td><td>UI component framework</td></tr>
+            <tr><td><strong>Vite</strong></td><td><span class="chip chip-blue">latest</span></td><td>Build tool & dev server</td></tr>
+            <tr><td><strong>React Router DOM</strong></td><td><span class="chip chip-blue">v6+</span></td><td>Client-side routing</td></tr>
+            <tr><td><strong>Tailwind CSS</strong></td><td><span class="chip chip-cyan">utility</span></td><td>Styling framework</td></tr>
+            <tr><td><strong>Axios / Fetch</strong></td><td>via <code>api.js</code></td><td>HTTP requests to backend</td></tr>
+            <tr><td><strong>JSX</strong></td><td>all components</td><td>Component syntax</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><h3>Backend</h3><p>Server-side API</p></div></div>
+      <div class="card-body">
+        <table class="ep-table">
+          <thead><tr><th>Technology</th><th>Version / Detail</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ASP.NET Core</strong></td><td><span class="chip chip-green">8 (net8.0)</span></td><td>Web API framework</td></tr>
+            <tr><td><strong>Entity Framework Core</strong></td><td><span class="chip chip-green">8</span></td><td>ORM — DB migrations</td></tr>
+            <tr><td><strong>JWT Bearer</strong></td><td>Microsoft.AspNetCore…</td><td>Stateless token authentication</td></tr>
+            <tr><td><strong>AutoMapper</strong></td><td>NuGet</td><td>Entity ↔ DTO mapping</td></tr>
+            <tr><td><strong>Swashbuckle</strong></td><td>Swagger UI</td><td>API documentation</td></tr>
+            <tr><td><strong>Polly</strong></td><td>NuGet</td><td>Resilience & retry</td></tr>
+            <tr><td><strong>Svix</strong></td><td>NuGet</td><td>Webhook event handling</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><h3>Database & Storage</h3><p>Persistence layer</p></div></div>
+      <div class="card-body">
+        <table class="ep-table">
+          <thead><tr><th>Technology</th><th>Detail</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SQL Server</strong></td><td>Azure SQL / local</td><td>Primary relational DB</td></tr>
+            <tr><td><strong>Microsoft.Data.SqlClient</strong></td><td>NuGet</td><td>SQL Server driver</td></tr>
+            <tr><td><strong>Azure Blob Storage</strong></td><td>Azure.Storage.Blobs</td><td>Certificates, PDFs, images</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><h3>Infrastructure & DevOps</h3><p>Deployment pipeline</p></div></div>
+      <div class="card-body">
+        <table class="ep-table">
+          <thead><tr><th>Technology</th><th>Detail</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Azure App Service</strong></td><td>Windows/Linux plan</td><td>Hosting (API + SPA)</td></tr>
+            <tr><td><strong>GitHub Actions</strong></td><td>main_acwebsite(icmet-test).yml</td><td>CI/CD automation</td></tr>
+            <tr><td><strong>ngrok</strong></td><td>ngrok.exe included</td><td>Local dev tunneling</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §3 FRONTEND STRUCTURE
+══════════════════════════════════ -->
+<section class="section" id="frontend">
+  <h2 class="section-title"><span>⚛️</span> Frontend Project Structure <span class="stag">FRONTEND</span></h2>
+
+  <div class="desc">
+    The frontend is a <strong>React 18 SPA</strong> built with Vite. All source code lives under <code>src/Frontend/icmet-website/src/</code>. The app is served as static files and communicates with the backend exclusively via REST API calls. There is no SSR (Server-Side Rendering).
+  </div>
+
+  <div class="g21">
+    <div class="card">
+      <div class="card-head"><div><h3>Folder Structure</h3><p>src/ directory breakdown</p></div></div>
+      <div class="card-body">
+        <div class="arch-layers">
+          <div class="arch-layer" style="background:#f0fdf4">
+            <div class="al-label" style="color:var(--green)">📁 api/</div>
+            <div class="al-detail">Central HTTP client. All API calls funnel through <code>api.js</code> — sets base URL, attaches Bearer token from localStorage, handles response errors.</div>
+          </div>
+          <div class="arch-layer" style="background:#eff6ff">
+            <div class="al-label" style="color:var(--blue)">📁 components/</div>
+            <div class="al-detail">Shared UI components used across pages. Includes <code>Navbar</code>, <code>Footer</code>, <code>ScrollToTop</code>, <code>AuthSync</code>, <code>FloatingSocialBar</code>, and all admin sub-components (modals, tabs, stat cards, pagination, sidebar).</div>
+          </div>
+          <div class="arch-layer" style="background:#faf5ff">
+            <div class="al-label" style="color:var(--purple)">📁 layouts/</div>
+            <div class="al-detail"><code>PublicLayout.jsx</code> wraps all public pages (Navbar + Footer). <code>DashboardLayout.jsx</code> wraps admin pages (Sidebar + top bar). Route protection logic lives here.</div>
+          </div>
+          <div class="arch-layer" style="background:#fff7ed">
+            <div class="al-label" style="color:var(--amber)">📁 pages/</div>
+            <div class="al-detail">One file per page. Split into public pages (root level) and admin pages (pages/admin/). Each page composes components and calls the API directly.</div>
+          </div>
+          <div class="arch-layer" style="background:#ecfeff">
+            <div class="al-label" style="color:var(--cyan)">📁 routes/</div>
+            <div class="al-detail"><code>AppRoutes.jsx</code> — single source of truth for all routes. Defines which layout wraps which pages and guards protected routes.</div>
+          </div>
+          <div class="arch-layer">
+            <div class="al-label" style="color:var(--slate)">📁 theme/</div>
+            <div class="al-detail"><code>theme.js</code> — shared design tokens (colors, spacing, typography) for consistent styling across the app.</div>
+          </div>
+          <div class="arch-layer">
+            <div class="al-label" style="color:var(--slate)">📁 assets/</div>
+            <div class="al-detail">Local images bundled with the app (logos, hero images). Larger media (course images, certificates) live in Azure Blob Storage.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="card">
+        <div class="card-head"><div><h3>Entry Points</h3><p>How the app boots</p></div></div>
+        <div class="card-body">
+          <div class="flow">
+            <div class="flow-step">
+              <div class="flow-num fn-blue">1</div>
+              <div class="flow-content">
+                <h4>main.jsx</h4>
+                <p>React root mount. Wraps <code>&lt;App&gt;</code> with <code>BrowserRouter</code> and any global providers.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-cyan">2</div>
+              <div class="flow-content">
+                <h4>App.jsx</h4>
+                <p>Renders <code>&lt;AppRoutes&gt;</code>. Handles global layout shell.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-green">3</div>
+              <div class="flow-content">
+                <h4>AppRoutes.jsx</h4>
+                <p>Declares all routes. Picks <code>PublicLayout</code> or <code>DashboardLayout</code> based on path.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ac-card ac-blue">
+        <div class="ac-title t-blue">🔌 AuthSync.jsx</div>
+        <p style="font-size:12px; color:var(--text2);">On every page load, <code>AuthSync</code> checks localStorage for a JWT token. If found, it validates expiry and sets the auth state. If expired, it clears storage and redirects to login. This keeps the UI in sync with auth state without requiring a page refresh.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §4 ROUTING
+══════════════════════════════════ -->
+<section class="section" id="routing">
+  <h2 class="section-title"><span>🗺️</span> Routing & Layouts <span class="stag">ROUTING</span></h2>
+
+  <div class="desc">
+    React Router DOM v6 handles all navigation. There are <strong>two layout wrappers</strong>: one for the public-facing website, and one for the admin dashboard. Route guards check the JWT token and user role before allowing access to protected pages.
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head" style="border-left: 3px solid var(--blue)"><div><h3>PublicLayout</h3><p>For all public & authenticated user pages</p></div></div>
+      <div class="card-body">
+        <div class="info-box ib-blue">
+          <span class="ib-icon">ℹ️</span>
+          <span>Includes <strong>Navbar</strong> at top and <strong>Footer</strong> at bottom. Wraps the page content in the middle. All routes under <code>/</code> use this layout.</span>
+        </div>
+        <div class="chips">
+          <span class="chip chip-blue">/ → Home</span>
+          <span class="chip chip-blue">/courses</span>
+          <span class="chip chip-blue">/courses/:id</span>
+          <span class="chip chip-blue">/news</span>
+          <span class="chip chip-blue">/news/:id</span>
+          <span class="chip chip-blue">/library</span>
+          <span class="chip chip-blue">/certifications</span>
+          <span class="chip chip-blue">/contact</span>
+          <span class="chip chip-blue">/login</span>
+          <span class="chip chip-blue">/cart</span>
+          <span class="chip chip-blue">/checkout</span>
+          <span class="chip chip-blue">/my-courses</span>
+          <span class="chip chip-blue">/refunds</span>
+          <span class="chip chip-blue">/payment-result</span>
+          <span class="chip chip-slate">+ more training pages</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head" style="border-left: 3px solid var(--purple)"><div><h3>DashboardLayout</h3><p>For admin & management pages</p></div></div>
+      <div class="card-body">
+        <div class="info-box ib-purple">
+          <span class="ib-icon">🛡️</span>
+          <span>Route-guarded — redirects to <code>/login</code> if no valid token or if the token does not contain the Admin role claim. Includes the <strong>Sidebar</strong> navigation.</span>
+        </div>
+        <div class="chips">
+          <span class="chip chip-purple">/admin → AdminDashboard</span>
+          <span class="chip chip-purple">/admin/users</span>
+          <span class="chip chip-purple">/admin/courses</span>
+          <span class="chip chip-purple">/admin/refunds</span>
+          <span class="chip chip-purple">/admin/certificates</span>
+          <span class="chip chip-purple">/admin/attendance</span>
+          <span class="chip chip-purple">/admin/financial</span>
+          <span class="chip chip-purple">/admin/news</span>
+          <span class="chip chip-purple">/admin/books</span>
+          <span class="chip chip-purple">/admin/instructors</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §5 PAGES
+══════════════════════════════════ -->
+<section class="section" id="pages">
+  <h2 class="section-title"><span>📄</span> Pages & Components <span class="stag">PAGES</span></h2>
+
+  <div class="g2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-head"><div><h3>Admin Components</h3><p>components/admin/</p></div></div>
+      <div class="card-body">
+        <table class="ep-table">
+          <thead><tr><th>Component</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>Sidebar.jsx</code></td><td>Admin nav with links to all dashboard tabs</td></tr>
+            <tr><td><code>StatCards.jsx</code></td><td>KPI summary cards (users, revenue, etc.)</td></tr>
+            <tr><td><code>Pagination.jsx</code></td><td>Reusable paginator for all list views</td></tr>
+            <tr><td><code>PageHero.jsx</code></td><td>Page header with title + breadcrumb</td></tr>
+            <tr><td><code>CertUploadModal.jsx</code></td><td>Modal to upload certificate files to Azure Blob</td></tr>
+            <tr><td><code>RefundActionModal.jsx</code></td><td>Modal for Approve / Reject / Mark Sent</td></tr>
+            <tr><td><code>RefundDetailModal.jsx</code></td><td>Full refund request detail view</td></tr>
+            <tr><td><code>helpers.js / normalizers.js</code></td><td>Data transform utilities for API responses</td></tr>
+            <tr><td><code>exportHelpers.js</code></td><td>CSV/Excel export logic for tables</td></tr>
+            <tr><td><code>constants.js / styles.js</code></td><td>Shared constants and style maps</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><h3>Admin Dashboard Tabs</h3><p>components/admin/tabs/</p></div></div>
+      <div class="card-body">
+        <table class="ep-table">
+          <thead><tr><th>Tab Component</th><th>What It Shows</th></tr></thead>
+          <tbody>
+            <tr><td><code>UsersTab.jsx</code></td><td>All registered users, roles, search & filter</td></tr>
+            <tr><td><code>CoursesTab.jsx</code></td><td>Course catalog management — add, edit, delete</td></tr>
+            <tr><td><code>RefundsTab.jsx</code></td><td>Refund queue with approve/reject/sent actions</td></tr>
+            <tr><td><code>CertificatesTab.jsx</code></td><td>Upload & assign certificates per user</td></tr>
+            <tr><td><code>AttendanceTab.jsx</code></td><td>Track student attendance per session</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;">
+          <table class="ep-table">
+            <thead><tr><th>Page (pages/admin/)</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><code>Financialtab.jsx</code></td><td>Revenue reports, payment summaries</td></tr>
+              <tr><td><code>NewsTab.jsx</code></td><td>Create / edit news articles</td></tr>
+              <tr><td><code>BooksTab.jsx</code></td><td>Library book management</td></tr>
+              <tr><td><code>mohadren.jsx</code></td><td>Instructors management panel</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §6 CLEAN ARCHITECTURE
+══════════════════════════════════ -->
+<section class="section" id="clean-arch">
+  <h2 class="section-title"><span>🏛️</span> Backend — Clean Architecture <span class="stag">BACKEND</span></h2>
+
+  <div class="desc">
+    The backend solution <code>Institute.Web.sln</code> follows <strong>Clean Architecture</strong> — the codebase is split into 4 projects, each with a distinct responsibility. Dependencies only flow inward: outer layers depend on inner layers, never the reverse. This ensures the business logic (Domain + Application) has zero dependency on ASP.NET or SQL Server.
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div><h3>Layer Responsibilities</h3><p>Institute.Web solution — 4 projects</p></div></div>
+    <div class="card-body" style="padding:0;">
+      <div class="arch-layers">
+
+        <div class="arch-layer" style="background: #fef2f2;">
+          <div style="width:32px;height:32px;background:var(--rose-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🌐</div>
+          <div class="al-label" style="color:var(--rose)">Institute.API<br><small style="font-size:10px;color:var(--muted)">Presentation</small></div>
+          <div class="al-detail">
+            <strong>Entry point</strong> — <code>Program.cs</code> bootstraps everything: registers services, configures middleware (CORS, auth, Swagger), sets up EF migrations, and starts Kestrel. Hosts all Controllers. Contains <code>appsettings.json</code> with connection strings, JWT config, and Azure Blob settings. This is the only project that references ASP.NET directly.
+          </div>
+        </div>
+
+        <div class="arch-layer" style="background: #fffbeb;">
+          <div style="width:32px;height:32px;background:var(--amber-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">⚙️</div>
+          <div class="al-label" style="color:var(--amber)">Institute.Application<br><small style="font-size:10px;color:var(--muted)">Business Logic</small></div>
+          <div class="al-detail">
+            Contains all <strong>use cases</strong> (services / command handlers). Uses <strong>AutoMapper</strong> to map between Domain entities and DTOs that are sent to the client. Contains validators, business rules, and orchestration logic. Has no knowledge of HTTP, databases, or Azure — it only speaks in terms of interfaces defined in the Domain.
+          </div>
+        </div>
+
+        <div class="arch-layer" style="background: #f0fdf4;">
+          <div style="width:32px;height:32px;background:var(--green-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🗄️</div>
+          <div class="al-label" style="color:var(--green)">Institute.Infrastructure<br><small style="font-size:10px;color:var(--muted)">Data Access</small></div>
+          <div class="al-detail">
+            Implements the interfaces defined in Application/Domain. Contains <strong>AppDbContext</strong> (EF Core), all Repository implementations, Azure Blob Storage service (using <code>Azure.Storage.Blobs</code>), and external integrations (Bank Misr payment gateway, Svix webhooks). EF migrations are managed from here.
+          </div>
+        </div>
+
+        <div class="arch-layer" style="background: #eff6ff;">
+          <div style="width:32px;height:32px;background:var(--blue-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">📦</div>
+          <div class="al-label" style="color:var(--blue)">Institute.Domain<br><small style="font-size:10px;color:var(--muted)">Core Entities</small></div>
+          <div class="al-detail">
+            The innermost layer — <strong>zero external dependencies</strong>. Contains only C# classes: <code>AppUser.cs</code>, <code>CoursePurchase.cs</code>, <code>Payment.cs</code>, and <code>AppDbContext.cs</code>. These are the canonical data models. No NuGet references to ASP.NET, EF, or Azure.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box ib-blue" style="margin-top:16px;">
+    <span class="ib-icon">💡</span>
+    <span>The dependency rule: <strong>Domain ← Application ← Infrastructure ← API</strong>. If you need to swap SQL Server for PostgreSQL, only Infrastructure changes. If you need to swap ASP.NET for a CLI tool, only the API project changes. The business logic stays untouched.</span>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §7 API ENDPOINTS
+══════════════════════════════════ -->
+<section class="section" id="api-endpoints">
+  <h2 class="section-title"><span>📡</span> API Endpoints <span class="stag">API</span></h2>
+
+  <div class="desc">
+    All endpoints follow REST conventions under the base path <code>/api/</code>. The API is documented via <strong>Swagger UI</strong> (Swashbuckle). Authentication is via <strong>Bearer JWT token</strong> in the <code>Authorization</code> header. Access levels: <span class="ep-auth ep-public">Public</span> — no token needed, <span class="ep-auth ep-user">User</span> — valid JWT required, <span class="ep-auth ep-admin">Admin</span> — Admin role required.
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">🔐 Auth Endpoints</div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table class="ep-table">
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Request Body</th><th>Response</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mb mb-post">POST</span></td>
+              <td><span class="ep-path">/api/auth/register</span></td>
+              <td><span class="ep-auth ep-public">Public</span></td>
+              <td><code>{ email, password, userName, phoneNumber }</code></td>
+              <td><code>201</code> — user object + token</td>
+              <td>Creates an AppUser via ASP.NET Identity. Returns JWT.</td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-post">POST</span></td>
+              <td><span class="ep-path">/api/auth/login</span></td>
+              <td><span class="ep-auth ep-public">Public</span></td>
+              <td><code>{ email, password }</code></td>
+              <td><code>200</code> — <code>{ token, expiresAt, user }</code></td>
+              <td>Validates credentials, returns signed JWT with role claims.</td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-post">POST</span></td>
+              <td><span class="ep-path">/api/auth/refresh</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td><code>{ refreshToken }</code></td>
+              <td><code>200</code> — new token pair</td>
+              <td>Refresh token rotation to avoid frequent re-login.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">👤 User Endpoints</div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table class="ep-table">
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Response</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/users</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Get all registered users with pagination</td>
+              <td><code>{ total, page, data: [AppUser] }</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/users/{id}</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td>Get a single user profile by ID</td>
+              <td><code>AppUser object</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-put">PUT</span></td>
+              <td><span class="ep-path">/api/users/{id}</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td>Update profile info (name, phone)</td>
+              <td><code>200 — updated user</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/users/{id}/courses</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td>Get courses the user is enrolled in (MyCourses)</td>
+              <td><code>[CoursePurchase]</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">🎓 Course Endpoints</div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table class="ep-table">
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Response</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/courses</span></td>
+              <td><span class="ep-auth ep-public">Public</span></td>
+              <td>List all active courses (with filters: category, type, search)</td>
+              <td><code>{ total, data: [Course] }</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/courses/{id}</span></td>
+              <td><span class="ep-auth ep-public">Public</span></td>
+              <td>Full course detail (description, schedule, instructor)</td>
+              <td><code>Course object</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-post">POST</span></td>
+              <td><span class="ep-path">/api/courses</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Create a new course</td>
+              <td><code>201 — Course</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-put">PUT</span></td>
+              <td><span class="ep-path">/api/courses/{id}</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Update course details</td>
+              <td><code>200 — updated</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-delete">DELETE</span></td>
+              <td><span class="ep-path">/api/courses/{id}</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Soft-delete a course</td>
+              <td><code>204 No Content</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">💳 Payment Endpoints</div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table class="ep-table">
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Response</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mb mb-post">POST</span></td>
+              <td><span class="ep-path">/api/payments/checkout</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td>Initiate checkout with Bank Misr — returns payment page URL</td>
+              <td><code>{ paymentUrl, orderId }</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/payments/return</span></td>
+              <td><span class="ep-auth ep-public">Public</span></td>
+              <td>Bank redirect callback after payment — verifies transaction, creates CoursePurchase</td>
+              <td>Redirects to <code>/payment-result</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/payments</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>All payment records for financial dashboard</td>
+              <td><code>{ total, data: [Payment] }</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">♻️ Refund Endpoints</div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table class="ep-table">
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Response</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mb mb-post">POST</span></td>
+              <td><span class="ep-path">/api/refund</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td>Submit a new refund request with bank details (IBAN + reason)</td>
+              <td><code>201 — RefundRequest</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/refund/my</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td>Get all refund requests submitted by the current logged-in user</td>
+              <td><code>[ RefundRequest ]</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/refund/{id}</span></td>
+              <td><span class="ep-auth ep-user">User / Admin</span></td>
+              <td>Get a single refund request by ID (user sees own, admin sees all)</td>
+              <td><code>RefundRequest object</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/refund/admin/all</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>All refund requests — supports <code>?status=Pending</code> filter</td>
+              <td><code>{ total, data }</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-put">PUT</span></td>
+              <td><span class="ep-path">/api/refund/{id}/approve</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Mark refund as Approved — admin review only, no bank call yet</td>
+              <td><code>200 — updated</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-put">PUT</span></td>
+              <td><span class="ep-path">/api/refund/{id}/reject</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Reject with a required rejection reason note</td>
+              <td><code>200 — updated</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-put">PUT</span></td>
+              <td><span class="ep-path">/api/refund/{id}/sent</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Calls Bank Misr <code>RefundPaymentAsync</code> → marks Sent → deletes Enrollment</td>
+              <td><code>200 — final state</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">📜 Certificate Endpoints</div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table class="ep-table">
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Response</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mb mb-post">POST</span></td>
+              <td><span class="ep-path">/api/certificates/upload</span></td>
+              <td><span class="ep-auth ep-admin">Admin</span></td>
+              <td>Upload certificate file (PDF/Image) — stores in Azure Blob, saves URL in DB</td>
+              <td><code>{ blobUrl, certificateId }</code></td>
+            </tr>
+            <tr>
+              <td><span class="mb mb-get">GET</span></td>
+              <td><span class="ep-path">/api/certificates/{userId}</span></td>
+              <td><span class="ep-auth ep-user">User</span></td>
+              <td>Get all certificates issued to a specific user</td>
+              <td><code>[ Certificate ]</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §8 AUTHENTICATION
+══════════════════════════════════ -->
+<section class="section" id="auth">
+  <h2 class="section-title"><span>🔐</span> Authentication & Authorization <span class="stag">AUTH</span></h2>
+
+  <div class="desc">
+    The system uses <strong>stateless JWT (JSON Web Token)</strong> authentication via <code>Microsoft.AspNetCore.Authentication.JwtBearer</code>. Passwords are hashed server-side before storage. Tokens carry role claims (<code>Admin</code> or <code>User</code>) and are validated on every protected API request — without hitting the database on each call.
+  </div>
+
+  <div class="g2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-head"><div><h3>Login Flow — Step by Step</h3><p>From browser to protected resource</p></div></div>
+      <div class="card-body">
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num fn-blue">1</div>
+            <div class="flow-content">
+              <h4>User submits Login.jsx form</h4>
+              <p>Frontend sends <code>POST /api/auth/login</code> with <code>{ email, password }</code>.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-cyan">2</div>
+            <div class="flow-content">
+              <h4>API validates credentials</h4>
+              <p>The API looks up the user in the <code>AppUsers</code> table by email, then verifies the hashed password. If no match → <code>401 Unauthorized</code>. Roles are resolved via <code>UserPermissions</code> → <code>Permissions</code>.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-green">3</div>
+            <div class="flow-content">
+              <h4>JWT is generated & signed</h4>
+              <p>Server creates a token with claims: <code>userId</code>, <code>email</code>, <code>role</code> (Admin or User). Token is signed with the secret key from <code>appsettings.json</code>. Expiry: configurable (e.g., 7 days).</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-purple">4</div>
+            <div class="flow-content">
+              <h4>Frontend stores the token</h4>
+              <p><code>AuthSync.jsx</code> stores the JWT in <code>localStorage</code>. All subsequent API calls via <code>api.js</code> attach <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-amber">5</div>
+            <div class="flow-content">
+              <h4>Protected API reads role from token</h4>
+              <p>ASP.NET's <code>[Authorize]</code> attribute and <code>[Authorize(Roles = "Admin")]</code> validate the token signature and role on every request — <strong>no DB lookup needed</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card">
+        <div class="card-head"><div><h3>Token Structure (JWT Payload)</h3><p>Claims inside the token</p></div></div>
+        <div class="card-body">
+          <pre><span class="c-comment">// Decoded JWT payload example</span>
+{
+  <span class="c-prop">"sub"</span>:    <span class="c-str">"a3f2-91bc-..."</span>,   <span class="c-comment">// userId (GUID)</span>
+  <span class="c-prop">"email"</span>: <span class="c-str">"user@icmet.eg"</span>,
+  <span class="c-prop">"role"</span>:  <span class="c-str">"Admin"</span>,          <span class="c-comment">// or "User"</span>
+  <span class="c-prop">"iat"</span>:   <span class="c-num">1718000000</span>,       <span class="c-comment">// issued at</span>
+  <span class="c-prop">"exp"</span>:   <span class="c-num">1718604800</span>        <span class="c-comment">// expires at</span>
+}</pre>
+        </div>
+      </div>
+      <div class="ac-card ac-amber">
+        <div class="ac-title t-amber">⚠️ Token Expiry & AuthSync</div>
+        <p style="font-size:12px; color:var(--text2); line-height:1.6;"><code>AuthSync.jsx</code> runs on every page mount. It checks the JWT's <code>exp</code> claim against <code>Date.now()</code>. If expired, it clears localStorage and redirects to <code>/login</code>. This prevents users from seeing stale authenticated UI.</p>
+      </div>
+      <div class="ac-card ac-purple">
+        <div class="ac-title t-purple">🛡️ Admin Route Guard</div>
+        <p style="font-size:12px; color:var(--text2); line-height:1.6;">In <code>DashboardLayout.jsx</code>, React Router checks if the decoded token contains <code>role: "Admin"</code>. If not, it redirects immediately to <code>/login</code> — even if a valid User token exists.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §9 DATABASE SCHEMA
+══════════════════════════════════ -->
+<section class="section" id="database">
+  <h2 class="section-title"><span>🗃️</span> Database Schema <span class="stag">DATABASE</span></h2>
+
+  <div class="desc">
+    The database is <strong>SQL Server</strong> managed via <strong>Entity Framework Core 8</strong> Code-First migrations. The schema contains <strong>15 tables</strong> covering users, courses (Planwork), orders, payments, refunds, certificates, news, library, and permissions. The table below documents every column exactly as it appears in the database.
+  </div>
+
+  <!-- ── AppUsers ── -->
+  <div class="subsection">
+    <div class="subsection-title">👤 AppUsers <span style="font-size:11px;font-weight:400;color:var(--muted)">Custom user entity</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-blue">AppUsers</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">nvarchar PK</span><span class="col-desc">GUID — primary key for the user</span></div>
+      <div class="dbt-row"><span class="col-name">Username</span><span class="col-type">nvarchar</span><span class="col-desc">Display name used across the system</span></div>
+      <div class="dbt-row"><span class="col-name">Email</span><span class="col-type">nvarchar</span><span class="col-desc">Login credential and contact address</span></div>
+      <div class="dbt-row"><span class="col-name">FirstName</span><span class="col-type">nvarchar</span><span class="col-desc">User's first name</span></div>
+      <div class="dbt-row"><span class="col-name">LastName</span><span class="col-type">nvarchar</span><span class="col-desc">User's last name</span></div>
+      <div class="dbt-row"><span class="col-name">CreatedAt</span><span class="col-type">datetime2</span><span class="col-desc">Timestamp of account registration</span></div>
+      <div class="dbt-row"><span class="col-name">ClerkUserId</span><span class="col-type">nvarchar</span><span class="col-desc">External Clerk auth provider ID (if integrated)</span></div>
+      <div class="dbt-row"><span class="col-name">isDeleted</span><span class="col-type">bit</span><span class="col-desc">Soft-delete flag — deleted users remain in DB but are inactive</span></div>
+    </div>
+  </div>
+
+  <!-- ── Planwork ── -->
+  <div class="subsection">
+    <div class="subsection-title">📚 Planwork <span style="font-size:11px;font-weight:400;color:var(--muted)">Course catalogue — the core of the system</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-green">Planwork</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">ChildID</span><span class="col-type">int PK</span><span class="col-desc">Primary key of the course record</span></div>
+      <div class="dbt-row"><span class="col-name fk">ParentID</span><span class="col-type">int FK</span><span class="col-desc">Self-referencing FK — allows sub-courses under a parent course</span></div>
+      <div class="dbt-row"><span class="col-name">ServiceTitle</span><span class="col-type">nvarchar</span><span class="col-desc">Display title of the course or training program</span></div>
+      <div class="dbt-row"><span class="col-name">Priority</span><span class="col-type">int</span><span class="col-desc">Sort order for display on the public courses page</span></div>
+      <div class="dbt-row"><span class="col-name">main_flag</span><span class="col-type">bit</span><span class="col-desc">True if this is a main (top-level) course category</span></div>
+      <div class="dbt-row"><span class="col-name">details_flag</span><span class="col-type">bit</span><span class="col-desc">True if the course has a detail page</span></div>
+      <div class="dbt-row"><span class="col-name">special_flag</span><span class="col-type">bit</span><span class="col-desc">Marks the course as a featured / special offering</span></div>
+      <div class="dbt-row"><span class="col-name">course_Desc</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Full course description (HTML or plain text)</span></div>
+      <div class="dbt-row"><span class="col-name">course_place</span><span class="col-type">nvarchar</span><span class="col-desc">Location — online, onsite, or venue name</span></div>
+      <div class="dbt-row"><span class="col-name">course_date</span><span class="col-type">nvarchar</span><span class="col-desc">Scheduled start date (stored as string for flexible formats)</span></div>
+      <div class="dbt-row"><span class="col-name">course_days</span><span class="col-type">int</span><span class="col-desc">Duration of the course in days</span></div>
+      <div class="dbt-row"><span class="col-name">course_content</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Detailed curriculum / syllabus content</span></div>
+      <div class="dbt-row"><span class="col-name">PlanUser</span><span class="col-type">nvarchar</span><span class="col-desc">Target audience description for this plan</span></div>
+      <div class="dbt-row"><span class="col-name">PlanPass</span><span class="col-type">nvarchar</span><span class="col-desc">Prerequisite or qualification required</span></div>
+      <div class="dbt-row"><span class="col-name">PlanCost</span><span class="col-type">decimal</span><span class="col-desc">Price of the course in EGP</span></div>
+      <div class="dbt-row"><span class="col-name">SiTu</span><span class="col-type">nvarchar</span><span class="col-desc">Situation or status of the course (active/upcoming/closed)</span></div>
+      <div class="dbt-row"><span class="col-name">Slug</span><span class="col-type">nvarchar</span><span class="col-desc">URL-friendly identifier — used in <code>/courses/{slug}</code> route</span></div>
+    </div>
+  </div>
+
+  <!-- ── PlanFiles ── -->
+  <div class="subsection">
+    <div class="subsection-title">📎 PlanFiles <span style="font-size:11px;font-weight:400;color:var(--muted)">Files attached to a course plan</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-cyan">PlanFiles</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Plan_Id</span><span class="col-type">int PK</span><span class="col-desc">Primary key of the file record</span></div>
+      <div class="dbt-row"><span class="col-name fk">FileId</span><span class="col-type">int FK</span><span class="col-desc">FK → Planwork.ChildID — which course this file belongs to</span></div>
+      <div class="dbt-row"><span class="col-name">File_Title</span><span class="col-type">nvarchar</span><span class="col-desc">Display label for the file (e.g., "Course Outline PDF")</span></div>
+      <div class="dbt-row"><span class="col-name">File_name</span><span class="col-type">nvarchar</span><span class="col-desc">Actual filename stored in Azure Blob Storage</span></div>
+      <div class="dbt-row"><span class="col-name">File_priority</span><span class="col-type">int</span><span class="col-desc">Sort order for displaying multiple files for one course</span></div>
+    </div>
+  </div>
+
+  <!-- ── Enrollments ── -->
+  <div class="subsection">
+    <div class="subsection-title">🎓 Enrollments <span style="font-size:11px;font-weight:400;color:var(--muted)">User ↔ Course enrollment records</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-green">Enrollments</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">UserId</span><span class="col-type">nvarchar FK</span><span class="col-desc">FK → AppUsers.Id — the enrolled student</span></div>
+      <div class="dbt-row"><span class="col-name fk">PlanworkId</span><span class="col-type">int FK</span><span class="col-desc">FK → Planwork.ChildID — which course</span></div>
+      <div class="dbt-row"><span class="col-name fk">OrderId</span><span class="col-type">int FK</span><span class="col-desc">FK → Orders.Id — the order that created this enrollment</span></div>
+      <div class="dbt-row"><span class="col-name">EnrolledAt</span><span class="col-type">datetime2</span><span class="col-desc">Timestamp when enrollment was confirmed (post-payment)</span></div>
+      <div class="dbt-row"><span class="col-name fk">AppUserId</span><span class="col-type">nvarchar FK</span><span class="col-desc">Secondary FK reference to AppUsers (navigation property)</span></div>
+      <div class="dbt-row"><span class="col-name fk">PlanworkChildId</span><span class="col-type">int FK</span><span class="col-desc">Secondary FK reference to Planwork (navigation property)</span></div>
+      <div class="dbt-row"><span class="col-name">Attended</span><span class="col-type">bit</span><span class="col-desc">Whether the student attended the course — used by AttendanceTab</span></div>
+    </div>
+  </div>
+
+  <!-- ── Orders ── -->
+  <div class="subsection">
+    <div class="subsection-title">🛒 Orders <span style="font-size:11px;font-weight:400;color:var(--muted)">Checkout session — one order per checkout</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-amber">Orders</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">UserId</span><span class="col-type">nvarchar FK</span><span class="col-desc">FK → AppUsers.Id — who placed the order</span></div>
+      <div class="dbt-row"><span class="col-name">TotalAmount</span><span class="col-type">decimal(18,2)</span><span class="col-desc">Sum of all course prices in this order (in EGP)</span></div>
+      <div class="dbt-row"><span class="col-name">Status</span><span class="col-type">nvarchar</span><span class="col-desc">Pending / Paid / Failed / Refunded</span></div>
+      <div class="dbt-row"><span class="col-name">CreatedAt</span><span class="col-type">datetime2</span><span class="col-desc">When the order was initiated</span></div>
+      <div class="dbt-row"><span class="col-name">GatewaySessionId</span><span class="col-type">nvarchar</span><span class="col-desc">Bank Misr session ID — returned when creating the payment session</span></div>
+      <div class="dbt-row"><span class="col-name">OrderNumber</span><span class="col-type">nvarchar</span><span class="col-desc">Human-readable order number — used in Bank Misr refund calls</span></div>
+      <div class="dbt-row"><span class="col-name">SuccessIndicator</span><span class="col-type">nvarchar</span><span class="col-desc">Bank-returned success token — verified on the return callback to confirm genuine payment</span></div>
+    </div>
+  </div>
+
+  <!-- ── OrderItems ── -->
+  <div class="subsection">
+    <div class="subsection-title">📦 OrderItems <span style="font-size:11px;font-weight:400;color:var(--muted)">Individual line items within an order</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-amber">OrderItems</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">OrderId</span><span class="col-type">int FK</span><span class="col-desc">FK → Orders.Id — which order this line belongs to</span></div>
+      <div class="dbt-row"><span class="col-name fk">PlanworkId</span><span class="col-type">int FK</span><span class="col-desc">FK → Planwork.ChildID — which course was ordered</span></div>
+      <div class="dbt-row"><span class="col-name">Price</span><span class="col-type">decimal(18,2)</span><span class="col-desc">Price snapshot at time of order (course price may change later)</span></div>
+    </div>
+  </div>
+
+  <!-- ── Payments ── -->
+  <div class="subsection">
+    <div class="subsection-title">💳 Payments <span style="font-size:11px;font-weight:400;color:var(--muted)">Bank Misr transaction record</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-amber">Payments</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">OrderId</span><span class="col-type">int FK</span><span class="col-desc">FK → Orders.Id — which order this payment settles</span></div>
+      <div class="dbt-row"><span class="col-name">Amount</span><span class="col-type">decimal(18,2)</span><span class="col-desc">Amount actually charged by the bank (EGP)</span></div>
+      <div class="dbt-row"><span class="col-name">PaymentDate</span><span class="col-type">datetime2</span><span class="col-desc">When the bank confirmed the transaction</span></div>
+      <div class="dbt-row"><span class="col-name">Method</span><span class="col-type">nvarchar</span><span class="col-desc">Payment method (e.g., MASTERCARD, VISA)</span></div>
+      <div class="dbt-row"><span class="col-name">Status</span><span class="col-type">nvarchar</span><span class="col-desc">Paid / Failed / Refunded</span></div>
+      <div class="dbt-row"><span class="col-name">TransactionRef</span><span class="col-type">nvarchar</span><span class="col-desc">Bank transaction ID — <strong>required for initiating refunds</strong> via Bank Misr API</span></div>
+      <div class="dbt-row"><span class="col-name">CreatedAt</span><span class="col-type">datetime2</span><span class="col-desc">Record creation timestamp</span></div>
+      <div class="dbt-row"><span class="col-name">GatewayResponse</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Raw JSON response from Bank Misr — kept for auditing and debugging</span></div>
+    </div>
+  </div>
+
+  <!-- ── Carts ── -->
+  <div class="subsection">
+    <div class="subsection-title">🛒 Carts <span style="font-size:11px;font-weight:400;color:var(--muted)">Active shopping cart per user</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-cyan">Carts</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">UserId</span><span class="col-type">nvarchar FK</span><span class="col-desc">FK → AppUsers.Id — owner of this cart</span></div>
+      <div class="dbt-row"><span class="col-name">CreatedAt</span><span class="col-type">datetime2</span><span class="col-desc">When the cart was first created</span></div>
+      <div class="dbt-row"><span class="col-name">IsCheckedOut</span><span class="col-type">bit</span><span class="col-desc">True once the user proceeds to checkout — cart becomes read-only</span></div>
+    </div>
+  </div>
+
+  <!-- ── CartItems ── -->
+  <div class="subsection">
+    <div class="subsection-title">🧺 CartItems <span style="font-size:11px;font-weight:400;color:var(--muted)">Courses added to a cart</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-cyan">CartItems</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">CartId</span><span class="col-type">int FK</span><span class="col-desc">FK → Carts.Id — which cart this item belongs to</span></div>
+      <div class="dbt-row"><span class="col-name fk">PlanworkId</span><span class="col-type">int FK</span><span class="col-desc">FK → Planwork.ChildID — which course was added</span></div>
+      <div class="dbt-row"><span class="col-name">Price</span><span class="col-type">decimal(18,2)</span><span class="col-desc">Price snapshot when added to cart</span></div>
+    </div>
+  </div>
+
+  <!-- ── RefundRequests ── -->
+  <div class="subsection">
+    <div class="subsection-title">♻️ RefundRequests <span style="font-size:11px;font-weight:400;color:var(--muted)">Full lifecycle of every refund</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-purple">RefundRequests</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name">RefNumber</span><span class="col-type">nvarchar</span><span class="col-desc">Human-readable reference code (e.g., REF-2024-001) shown to user</span></div>
+      <div class="dbt-row"><span class="col-name fk">OrderId</span><span class="col-type">int FK</span><span class="col-desc">FK → Orders.Id — which order to refund</span></div>
+      <div class="dbt-row"><span class="col-name fk">UserId</span><span class="col-type">nvarchar FK</span><span class="col-desc">FK → AppUsers.Id — who requested the refund</span></div>
+      <div class="dbt-row"><span class="col-name fk">PlanworkId</span><span class="col-type">int FK</span><span class="col-desc">FK → Planwork.ChildID — which course is being refunded</span></div>
+      <div class="dbt-row"><span class="col-name">Amount</span><span class="col-type">decimal(18,2)</span><span class="col-desc">Amount to be refunded (EGP)</span></div>
+      <div class="dbt-row"><span class="col-name">Currency</span><span class="col-type">nvarchar</span><span class="col-desc">Currency code (EGP)</span></div>
+      <div class="dbt-row"><span class="col-name">Reason</span><span class="col-type">nvarchar</span><span class="col-desc">Short user-selected reason category</span></div>
+      <div class="dbt-row"><span class="col-name">Details</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">User's free-text explanation of why they want a refund</span></div>
+      <div class="dbt-row"><span class="col-name">Status</span><span class="col-type">nvarchar</span><span class="col-desc">Pending → Approved → Sent  |  Pending → Rejected</span></div>
+      <div class="dbt-row"><span class="col-name">BankName</span><span class="col-type">nvarchar</span><span class="col-desc">User's bank name for manual transfer fallback</span></div>
+      <div class="dbt-row"><span class="col-name">AccountNumber</span><span class="col-type">nvarchar</span><span class="col-desc">Bank account number for manual transfer</span></div>
+      <div class="dbt-row"><span class="col-name">AccountHolder</span><span class="col-type">nvarchar</span><span class="col-desc">Account holder name as it appears at the bank</span></div>
+      <div class="dbt-row"><span class="col-name">Iban</span><span class="col-type">nvarchar(34)</span><span class="col-desc">IBAN — used if Bank Misr auto-refund fails</span></div>
+      <div class="dbt-row"><span class="col-name">AdminNote</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Internal admin note — not shown to user</span></div>
+      <div class="dbt-row"><span class="col-name">RejectionReason</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Rejection explanation — shown to user if status = Rejected</span></div>
+      <div class="dbt-row"><span class="col-name">RequestedAt</span><span class="col-type">datetime2</span><span class="col-desc">When the user submitted the request</span></div>
+      <div class="dbt-row"><span class="col-name">ApprovedAt</span><span class="col-type">datetime2 NULL</span><span class="col-desc">Timestamp of admin approval (null until approved)</span></div>
+      <div class="dbt-row"><span class="col-name">SentAt</span><span class="col-type">datetime2 NULL</span><span class="col-desc">Timestamp when bank transfer was executed</span></div>
+      <div class="dbt-row"><span class="col-name">RejectedAt</span><span class="col-type">datetime2 NULL</span><span class="col-desc">Timestamp of rejection (null unless rejected)</span></div>
+    </div>
+  </div>
+
+  <!-- ── Certificates ── -->
+  <div class="subsection">
+    <div class="subsection-title">📜 Certificates <span style="font-size:11px;font-weight:400;color:var(--muted)">Issued certificates stored in Azure Blob</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-blue">Certificates</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">UserId</span><span class="col-type">nvarchar FK</span><span class="col-desc">FK → AppUsers.Id — who this certificate belongs to</span></div>
+      <div class="dbt-row"><span class="col-name fk">PlanworkId</span><span class="col-type">int FK</span><span class="col-desc">FK → Planwork.ChildID — which course this certificate is for</span></div>
+      <div class="dbt-row"><span class="col-name">FileUrl</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Full Azure Blob Storage URL to download the certificate file</span></div>
+      <div class="dbt-row"><span class="col-name">FileName</span><span class="col-type">nvarchar</span><span class="col-desc">Original filename (e.g., <code>cert_user123_webdev.pdf</code>)</span></div>
+      <div class="dbt-row"><span class="col-name">FileSizeBytes</span><span class="col-type">bigint</span><span class="col-desc">File size in bytes — displayed in the UI</span></div>
+      <div class="dbt-row"><span class="col-name">UploadedAt</span><span class="col-type">datetime2</span><span class="col-desc">Timestamp when admin uploaded the certificate</span></div>
+    </div>
+  </div>
+
+  <!-- ── Lecturer ── -->
+  <div class="subsection">
+    <div class="subsection-title">👨‍🏫 Lecturer <span style="font-size:11px;font-weight:400;color:var(--muted)">Instructor profiles</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-rose">Lecturer</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">lecturer_id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name">lecturer_Name</span><span class="col-type">nvarchar</span><span class="col-desc">Full name of the instructor</span></div>
+      <div class="dbt-row"><span class="col-name">lecturer_pic</span><span class="col-type">nvarchar</span><span class="col-desc">URL to the instructor's profile photo (Azure Blob or relative path)</span></div>
+      <div class="dbt-row"><span class="col-name">lecturer_course</span><span class="col-type">nvarchar</span><span class="col-desc">Primary subject / course area the instructor teaches</span></div>
+      <div class="dbt-row"><span class="col-name">lecturer_main_Edu</span><span class="col-type">nvarchar</span><span class="col-desc">Highest academic qualification</span></div>
+      <div class="dbt-row"><span class="col-name">lecturer_Edu</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Full education and certification history</span></div>
+      <div class="dbt-row"><span class="col-name">lecturer_Details</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Biography and professional experience</span></div>
+      <div class="dbt-row"><span class="col-name">telephone</span><span class="col-type">nvarchar</span><span class="col-desc">Contact phone number</span></div>
+      <div class="dbt-row"><span class="col-name">email</span><span class="col-type">nvarchar</span><span class="col-desc">Contact email address</span></div>
+    </div>
+  </div>
+
+  <!-- ── newsPic ── -->
+  <div class="subsection">
+    <div class="subsection-title">📰 newsPic <span style="font-size:11px;font-weight:400;color:var(--muted)">News articles with images</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-cyan">newsPic</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">news_id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name fk">PicId</span><span class="col-type">int FK</span><span class="col-desc">FK → dailynews.news_id — links image to the news article</span></div>
+      <div class="dbt-row"><span class="col-name">image_name</span><span class="col-type">nvarchar</span><span class="col-desc">Image filename stored in Azure Blob</span></div>
+      <div class="dbt-row"><span class="col-name">StartUp_Pic</span><span class="col-type">bit</span><span class="col-desc">True if this is the hero/thumbnail image for the article</span></div>
+      <div class="dbt-row"><span class="col-name">Pic_priority</span><span class="col-type">int</span><span class="col-desc">Sort order for gallery images within an article</span></div>
+      <div class="dbt-row"><span class="col-name">Ac_comment</span><span class="col-type">nvarchar</span><span class="col-desc">Caption or alt-text for the image</span></div>
+    </div>
+  </div>
+
+  <!-- ── dailynews ── -->
+  <div class="subsection">
+    <div class="subsection-title">📋 dailynews <span style="font-size:11px;font-weight:400;color:var(--muted)">News articles published on the site</span></div>
+    <div class="dbt">
+      <div class="dbt-head dh-cyan">dailynews</div>
+      <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+      <div class="dbt-row"><span class="col-name pk">news_id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+      <div class="dbt-row"><span class="col-name">news_date</span><span class="col-type">datetime2</span><span class="col-desc">Publication date displayed on the news page</span></div>
+      <div class="dbt-row"><span class="col-name">a_stol</span><span class="col-type">nvarchar</span><span class="col-desc">Article headline / title</span></div>
+      <div class="dbt-row"><span class="col-name">a_details</span><span class="col-type">nvarchar(MAX)</span><span class="col-desc">Full article body (HTML or plain text)</span></div>
+      <div class="dbt-row"><span class="col-name">MainPagePriority</span><span class="col-type">int</span><span class="col-desc">Controls display order on the homepage news section</span></div>
+      <div class="dbt-row"><span class="col-name">approved</span><span class="col-type">bit</span><span class="col-desc">Admin approval flag — only approved articles are shown publicly</span></div>
+    </div>
+  </div>
+
+  <!-- ── BooksType ── -->
+  <div class="subsection">
+    <div class="subsection-title">📚 BooksType + Books <span style="font-size:11px;font-weight:400;color:var(--muted)">Library catalogue</span></div>
+    <div class="g2">
+      <div class="dbt">
+        <div class="dbt-head dh-green">BooksType</div>
+        <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+        <div class="dbt-row"><span class="col-name pk">TypeId</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+        <div class="dbt-row"><span class="col-name">TypeName</span><span class="col-type">nvarchar</span><span class="col-desc">Category name (e.g., Engineering, Management)</span></div>
+      </div>
+      <div class="dbt">
+        <div class="dbt-head dh-green">Books</div>
+        <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+        <div class="dbt-row"><span class="col-name pk">BookId</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+        <div class="dbt-row"><span class="col-name fk">TypeId</span><span class="col-type">int FK</span><span class="col-desc">FK → BooksType.TypeId — category of the book</span></div>
+        <div class="dbt-row"><span class="col-name">BookName</span><span class="col-type">nvarchar</span><span class="col-desc">Title of the book</span></div>
+        <div class="dbt-row"><span class="col-name">Author</span><span class="col-type">nvarchar</span><span class="col-desc">Author name(s)</span></div>
+        <div class="dbt-row"><span class="col-name">BookDate</span><span class="col-type">datetime2</span><span class="col-desc">Publication date</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Permissions ── -->
+  <div class="subsection">
+    <div class="subsection-title">🔑 Permissions + UserPermissions <span style="font-size:11px;font-weight:400;color:var(--muted)">Granular permission system</span></div>
+    <div class="g2">
+      <div class="dbt">
+        <div class="dbt-head dh-purple">Permissions</div>
+        <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+        <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+        <div class="dbt-row"><span class="col-name">Name</span><span class="col-type">nvarchar</span><span class="col-desc">Permission label (e.g., <code>CanApproveRefunds</code>, <code>CanUploadCerts</code>)</span></div>
+      </div>
+      <div class="dbt">
+        <div class="dbt-head dh-purple">UserPermissions</div>
+        <div class="dbt-row-header"><span>Column</span><span>Type</span><span>Description</span></div>
+        <div class="dbt-row"><span class="col-name pk">Id</span><span class="col-type">int PK</span><span class="col-desc">Auto-increment primary key</span></div>
+        <div class="dbt-row"><span class="col-name fk">AppUserId</span><span class="col-type">nvarchar FK</span><span class="col-desc">FK → AppUsers.Id — which user has this permission</span></div>
+        <div class="dbt-row"><span class="col-name fk">PermissionId</span><span class="col-type">int FK</span><span class="col-desc">FK → Permissions.Id — which permission is granted</span></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ══════════════════════════════════
+  §10 DB RELATIONS
+══════════════════════════════════ -->
+<section class="section" id="relations">
+  <h2 class="section-title"><span>🔗</span> Database Relationships <span class="stag">RELATIONS</span></h2>
+
+  <div class="desc">
+    All foreign key relationships are enforced at the database level by EF Core. The central entities are <strong>AppUsers</strong> and <strong>Planwork</strong> (courses) — almost every other table connects back to one or both. Cascades are configured to avoid accidental data loss; most status changes are soft operations.
+  </div>
+
+  <div class="g2">
+    <div class="rel-svg-wrap">
+      <svg viewBox="0 0 500 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'JetBrains Mono',monospace;">
+        <defs>
+          <marker id="fk-end" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
+          </marker>
+          <marker id="fk-end-b" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+
+        <!-- AppUsers (top-left) -->
+        <rect x="10" y="10" width="120" height="34" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+        <text x="70" y="31" font-size="12" fill="#1d4ed8" text-anchor="middle" font-weight="700">AppUsers</text>
+
+        <!-- Planwork (top-right) -->
+        <rect x="370" y="10" width="120" height="34" rx="6" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+        <text x="430" y="31" font-size="12" fill="#065f46" text-anchor="middle" font-weight="700">Planwork</text>
+
+        <!-- Carts (left) -->
+        <rect x="10" y="110" width="100" height="30" rx="5" fill="#cffafe" stroke="#67e8f9" stroke-width="1.3"/>
+        <text x="60" y="129" font-size="11" fill="#0891b2" text-anchor="middle" font-weight="600">Carts</text>
+
+        <!-- CartItems (left-mid) -->
+        <rect x="10" y="190" width="100" height="30" rx="5" fill="#cffafe" stroke="#67e8f9" stroke-width="1.3"/>
+        <text x="60" y="209" font-size="11" fill="#0891b2" text-anchor="middle" font-weight="600">CartItems</text>
+
+        <!-- Orders (center-top) -->
+        <rect x="190" y="80" width="120" height="30" rx="5" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.3"/>
+        <text x="250" y="99" font-size="11" fill="#92400e" text-anchor="middle" font-weight="600">Orders</text>
+
+        <!-- OrderItems (center) -->
+        <rect x="190" y="160" width="120" height="30" rx="5" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.3"/>
+        <text x="250" y="179" font-size="11" fill="#92400e" text-anchor="middle" font-weight="600">OrderItems</text>
+
+        <!-- Payments (center-lower) -->
+        <rect x="190" y="240" width="120" height="30" rx="5" fill="#fde68a" stroke="#f59e0b" stroke-width="1.3"/>
+        <text x="250" y="259" font-size="11" fill="#92400e" text-anchor="middle" font-weight="600">Payments</text>
+
+        <!-- Enrollments (right-mid) -->
+        <rect x="370" y="110" width="120" height="30" rx="5" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.3"/>
+        <text x="430" y="129" font-size="11" fill="#065f46" text-anchor="middle" font-weight="600">Enrollments</text>
+
+        <!-- Certificates (right-lower) -->
+        <rect x="370" y="190" width="120" height="30" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.3"/>
+        <text x="430" y="209" font-size="11" fill="#1d4ed8" text-anchor="middle" font-weight="600">Certificates</text>
+
+        <!-- RefundRequests (bottom-center) -->
+        <rect x="160" y="340" width="140" height="30" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.3"/>
+        <text x="230" y="359" font-size="11" fill="#5b21b6" text-anchor="middle" font-weight="600">RefundRequests</text>
+
+        <!-- UserPermissions (bottom-left) -->
+        <rect x="10" y="340" width="120" height="30" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.3"/>
+        <text x="70" y="359" font-size="11" fill="#5b21b6" text-anchor="middle" font-weight="600">UserPermissions</text>
+
+        <!-- PlanFiles (right) -->
+        <rect x="370" y="270" width="120" height="30" rx="5" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.3"/>
+        <text x="430" y="289" font-size="11" fill="#065f46" text-anchor="middle" font-weight="600">PlanFiles</text>
+
+        <!-- newsPic / dailynews (bottom-right) -->
+        <rect x="370" y="350" width="120" height="30" rx="5" fill="#cffafe" stroke="#67e8f9" stroke-width="1.3"/>
+        <text x="430" y="369" font-size="11" fill="#0891b2" text-anchor="middle" font-weight="600">dailynews</text>
+        <rect x="370" y="420" width="120" height="30" rx="5" fill="#cffafe" stroke="#67e8f9" stroke-width="1.3"/>
+        <text x="430" y="439" font-size="11" fill="#0891b2" text-anchor="middle" font-weight="600">newsPic</text>
+
+        <!-- Books (bottom-far-left) -->
+        <rect x="10" y="430" width="100" height="30" rx="5" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.3"/>
+        <text x="60" y="449" font-size="11" fill="#065f46" text-anchor="middle" font-weight="600">Books</text>
+
+        <!-- ── RELATIONS ── -->
+        <!-- AppUsers → Carts -->
+        <line x1="70" y1="44" x2="60" y2="110" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="34" y="82" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- AppUsers → Orders -->
+        <line x1="120" y1="27" x2="200" y2="85" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="148" y="56" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- AppUsers → Enrollments -->
+        <line x1="130" y1="20" x2="370" y2="22" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#fk-end-b)"/>
+        <text x="250" y="16" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- AppUsers → Certificates -->
+        <line x1="90" y1="44" x2="375" y2="195" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+
+        <!-- AppUsers → UserPermissions -->
+        <line x1="50" y1="44" x2="55" y2="340" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+
+        <!-- AppUsers → RefundRequests -->
+        <line x1="80" y1="44" x2="185" y2="340" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+
+        <!-- Planwork → Enrollments -->
+        <line x1="430" y1="44" x2="430" y2="110" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="436" y="82" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- Planwork → PlanFiles -->
+        <line x1="460" y1="44" x2="460" y2="270" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="465" y="165" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- Planwork → Certificates -->
+        <line x1="410" y1="44" x2="410" y2="190" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+
+        <!-- Planwork → RefundRequests -->
+        <line x1="380" y1="44" x2="290" y2="340" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+
+        <!-- Planwork → OrderItems -->
+        <line x1="370" y1="25" x2="310" y2="163" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="352" y="95" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- Carts → CartItems -->
+        <line x1="60" y1="140" x2="60" y2="190" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="65" y="168" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- CartItems → Planwork -->
+        <line x1="110" y1="205" x2="370" y2="22" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+
+        <!-- Orders → OrderItems -->
+        <line x1="250" y1="110" x2="250" y2="160" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="255" y="140" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- Orders → Payments -->
+        <line x1="260" y1="110" x2="260" y2="240" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="265" y="185" font-size="9" fill="#94a3b8">1:1</text>
+
+        <!-- Orders → Enrollments -->
+        <line x1="310" y1="93" x2="370" y2="118" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="345" y="100" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- Orders → RefundRequests -->
+        <line x1="230" y1="110" x2="215" y2="340" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="193" y="230" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- Payments → RefundRequests (implied via Orders) -->
+        <line x1="245" y1="270" x2="240" y2="340" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+
+        <!-- dailynews → newsPic -->
+        <line x1="430" y1="380" x2="430" y2="420" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="435" y="405" font-size="9" fill="#94a3b8">1:N</text>
+
+        <!-- Legend -->
+        <line x1="10" y1="500" x2="35" y2="500" stroke="#64748b" stroke-width="1.3" marker-end="url(#fk-end)"/>
+        <text x="40" y="504" font-size="9" fill="#64748b">FK (primary)</text>
+        <line x1="160" y1="500" x2="185" y2="500" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#fk-end-b)"/>
+        <text x="190" y="504" font-size="9" fill="#94a3b8">FK (secondary / nav)</text>
+      </svg>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card">
+        <div class="card-head"><div><h3>Key Relationship Rules</h3><p>15 tables — how they connect</p></div></div>
+        <div class="card-body">
+          <div class="flow">
+            <div class="flow-step">
+              <div class="flow-num fn-blue" style="font-size:11px;width:26px;height:26px;">1</div>
+              <div class="flow-content">
+                <h4>AppUsers → Carts (1:N)</h4>
+                <p>Each user has one active cart. <code>Carts.UserId FK</code>. CartItems link to both a Cart and a Planwork course.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-amber" style="font-size:11px;width:26px;height:26px;">2</div>
+              <div class="flow-content">
+                <h4>AppUsers + Planwork → Orders (1:N each)</h4>
+                <p>An order records who bought what. <code>Orders.UserId</code> links to the buyer. <code>OrderItems</code> holds the individual course lines with price snapshots.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-amber" style="font-size:11px;width:26px;height:26px;">3</div>
+              <div class="flow-content">
+                <h4>Orders → Payments (1:1)</h4>
+                <p>Each paid order has exactly one Payment record. <code>Payments.OrderId FK</code>. <code>TransactionRef</code> is critical for Bank Misr refund calls.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-green" style="font-size:11px;width:26px;height:26px;">4</div>
+              <div class="flow-content">
+                <h4>Orders → Enrollments (1:N)</h4>
+                <p>On payment success, one Enrollment row is created per OrderItem. Enrollment is deleted when a refund is fully processed.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-purple" style="font-size:11px;width:26px;height:26px;">5</div>
+              <div class="flow-content">
+                <h4>Orders → RefundRequests (1:N)</h4>
+                <p>A user can request a refund per order+course combination. <code>RefundRequests.OrderId</code> + <code>PlanworkId</code> + <code>UserId</code> are the three key FKs.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-cyan" style="font-size:11px;width:26px;height:26px;">6</div>
+              <div class="flow-content">
+                <h4>Planwork → PlanFiles (1:N)</h4>
+                <p>Each course can have multiple attached files (outlines, brochures). <code>PlanFiles.FileId FK</code> → <code>Planwork.ChildID</code>.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-blue" style="font-size:11px;width:26px;height:26px;">7</div>
+              <div class="flow-content">
+                <h4>dailynews → newsPic (1:N)</h4>
+                <p>Each news article can have multiple images. <code>newsPic.PicId FK</code> → <code>dailynews.news_id</code>.</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num fn-purple" style="font-size:11px;width:26px;height:26px;">8</div>
+              <div class="flow-content">
+                <h4>AppUsers ↔ Permissions (M:N via UserPermissions)</h4>
+                <p>Granular permissions are assigned per user via the join table <code>UserPermissions</code>. Allows fine-grained admin access control beyond simple roles.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ac-card ac-amber">
+        <div class="ac-title t-amber">🔑 Key: Orders.SuccessIndicator</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;">On payment return, the system verifies <code>Orders.SuccessIndicator</code> against the value returned by Bank Misr's callback. Only if they match is the order marked Paid and enrollments created. This prevents URL manipulation attacks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §11 FILE UPLOADS
+══════════════════════════════════ -->
+<section class="section" id="file-uploads">
+  <h2 class="section-title"><span>📁</span> File Upload Pipeline <span class="stag">FILES</span></h2>
+
+  <div class="desc">
+    Files are <strong>never stored on the server's filesystem</strong>. All uploads go directly to <strong>Azure Blob Storage</strong> via the <code>Azure.Storage.Blobs</code> SDK. The returned blob URL is then saved to the database. This means the server is stateless and can be restarted or scaled without losing files.
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div><h3>Certificate Upload Flow</h3><p>Admin → Blob Storage → DB</p></div></div>
+      <div class="card-body">
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num fn-purple">1</div>
+            <div class="flow-content">
+              <h4>Admin opens CertUploadModal.jsx</h4>
+              <p>Selects a PDF or image file from their device. The modal shows a preview and validates file type/size on the client.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-blue">2</div>
+            <div class="flow-content">
+              <h4>Frontend sends multipart/form-data</h4>
+              <p><code>POST /api/certificates/upload</code> with the file binary and metadata (userId, courseId) as form fields. The <code>Authorization: Bearer</code> token is included — Admin role required.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-cyan">3</div>
+            <div class="flow-content">
+              <h4>API uploads to Azure Blob</h4>
+              <p>The Infrastructure layer's blob service uses <code>Azure.Storage.Blobs.BlobClient.UploadAsync()</code>. The file is stored in a named container (e.g., <code>certificates</code>) with a unique GUID filename.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-green">4</div>
+            <div class="flow-content">
+              <h4>Blob URL saved to DB & returned</h4>
+              <p>The public blob URL (e.g., <code>https://&lt;account&gt;.blob.core.windows.net/certificates/abc123.pdf</code>) is stored in the <code>Certificates</code> table and returned to the frontend.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-amber">5</div>
+            <div class="flow-content">
+              <h4>User downloads via direct URL</h4>
+              <p>When a user opens their certificate, the frontend links directly to the Azure Blob URL — no API proxy needed. Azure Blob serves the file directly to the browser.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card">
+        <div class="card-head"><div><h3>Azure Blob Config</h3><p>appsettings.json settings</p></div></div>
+        <div class="card-body">
+          <pre><span class="c-comment">// appsettings.json (simplified)</span>
+{
+  <span class="c-prop">"AzureBlob"</span>: {
+    <span class="c-prop">"ConnectionString"</span>: <span class="c-str">"DefaultEndpointsProtocol=..."</span>,
+    <span class="c-prop">"ContainerName"</span>: <span class="c-str">"certificates"</span>,
+    <span class="c-prop">"BaseUrl"</span>: <span class="c-str">"https://&lt;account&gt;.blob.core.windows.net"</span>
+  }
+}</pre>
+        </div>
+      </div>
+      <div class="ac-card ac-green">
+        <div class="ac-title t-green">📦 What's Stored in Blob</div>
+        <ul class="doc-list">
+          <li>Student certificates (PDF)</li>
+          <li>Certificate images (JPG/PNG)</li>
+          <li>Course materials (PDF)</li>
+          <li>Static media (slide images, news photos)</li>
+        </ul>
+      </div>
+      <div class="ac-card ac-blue">
+        <div class="ac-title t-blue">🔒 Access Control</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;">The upload endpoint is <code>[Authorize(Roles="Admin")]</code> only. Blob containers can be set to private with SAS token URLs for sensitive files, or public for general media assets.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §12 PAYMENT FLOW
+══════════════════════════════════ -->
+<section class="section" id="payment-flow">
+  <h2 class="section-title"><span>💳</span> Payment Flow (Bank Misr) <span class="stag">PAYMENT</span></h2>
+
+  <div class="desc">
+    Payments are processed through <strong>Bank Misr's Mastercard gateway</strong>. The system uses a <strong>redirect-based flow</strong> — the user is sent to the bank's hosted payment page, then redirected back to the system. This means ICMET never handles raw card data (PCI DSS compliant).
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div><h3>End-to-End Payment Flow</h3></div></div>
+    <div class="card-body">
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num fn-blue">1</div>
+          <div class="flow-content"><h4>User clicks "Checkout" on ShoppingCartPage.jsx</h4><p>Frontend calls <code>POST /api/payments/checkout</code> with course IDs and total amount.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num fn-cyan">2</div>
+          <div class="flow-content"><h4>API creates an order with Bank Misr</h4><p>Backend calls Bank Misr's API to create a payment session. Bank returns a <code>paymentUrl</code> and an <code>orderId</code>. The system stores the pending order in the <code>Payments</code> table with <code>Status = 0</code>.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num fn-purple">3</div>
+          <div class="flow-content"><h4>User is redirected to Bank's hosted page</h4><p>Frontend receives the <code>paymentUrl</code> and redirects the browser to Bank Misr's secure payment page. User enters card details there — ICMET never sees the card number.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num fn-amber">4</div>
+          <div class="flow-content"><h4>Bank redirects back to the return URL</h4><p>After payment, Bank Misr redirects the browser to <code>GET /api/payments/return?orderId=...&result=SUCCESS</code>. The API verifies the transaction reference with the bank.</p></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num fn-green">5</div>
+          <div class="flow-content"><h4>System confirms & creates enrollment</h4><p>If verified: Payment record updated to <code>Status = 1 (Paid)</code>, <code>CoursePurchase</code> record created, <code>TransactionRef</code> stored. User is redirected to <code>/payment-result?success=true</code>.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §13 REFUND FLOW
+══════════════════════════════════ -->
+<section class="section" id="refund-flow">
+  <h2 class="section-title"><span>♻️</span> Refund Flow <span class="stag">REFUND</span></h2>
+
+  <div class="desc">
+    Refunds follow a <strong>3-party workflow</strong>: the user submits a request, an admin reviews and approves it, and then the admin triggers the actual bank transfer. The system keeps the full audit trail in <code>RefundRequests</code> with timestamped status transitions.
+  </div>
+
+  <div class="g2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-head"><div><h3>Status Lifecycle</h3></div></div>
+      <div class="card-body">
+        <div style="margin:10px 0 20px;">
+          <div class="status-row">
+            <div class="status-box sb-pend"><div class="sb-label">User submits</div><div class="sb-name">Pending</div></div>
+            <div class="s-arr"><span>→</span><small>Admin approves</small></div>
+            <div class="status-box sb-appr"><div class="sb-label">Admin reviewed</div><div class="sb-name">Approved</div></div>
+            <div class="s-arr"><span>→</span><small>Admin clicks Sent</small></div>
+            <div class="status-box sb-sent"><div class="sb-label">Bank transferred</div><div class="sb-name">Sent ✅</div></div>
+          </div>
+          <div class="status-row" style="margin-top:16px;">
+            <div class="status-box sb-pend" style="opacity:0.35;min-width:120px;"><div class="sb-name"> </div></div>
+            <div class="s-arr"><span>→</span><small>Admin rejects</small></div>
+            <div class="status-box sb-rej"><div class="sb-label">With reason</div><div class="sb-name">Rejected ❌</div></div>
+          </div>
+        </div>
+
+        <table class="role-table" style="margin-top:8px;">
+          <thead><tr><th>Status</th><th>Triggered By</th><th>DB Changes</th><th>Bank Call?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Pending</strong></td><td>User submits request</td><td>New row in <code>RefundRequests</code></td><td>No</td></tr>
+            <tr><td><strong>Approved</strong></td><td>Admin clicks Approve</td><td><code>Status = Approved</code>, <code>ApprovedAt = now()</code></td><td>No</td></tr>
+            <tr><td><strong>Sent</strong></td><td>Admin clicks Sent</td><td><code>Status = Sent</code>, <code>SentAt = now()</code>, Enrollment deleted</td><td><strong>Yes → Bank Misr</strong></td></tr>
+            <tr><td><strong>Rejected</strong></td><td>Admin clicks Reject</td><td><code>Status = Rejected</code>, <code>RejectionReason</code> saved</td><td>No</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div><h3>What Happens on "Sent"</h3><p>The critical step</p></div></div>
+      <div class="card-body">
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num fn-purple">1</div>
+            <div class="flow-content"><h4>Admin clicks "Mark as Sent" in RefundActionModal</h4><p>Frontend calls <code>PUT /api/refund/{id}/sent</code>.</p></div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-blue">2</div>
+            <div class="flow-content"><h4>API fetches the original payment</h4><p>Looks up <code>Payment.TransactionRef</code> linked to this refund request.</p></div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-amber">3</div>
+            <div class="flow-content">
+              <h4>Calls Bank Misr RefundPaymentAsync</h4>
+              <p>Makes a <code>PUT</code> request to Bank Misr's endpoint:</p>
+              <code>PUT /order/{orderNumber}/transaction/{newRefundId}</code>
+              <p style="margin-top:5px;">With body: <code>{ apiOperation: "REFUND", amount: {total: X, currency: "EGP"} }</code></p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-green">4</div>
+            <div class="flow-content"><h4>On SUCCESS → Enrollment deleted</h4><p>EF Core deletes the <code>CoursePurchase</code> row (or marks Status = Refunded). User immediately loses access to the course in MyCourses.</p></div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-cyan">5</div>
+            <div class="flow-content"><h4>On FAILURE → Manual IBAN fallback</h4><p>If bank returns an error, the system keeps the refund at Approved status. Admin uses the stored <code>IBAN</code> + <code>BankName</code> fields to process the transfer manually.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §14 ROLES
+══════════════════════════════════ -->
+<section class="section" id="roles">
+  <h2 class="section-title"><span>👥</span> Roles & Permissions <span class="stag">ROLES</span></h2>
+
+  <div class="desc">
+    Roles are stored in <strong>ASP.NET Identity tables</strong> (<code>AspNetRoles</code>, <code>AspNetUserRoles</code>) and embedded as <strong>claims inside the JWT token</strong>. There are two application roles: <code>Admin</code> and <code>User</code>. Access is enforced both on the frontend (route guards) and the backend (<code>[Authorize(Roles="Admin")]</code>).
+  </div>
+
+  <div class="card">
+    <div class="card-body" style="padding:0;">
+      <table class="role-table">
+        <thead>
+          <tr><th>Feature / Action</th><th>Public (no login)</th><th>User (logged in)</th><th>Admin</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Browse courses & news</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td></tr>
+          <tr><td>View course details</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td></tr>
+          <tr><td>Browse library & certifications pages</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td></tr>
+          <tr><td>Register / Login</td><td class="check">✔ Yes</td><td class="cross">— (already in)</td><td class="cross">— (use admin account)</td></tr>
+          <tr style="background:#f0fdf4;"><td>Add to cart & checkout</td><td class="cross">✖ No</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#f0fdf4;"><td>View MyCourses (enrollments)</td><td class="cross">✖ No</td><td class="check">✔ Yes (own)</td><td class="check">✔ Yes (any)</td></tr>
+          <tr style="background:#f0fdf4;"><td>Submit refund request</td><td class="cross">✖ No</td><td class="check">✔ Yes (own)</td><td class="cross">— (admins use panel)</td></tr>
+          <tr style="background:#f0fdf4;"><td>Download own certificate</td><td class="cross">✖ No</td><td class="check">✔ Yes</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>View admin dashboard</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>Manage all users</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>Create / edit / delete courses</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>Approve / reject / process refunds</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>Upload certificates</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>Track attendance</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>View financial reports</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>Manage news & library books</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+          <tr style="background:#faf5ff;"><td>Manage instructors</td><td class="cross">✖ No</td><td class="cross">✖ No</td><td class="check">✔ Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §15 DEPLOYMENT
+══════════════════════════════════ -->
+<section class="section" id="deployment">
+  <h2 class="section-title"><span>🚀</span> Deployment Pipeline <span class="stag">CI/CD</span></h2>
+
+  <div class="desc">
+    The project uses <strong>GitHub Actions</strong> for automated CI/CD. Every push to the <code>main</code> branch triggers a build and deploy to <strong>Azure App Service</strong>. The workflow file is located at <code>.github/workflows/main_acwebsite(icmet-test).yml</code>.
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div><h3>CI/CD Steps</h3><p>main_acwebsite(icmet-test).yml</p></div></div>
+      <div class="card-body">
+        <div class="pipeline">
+          <div class="pipe-step">
+            <div class="pipe-icon">
+              <div class="pipe-dot" style="background:#f0fdf4;border-color:#6ee7b7;">💾</div>
+              <div class="pipe-line" style="background:#e2e8f0;"></div>
+            </div>
+            <div class="pipe-body">
+              <h4>Trigger: push to <code>main</code></h4>
+              <p>GitHub Actions workflow starts on every commit to the main branch. Can also be triggered manually via <code>workflow_dispatch</code>.</p>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-icon">
+              <div class="pipe-dot" style="background:#eff6ff;border-color:#93c5fd;">⚙️</div>
+              <div class="pipe-line" style="background:#e2e8f0;"></div>
+            </div>
+            <div class="pipe-body">
+              <h4>Backend Build</h4>
+              <p><code>dotnet restore</code> → <code>dotnet build --configuration Release</code> → <code>dotnet publish -o ./publish</code> targeting <code>net8.0</code>.</p>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-icon">
+              <div class="pipe-dot" style="background:#eff6ff;border-color:#93c5fd;">🎨</div>
+              <div class="pipe-line" style="background:#e2e8f0;"></div>
+            </div>
+            <div class="pipe-body">
+              <h4>Frontend Build</h4>
+              <p><code>npm ci</code> → <code>npm run build</code> (Vite) → outputs static files to <code>dist/</code>. These are placed inside the ASP.NET publish output to be served as static files.</p>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-icon">
+              <div class="pipe-dot" style="background:#faf5ff;border-color:#c4b5fd;">☁️</div>
+              <div class="pipe-line" style="background:#e2e8f0;"></div>
+            </div>
+            <div class="pipe-body">
+              <h4>Deploy to Azure App Service</h4>
+              <p>GitHub Action uses <code>azure/webapps-deploy</code> action with a publish profile secret to deploy the combined output to <code>acwebsite-icmet-test.azurewebsites.net</code>.</p>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-icon">
+              <div class="pipe-dot" style="background:#f0fdf4;border-color:#6ee7b7;">✅</div>
+              <div class="pipe-line" style="background:transparent;"></div>
+            </div>
+            <div class="pipe-body">
+              <h4>Live on Production</h4>
+              <p>Azure App Service runs the <code>.NET 8</code> application. ASP.NET Core serves both the API routes (<code>/api/*</code>) and the React SPA (all other paths fallback to <code>index.html</code>).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card">
+        <div class="card-head"><div><h3>Azure Resources</h3><p>Cloud services in use</p></div></div>
+        <div class="card-body">
+          <table class="ep-table">
+            <thead><tr><th>Service</th><th>Purpose</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Azure App Service</strong></td><td>Hosts the entire app (API + SPA)</td><td>.NET 8 runtime</td></tr>
+              <tr><td><strong>Azure SQL Database</strong></td><td>Production SQL Server</td><td>EF Core migrations auto-run on startup</td></tr>
+              <tr><td><strong>Azure Blob Storage</strong></td><td>Certificates, PDFs, media</td><td>Container: <code>certificates</code></td></tr>
+              <tr><td><strong>Azure Identity</strong></td><td>Managed identity for Blob auth</td><td>No connection string needed in prod</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div><h3>How SPA + API are Served Together</h3></div></div>
+        <div class="card-body">
+          <div class="info-box ib-blue">
+            <span class="ib-icon">💡</span>
+            <span>ASP.NET Core serves the React <code>dist/</code> folder as static files. Any request to <code>/api/*</code> is handled by the API controllers. Any other path (e.g., <code>/courses/5</code>) falls through to <code>index.html</code>, which lets React Router handle the navigation client-side. This is the standard SPA hosting pattern on ASP.NET.</span>
+          </div>
+          <pre style="margin-top:8px;"><span class="c-comment">// Program.cs (simplified)</span>
+app.<span class="c-prop">UseStaticFiles</span>();          <span class="c-comment">// serves React dist/</span>
+app.<span class="c-prop">UseRouting</span>();
+app.<span class="c-prop">UseAuthentication</span>();
+app.<span class="c-prop">UseAuthorization</span>();
+app.<span class="c-prop">MapControllers</span>();          <span class="c-comment">// /api/* endpoints</span>
+app.<span class="c-prop">MapFallbackToFile</span>(<span class="c-str">"index.html"</span>); <span class="c-comment">// SPA fallback</span></pre>
+        </div>
+      </div>
+
+      <div class="ac-card ac-cyan">
+        <div class="ac-title t-cyan">🔌 ngrok (Local Dev)</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;"><code>ngrok.exe</code> is included in the Backend project. Used during local development to expose the local ASP.NET Core server over HTTPS to external services (e.g., Bank Misr payment callback or webhook testing). Run it alongside <code>dotnet run</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+  §16 ENVIRONMENTS
+══════════════════════════════════ -->
+<section class="section" id="environments">
+  <h2 class="section-title"><span>🌍</span> Environments & Config <span class="stag">CONFIG</span></h2>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div><h3>appsettings.json — Key Config Sections</h3><p>Institute.API/appsettings.json</p></div></div>
+      <div class="card-body">
+        <pre><span class="c-comment">// Structure of appsettings.json</span>
+{
+  <span class="c-prop">"ConnectionStrings"</span>: {
+    <span class="c-prop">"DefaultConnection"</span>: <span class="c-str">"Server=...;Database=ICMETDb;..."</span>
+  },
+  <span class="c-prop">"Jwt"</span>: {
+    <span class="c-prop">"Key"</span>:     <span class="c-str">"your-secret-key-min-256-bits"</span>,
+    <span class="c-prop">"Issuer"</span>:  <span class="c-str">"https://acwebsite-icmet-test..."</span>,
+    <span class="c-prop">"Audience"</span>:<span class="c-str">"ICMET-Users"</span>,
+    <span class="c-prop">"ExpiryDays"</span>: <span class="c-num">7</span>
+  },
+  <span class="c-prop">"AzureBlob"</span>: {
+    <span class="c-prop">"ConnectionString"</span>: <span class="c-str">"DefaultEndpointsProtocol=..."</span>,
+    <span class="c-prop">"ContainerName"</span>: <span class="c-str">"certificates"</span>
+  },
+  <span class="c-prop">"BankMisr"</span>: {
+    <span class="c-prop">"ApiUrl"</span>:      <span class="c-str">"https://bankmisrpayment..."</span>,
+    <span class="c-prop">"MerchantId"</span>:  <span class="c-str">"..."</span>,
+    <span class="c-prop">"ApiPassword"</span>: <span class="c-str">"..."</span>
+  }
+}</pre>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card">
+        <div class="card-head"><div><h3>Frontend API URL Config</h3><p>src/api/api.js</p></div></div>
+        <div class="card-body">
+          <pre><span class="c-comment">// api.js — base URL setup</span>
+<span class="c-key">const</span> BASE_URL = import.meta.env.<span class="c-prop">VITE_API_URL</span>
+  || <span class="c-str">'https://acwebsite-icmet-test.azurewebsites.net'</span>;
+
+<span class="c-comment">// Every request auto-attaches Bearer token</span>
+<span class="c-key">const</span> token = localStorage.<span class="c-prop">getItem</span>(<span class="c-str">'token'</span>);
+headers[<span class="c-str">'Authorization'</span>] = <span class="c-str">`Bearer </span><span class="c-prop">${token}</span><span class="c-str">`</span>;</pre>
+          <div class="info-box ib-amber" style="margin-top:8px;">
+            <span class="ib-icon">⚠️</span>
+            <span>Set <code>VITE_API_URL</code> in a <code>.env</code> file for local development pointing to <code>http://localhost:5000</code>. In production on Azure, it falls back to the production URL.</span>
+          </div>
+        </div>
+      </div>
+      <div class="ac-card ac-green">
+        <div class="ac-title t-green">✅ Production Checklist</div>
+        <ul class="doc-list">
+          <li>JWT secret key — strong random string, stored in Azure App Service environment variables (not in code)</li>
+          <li>Connection string — Azure SQL, set in App Service Configuration blade</li>
+          <li>Blob Storage connection — use Azure Managed Identity in production (no connection string needed)</li>
+          <li>Bank Misr credentials — stored as App Service secrets</li>
+          <li>CORS policy — restrict to known frontend origin in production</li>
+          <li>EF Migrations — run automatically on app startup via <code>dbContext.Database.Migrate()</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// Active nav highlight
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.sidebar nav a');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) {
+          link.classList.add('active');
+        }
+      });
+    }
+  });
+}, { threshold: 0.2, rootMargin: '-80px 0px -60% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

@@ -1,5 +1,4 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
 const Instructors = () => {
     const [selectedLecturer, setSelectedLecturer] = useState(null);
@@ -8,7 +7,16 @@ const Instructors = () => {
     const [error, setError] = useState(null);
 
     const API_BASE_URL = 'https://acwebsite-icmet-test.azurewebsites.net/api';
-    const IMAGE_BASE_URL = 'https://www.arabcont.com/icemt/assets/images/';
+
+    // الـ pic من الـ API بييجي full URL زي:
+    // "https://acwebappbackup.blob.core.windows.net/icemt/lecturers/lect01.jpg"
+    // استخدمه مباشرة بدون أي prefix
+    const getPhotoSrc = (pic) => {
+        if (!pic) return null;
+        return pic;
+    };
+
+    const FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23dde3ea' width='100' height='100'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='44' fill='%23899aaa'%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E";
 
     useEffect(() => {
         document.title = 'محاضرينا - المعهد التكنولوجي لهندسة التشييد والإدارة';
@@ -21,11 +29,12 @@ const Instructors = () => {
                 const response = await fetch(`${API_BASE_URL}/Lecturer`);
                 if (!response.ok) throw new Error('فشل في تحميل بيانات المحاضرين');
                 const data = await response.json();
-                setLecturers(data);
+                // فلتر entries التجريبية اللي name فيها "string"
+                const real = data.filter(l => l.name && l.name !== 'string');
+                setLecturers(real);
                 setError(null);
             } catch (err) {
                 setError(err.message);
-                console.error('Error fetching lecturers:', err);
             } finally {
                 setLoading(false);
             }
@@ -40,105 +49,47 @@ const Instructors = () => {
             const detailedData = await response.json();
             setSelectedLecturer(detailedData);
         } catch (err) {
-            console.error('Error fetching lecturer details:', err);
             alert('حدث خطأ في تحميل تفاصيل المحاضر');
         }
     };
 
-    /**
-     * Parses HTML from the DB into sections: [{ title, items[] }]
-     *
-     * Supports two DB formats:
-     *
-     * FORMAT A — h5 + p  (e.g. م / كرم عبد الحميد البري)
-     *   <h5>يحاضر في</h5>
-     *   <p>المعهد التكنولوجي...</p>
-     *   <h5>اهم المشروعات</h5>
-     *   <p>مكتبة الاسكندرية</p>
-     *   → h5 becomes title, each p becomes a bullet under it
-     *
-     * FORMAT B — table tr + td
-     *   <tr><td>يحاضر في</td></tr>          ← single short cell → title
-     *   <tr><td>col1</td><td>col2</td></tr>  ← all cells joined → one bullet
-     */
     const parseHTMLContent = (htmlString) => {
         if (!htmlString) return [];
-
         const div = document.createElement('div');
         div.innerHTML = htmlString;
-
         const sections = [];
         let current = { title: null, items: [] };
 
-        // ── FORMAT A: h5 and p tags ──────────────────────────────────────
         const hasH5 = div.querySelector('h5') !== null;
         const hasP = div.querySelector('p') !== null;
+        const hasLi = div.querySelector('li') !== null;
 
         if (hasH5 || hasP) {
-            // Walk all direct/nested children in document order
-            const nodes = div.querySelectorAll('h5, p');
-            nodes.forEach((node) => {
+            div.querySelectorAll('h5, p').forEach((node) => {
                 const text = node.textContent.trim();
                 if (!text) return;
-
                 if (node.tagName === 'H5') {
-                    // Save previous section
-                    if (current.title !== null || current.items.length > 0) {
-                        sections.push(current);
-                    }
+                    if (current.title !== null || current.items.length > 0) sections.push(current);
                     current = { title: text, items: [] };
                 } else {
-                    // p → bullet
                     current.items.push(text);
                 }
             });
-
-            if (current.title !== null || current.items.length > 0) {
-                sections.push(current);
-            }
+            if (current.title !== null || current.items.length > 0) sections.push(current);
             return sections;
         }
 
-        // ── FORMAT B: table tr + td ──────────────────────────────────────
-        const rows = div.querySelectorAll('tr');
-        if (rows.length > 0) {
-            rows.forEach((row) => {
-                const cells = Array.from(row.querySelectorAll('td, th'))
-                    .map(td => td.textContent.trim())
-                    .filter(Boolean);
-
-                if (cells.length === 0) return;
-
-                // Join all cells into one string
-                const fullText = cells.join(' ').replace(/\s+/g, ' ').trim();
-                if (!fullText) return;
-
-                // Single short cell → section title
-                const isTitle = cells.length === 1 && fullText.length <= 60;
-
-                if (isTitle) {
-                    if (current.title !== null || current.items.length > 0) {
-                        sections.push(current);
-                    }
-                    current = { title: fullText, items: [] };
-                } else {
-                    current.items.push(fullText);
-                }
-            });
-
-            if (current.title !== null || current.items.length > 0) {
-                sections.push(current);
-            }
-            return sections;
+        if (hasLi) {
+            const items = Array.from(div.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
+            return [{ title: null, items }];
         }
 
-        // ── FORMAT C: li fallback ────────────────────────────────────────
-        const listItems = div.querySelectorAll('li');
-        if (listItems.length > 0) {
-            return [{ title: null, items: Array.from(listItems).map(li => li.textContent.trim()).filter(Boolean) }];
+        const divTags = div.querySelectorAll('div');
+        if (divTags.length > 0) {
+            const items = Array.from(divTags).map(d => d.textContent.trim()).filter(Boolean);
+            return [{ title: null, items }];
         }
 
-        // ── FORMAT D: plain text fallback ────────────────────────────────
         const lines = htmlString.replace(/<[^>]+>/g, '\n').split('\n').map(l => l.trim()).filter(Boolean);
         return [{ title: null, items: lines }];
     };
@@ -146,7 +97,6 @@ const Instructors = () => {
     const renderParsedContent = (htmlString) => {
         const sections = parseHTMLContent(htmlString);
         if (!sections.length) return null;
-
         return sections.map((section, sIdx) => (
             <div key={sIdx} className={sIdx > 0 ? 'mt-5' : ''}>
                 {section.title && (
@@ -164,64 +114,60 @@ const Instructors = () => {
         ));
     };
 
-    const LecturerCard = ({ lecturer }) => (
-        <div className="flex h-full flex-col rounded-xl bg-white shadow-md transition-shadow duration-300 hover:shadow-lg">
-            <div className="flex flex-1 flex-col p-5">
-                <div className="mb-4 flex gap-4">
-                    <div className="flex-shrink-0">
-                        <div className="h-24 w-24 overflow-hidden rounded-lg shadow-md">
-                            <img
-                                src={lecturer.pic ? `${IMAGE_BASE_URL}${lecturer.pic}` : ''}
-                                alt={lecturer.name}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                    e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23e0e0e0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="40" fill="%239e9e9e"%3E👤%3C/text%3E%3C/svg%3E';
-                                }}
-                            />
-                        </div>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <h3 className="mb-2 text-lg font-bold text-orange-600">{lecturer.name}</h3>
-                        <p className="mb-3 text-sm leading-relaxed text-gray-700">{lecturer.course}</p>
-                        <div className="flex gap-2">
-                            <div className="rounded-md bg-blue-50 p-2">
-                                <svg className="h-4 w-4 text-blue-700" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                </svg>
+    const LecturerCard = ({ lecturer }) => {
+        const src = getPhotoSrc(lecturer.pic);
+        return (
+            <div className="flex h-full flex-col rounded-xl bg-white shadow-md transition-shadow duration-300 hover:shadow-lg">
+                <div className="flex flex-1 flex-col p-5">
+                    <div className="mb-4 flex gap-4">
+                        <div className="flex-shrink-0">
+                            <div className="h-24 w-24 overflow-hidden rounded-lg shadow-md bg-gray-100">
+                                <img
+                                    src={src || FALLBACK}
+                                    alt={lecturer.name}
+                                    className="h-full w-full object-cover"
+                                    onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK; }}
+                                />
                             </div>
-                            {lecturer.telephone && (
-                                <div className="rounded-md bg-orange-50 p-2">
-                                    <svg className="h-4 w-4 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
-                                    </svg>
-                                </div>
-                            )}
-                            {lecturer.email && (
-                                <div className="rounded-md bg-gray-100 p-2">
-                                    <svg className="h-4 w-4 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                                    </svg>
-                                </div>
-                            )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <h3 className="mb-2 text-lg font-bold text-orange-600">{lecturer.name}</h3>
+                            <p className="mb-3 text-sm leading-relaxed text-gray-700">{lecturer.course}</p>
+                            <div className="flex gap-2">
+                                {lecturer.telephone && (
+                                    <div className="rounded-md bg-orange-50 p-2" title={lecturer.telephone}>
+                                        <svg className="h-4 w-4 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                                        </svg>
+                                    </div>
+                                )}
+                                {lecturer.email && (
+                                    <div className="rounded-md bg-gray-100 p-2" title={lecturer.email}>
+                                        <svg className="h-4 w-4 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                                        </svg>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
+                    <button
+                        onClick={() => handleLecturerClick(lecturer.id)}
+                        className="w-full mt-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                    >
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                        </svg>
+                        السيرة الذاتية
+                    </button>
                 </div>
-                <button
-                    onClick={() => handleLecturerClick(lecturer.id)}
-                    className="w-full mt-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                >
-                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
-                    </svg>
-                    السيرة الذاتية
-                </button>
             </div>
-        </div>
-    );
+        );
+    };
 
     const CVDialog = ({ lecturer, onClose }) => {
         if (!lecturer) return null;
-
+        const src = getPhotoSrc(lecturer.pic);
         return (
             <div
                 className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black bg-opacity-50"
@@ -232,33 +178,28 @@ const Instructors = () => {
                     className="mx-4 my-auto w-full max-w-3xl rounded-2xl bg-white shadow-2xl"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Header */}
                     <div className="relative rounded-t-2xl bg-gradient-to-bl from-blue-700 to-blue-600 p-6 text-center">
                         <button
                             onClick={onClose}
                             className="absolute left-4 top-4 rounded-full p-2 text-white transition-colors hover:bg-white hover:bg-opacity-20"
-                            aria-label="إغلاق"
                         >
                             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                        <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-white">
+                        <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-gray-200">
                             <img
-                                src={lecturer.pic ? `${IMAGE_BASE_URL}${lecturer.pic}` : ''}
+                                src={src || FALLBACK}
                                 alt={lecturer.name}
                                 className="h-full w-full object-cover"
-                                onError={(e) => { e.target.style.backgroundColor = '#fff'; }}
+                                onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK; }}
                             />
                         </div>
                         <h2 className="mb-2 text-2xl font-bold text-white">{lecturer.name}</h2>
                         <p className="text-white text-opacity-90">{lecturer.course}</p>
                     </div>
 
-                    {/* Content */}
                     <div className="max-h-[calc(100vh-280px)] overflow-y-auto p-6">
-
-                        {/* Main Education */}
                         {lecturer.mainEdu && (
                             <div className="mb-6">
                                 <div className="mb-3 flex items-center gap-2">
@@ -273,7 +214,6 @@ const Instructors = () => {
                             </div>
                         )}
 
-                        {/* Education Section */}
                         {lecturer.edu && (
                             <>
                                 <div className="mb-6">
@@ -291,7 +231,6 @@ const Instructors = () => {
                             </>
                         )}
 
-                        {/* Experience/Details Section */}
                         {lecturer.details && (
                             <>
                                 <div className="mb-6">
@@ -309,7 +248,6 @@ const Instructors = () => {
                             </>
                         )}
 
-                        {/* Contact Section */}
                         {(lecturer.telephone || lecturer.email) && (
                             <div className="mb-6">
                                 <div className="mb-3 flex items-center gap-2">
@@ -324,9 +262,7 @@ const Instructors = () => {
                                             <svg className="h-5 w-5 flex-shrink-0 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
                                             </svg>
-                                            <p className="text-sm text-gray-700">
-                                                <span className="font-bold">تليفون: </span>{lecturer.telephone}
-                                            </p>
+                                            <p className="text-sm text-gray-700"><span className="font-bold">تليفون: </span>{lecturer.telephone}</p>
                                         </div>
                                     )}
                                     {lecturer.email && (
@@ -334,16 +270,13 @@ const Instructors = () => {
                                             <svg className="h-5 w-5 flex-shrink-0 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                                             </svg>
-                                            <p className="text-sm text-gray-700">
-                                                <span className="font-bold">البريد الإلكتروني: </span>{lecturer.email}
-                                            </p>
+                                            <p className="text-sm text-gray-700"><span className="font-bold">البريد الإلكتروني: </span>{lecturer.email}</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         )}
 
-                        {/* Close Button */}
                         <button
                             onClick={onClose}
                             className="w-full rounded-lg bg-orange-600 px-4 py-3 font-bold text-white transition-colors duration-200 hover:bg-orange-700"
@@ -357,30 +290,33 @@ const Instructors = () => {
     };
 
     return (
-        <div dir="rtl" className="min-h-screen bg-yellow-50">
+        <div dir="rtl" className="min-h-screen bg-gray-50">
             {/* Breadcrumb */}
-            <div className="border-b border-gray-300 bg-yellow-50 px-5 py-3" style={{ top: 70 }}>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Link to="/" className="text-gray-700 transition-colors hover:text-blue-700">
+            <div style={{ position: 'fixed', top: 70, left: 0, zIndex: 50, width: '100%', borderBottom: '1px solid #d1d5db', backgroundColor: '#f5f5f5', padding: '8px 20px' }}>
+                <div style={{ textAlign: 'center', fontFamily: '"Noto Kufi Arabic", serif', fontSize: '1rem' }}>
+                    <a
+                        href="/"
+                        style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'none', marginLeft: '8px' }}
+                        onMouseEnter={e => e.target.style.color = '#f57c00'}
+                        onMouseLeave={e => e.target.style.color = '#0865a8'}
+                    >
                         الصفحة الرئيسية
-                    </Link>
-                    <span className="text-gray-500">-</span>
-                    <span className="text-gray-700">محاضرينا</span>
+                    </a>
+                    <span style={{ color: '#6b7280', margin: '0 6px' }}>•</span>
+                    <span style={{ color: '#374151', marginRight: '8px' }}>محاضرينا</span>
                 </div>
             </div>
 
-            {/* Header Section */}
-            <div className="bg-gradient-to-bl from-blue-700 to-blue-600 px-5 py-10 text-center">
+            {/* Header */}
+            <div className="bg-gradient-to-bl from-blue-700 to-blue-600 px-5 py-10 text-center" style={{ marginTop: 40 }}>
                 <svg className="mx-auto mb-4 h-16 w-16 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
                 </svg>
-                <h1 className="mb-3 text-3xl font-bold text-white md:text-4xl">
-                    لدينا مجموعة من أكفأ المحاضرين
-                </h1>
+                <h1 className="mb-3 text-3xl font-bold text-white md:text-4xl">لدينا مجموعة من أكفأ المحاضرين</h1>
                 <p className="text-xl text-white text-opacity-90">قائمة المحاضرين</p>
             </div>
 
-            {/* Description Section */}
+            {/* Description */}
             <div className="px-5 py-8">
                 <div className="rounded-xl bg-white p-6 text-center shadow-md">
                     <p className="leading-relaxed text-gray-700">
@@ -389,7 +325,6 @@ const Instructors = () => {
                 </div>
             </div>
 
-            {/* Loading State */}
             {loading && (
                 <div className="flex items-center justify-center py-20">
                     <div className="text-center">
@@ -399,20 +334,15 @@ const Instructors = () => {
                 </div>
             )}
 
-            {/* Error State */}
             {error && (
                 <div className="mx-auto max-w-2xl px-5 pb-12">
                     <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-                        <svg className="mx-auto mb-3 h-12 w-12 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                        </svg>
                         <p className="mb-2 font-bold text-red-700">حدث خطأ</p>
                         <p className="text-red-600">{error}</p>
                     </div>
                 </div>
             )}
 
-            {/* Lecturers Grid */}
             {!loading && !error && (
                 <div className="mx-auto max-w-7xl px-5 pb-12">
                     {lecturers.length === 0 ? (
@@ -429,7 +359,6 @@ const Instructors = () => {
                 </div>
             )}
 
-            {/* CV Dialog */}
             {selectedLecturer && (
                 <CVDialog lecturer={selectedLecturer} onClose={() => setSelectedLecturer(null)} />
             )}

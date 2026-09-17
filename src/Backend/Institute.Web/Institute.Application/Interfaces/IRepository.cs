@@ -1,6 +1,7 @@
 ﻿using Institute.Domain.Entities;
 using Institute.Domain.specifications;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,8 @@ namespace Institute.Application.Interfaces
         Task<int> CountAsync();
 
         Task<int> CountWithSpecAsync(Ispecification<T> spec);
-
+        // ── Transaction support (W1 / W5 fix) ───────────────────────
+        Task<IDbContextTransaction> BeginTransactionAsync();
 
     }
 }
