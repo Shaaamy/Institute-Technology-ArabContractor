@@ -1,0 +1,719 @@
+Folder PATH listing for volume New Volume
+Volume serial number is 0000003E 1ABF:61F3
+D:.
+|   Institute.Web.sln
+|   ngrok.exe
+|   tree.txt
+|   
++---.vs
+|   |   slnx.sqlite
+|   |   VSWorkspaceState.json
+|   |   
+|   +---CopilotSnapshots
+|   |   \---049AB9A690D8E546AA3A571CD1414812
+|   |       |   state.mpack
+|   |       |   
+|   |       \---8697EE05D00B284E8C8C79604D77F294
+|   |               6CECB718189E418755872E96A6DEA827
+|   |               BAE173E6AAE39A40E5CEE85C839FC2EF
+|   |               C375B6BF15BB8200DE5C1ACEB970A1DD
+|   |               
+|   +---Institute.Web
+|   |   +---config
+|   |   |       applicationhost.config
+|   |   |       
+|   |   +---copilot-chat
+|   |   |   \---41de3c5a
+|   |   |       \---sessions
+|   |   |               079da5b3-dfb5-4756-b78b-f2aa1cf959ab
+|   |   |               1298b590-99ae-4fd0-9532-a9ce31f9f5a0
+|   |   |               2ee4af21-ee27-45c5-b5aa-9a06a33cd27b
+|   |   |               40910863-64c7-4c38-99f1-77c1086cce5e
+|   |   |               4a750a89-de55-4b26-9766-7ce70341f6f6
+|   |   |               5ae6d28a-c0c5-49a7-83b4-ea8157e6186a
+|   |   |               5b04a674-5bd2-4aab-ac4a-4a8b9153178e
+|   |   |               656e1add-b056-47db-8b97-bd4a8ebcbbaa
+|   |   |               6be96eb5-1326-492d-b204-f4e87ef2c2ac
+|   |   |               a6b99a04-d890-46e5-aa3a-571cd1414812
+|   |   |               ae5f7831-f27d-4ade-b070-cffab619b160
+|   |   |               c3d5ec59-28cf-4dff-b812-ac8b5fe75121
+|   |   |               d7d1a32f-d3b8-45f0-8065-28aacbda2f1b
+|   |   |               
+|   |   +---CopilotIndices
+|   |   |   \---18.4.105.37992
+|   |   |           CodeChunks.db
+|   |   |           SemanticSymbols.db
+|   |   |           
+|   |   +---DesignTimeBuild
+|   |   |       .dtbcache.v2
+|   |   |       
+|   |   +---FileContentIndex
+|   |   |       7863411f-22de-4b63-a196-0f1c2f2d2315.vsidx
+|   |   |       c63b9042-9aec-4725-9dcd-dc2c2578e1a4.vsidx
+|   |   |       e069ddda-0a15-47b6-8022-27c61c28c8c8.vsidx
+|   |   |       e1d21080-c070-40b9-badf-e796c910b757.vsidx
+|   |   |       ebf08f8b-d0b7-4b33-b986-c7be7009eddd.vsidx
+|   |   |       
+|   |   \---v18
+|   |           .futdcache.v2
+|   |           DocumentLayout.backup.json
+|   |           DocumentLayout.json
+|   |           
+|   +---Institute.Web.slnx
+|   |   +---copilot-chat
+|   |   |   \---41de3c5a
+|   |   |       \---sessions
+|   |   +---FileContentIndex
+|   |   |       4042ca40-560d-4084-8fd8-eb9e20359dbb.vsidx
+|   |   |       83560c2a-c068-4e0e-bb73-72b31b3d8b1f.vsidx
+|   |   |       
+|   |   \---v18
+|   |           DocumentLayout.json
+|   |           
+|   \---ProjectEvaluation
+|           institute.web.metadata.v10.bin
+|           institute.web.projects.v10.bin
+|           institute.web.strings.v10.bin
+|           
++---Domain
+|   \---Entities
+|           AppDbContext.cs
+|           AppUser.cs
+|           CoursePurchase.cs
+|           Payment.cs
+|           
++---Institute.API
+|   |   appsettings.json
+|   |   Institute.API.csproj
+|   |   Institute.API.csproj.user
+|   |   Institute.API.http
+|   |   Program.cs
+|   |   
+|   +---bin
+|   |   +---Debug
+|   |   |   \---net8.0
+|   |   |       |   appsettings.json
+|   |   |       |   AutoMapper.dll
+|   |   |       |   Azure.Core.dll
+|   |   |       |   Azure.Identity.dll
+|   |   |       |   Humanizer.dll
+|   |   |       |   Institute.API.deps.json
+|   |   |       |   Institute.API.dll
+|   |   |       |   Institute.API.exe
+|   |   |       |   Institute.API.pdb
+|   |   |       |   Institute.API.runtimeconfig.json
+|   |   |       |   Institute.API.staticwebassets.endpoints.json
+|   |   |       |   Institute.API.staticwebassets.runtime.json
+|   |   |       |   Institute.Application.dll
+|   |   |       |   Institute.Application.pdb
+|   |   |       |   Institute.Domain.dll
+|   |   |       |   Institute.Domain.pdb
+|   |   |       |   Institute.Infrastructure.dll
+|   |   |       |   Institute.Infrastructure.pdb
+|   |   |       |   Microsoft.AspNetCore.Authentication.JwtBearer.dll
+|   |   |       |   Microsoft.Bcl.AsyncInterfaces.dll
+|   |   |       |   Microsoft.CodeAnalysis.CSharp.dll
+|   |   |       |   Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+|   |   |       |   Microsoft.CodeAnalysis.dll
+|   |   |       |   Microsoft.CodeAnalysis.Workspaces.dll
+|   |   |       |   Microsoft.Data.SqlClient.dll
+|   |   |       |   Microsoft.EntityFrameworkCore.Abstractions.dll
+|   |   |       |   Microsoft.EntityFrameworkCore.Design.dll
+|   |   |       |   Microsoft.EntityFrameworkCore.dll
+|   |   |       |   Microsoft.EntityFrameworkCore.Relational.dll
+|   |   |       |   Microsoft.EntityFrameworkCore.SqlServer.dll
+|   |   |       |   Microsoft.Extensions.Caching.Memory.dll
+|   |   |       |   Microsoft.Extensions.DependencyInjection.Abstractions.dll
+|   |   |       |   Microsoft.Extensions.DependencyInjection.dll
+|   |   |       |   Microsoft.Extensions.DependencyModel.dll
+|   |   |       |   Microsoft.Extensions.Diagnostics.Abstractions.dll
+|   |   |       |   Microsoft.Extensions.Diagnostics.dll
+|   |   |       |   Microsoft.Extensions.Http.dll
+|   |   |       |   Microsoft.Extensions.Logging.Abstractions.dll
+|   |   |       |   Microsoft.Extensions.Logging.dll
+|   |   |       |   Microsoft.Extensions.Options.dll
+|   |   |       |   Microsoft.Extensions.Primitives.dll
+|   |   |       |   Microsoft.Identity.Client.dll
+|   |   |       |   Microsoft.Identity.Client.Extensions.Msal.dll
+|   |   |       |   Microsoft.IdentityModel.Abstractions.dll
+|   |   |       |   Microsoft.IdentityModel.JsonWebTokens.dll
+|   |   |       |   Microsoft.IdentityModel.Logging.dll
+|   |   |       |   Microsoft.IdentityModel.Protocols.dll
+|   |   |       |   Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+|   |   |       |   Microsoft.IdentityModel.Tokens.dll
+|   |   |       |   Microsoft.OpenApi.dll
+|   |   |       |   Microsoft.SqlServer.Server.dll
+|   |   |       |   Microsoft.Win32.SystemEvents.dll
+|   |   |       |   Mono.TextTemplating.dll
+|   |   |       |   Newtonsoft.Json.dll
+|   |   |       |   Polly.dll
+|   |   |       |   Svix.dll
+|   |   |       |   Swashbuckle.AspNetCore.Swagger.dll
+|   |   |       |   Swashbuckle.AspNetCore.SwaggerGen.dll
+|   |   |       |   Swashbuckle.AspNetCore.SwaggerUI.dll
+|   |   |       |   System.ClientModel.dll
+|   |   |       |   System.CodeDom.dll
+|   |   |       |   System.Composition.AttributedModel.dll
+|   |   |       |   System.Composition.Convention.dll
+|   |   |       |   System.Composition.Hosting.dll
+|   |   |       |   System.Composition.Runtime.dll
+|   |   |       |   System.Composition.TypedParts.dll
+|   |   |       |   System.Configuration.ConfigurationManager.dll
+|   |   |       |   System.Diagnostics.DiagnosticSource.dll
+|   |   |       |   System.Drawing.Common.dll
+|   |   |       |   System.IdentityModel.Tokens.Jwt.dll
+|   |   |       |   System.IO.Hashing.dll
+|   |   |       |   System.Memory.Data.dll
+|   |   |       |   System.Runtime.Caching.dll
+|   |   |       |   System.Security.Cryptography.ProtectedData.dll
+|   |   |       |   System.Security.Permissions.dll
+|   |   |       |   System.Windows.Extensions.dll
+|   |   |       |   Yarp.ReverseProxy.dll
+|   |   |       |   
+|   |   |       +---cs
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---de
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---es
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---fr
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---it
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---ja
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---ko
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---pl
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---pt-BR
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---ru
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---runtimes
+|   |   |       |   +---unix
+|   |   |       |   |   \---lib
+|   |   |       |   |       \---net6.0
+|   |   |       |   |               Microsoft.Data.SqlClient.dll
+|   |   |       |   |               System.Drawing.Common.dll
+|   |   |       |   |               
+|   |   |       |   +---win
+|   |   |       |   |   \---lib
+|   |   |       |   |       \---net6.0
+|   |   |       |   |               Microsoft.Data.SqlClient.dll
+|   |   |       |   |               Microsoft.Win32.SystemEvents.dll
+|   |   |       |   |               System.Drawing.Common.dll
+|   |   |       |   |               System.Runtime.Caching.dll
+|   |   |       |   |               System.Security.Cryptography.ProtectedData.dll
+|   |   |       |   |               System.Windows.Extensions.dll
+|   |   |       |   |               
+|   |   |       |   +---win-arm
+|   |   |       |   |   \---native
+|   |   |       |   |           Microsoft.Data.SqlClient.SNI.dll
+|   |   |       |   |           
+|   |   |       |   +---win-arm64
+|   |   |       |   |   \---native
+|   |   |       |   |           Microsoft.Data.SqlClient.SNI.dll
+|   |   |       |   |           
+|   |   |       |   +---win-x64
+|   |   |       |   |   \---native
+|   |   |       |   |           Microsoft.Data.SqlClient.SNI.dll
+|   |   |       |   |           
+|   |   |       |   \---win-x86
+|   |   |       |       \---native
+|   |   |       |               Microsoft.Data.SqlClient.SNI.dll
+|   |   |       |               
+|   |   |       +---tr
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       +---zh-Hans
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.resources.dll
+|   |   |       |       Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |       |       
+|   |   |       \---zh-Hant
+|   |   |               Microsoft.CodeAnalysis.CSharp.resources.dll
+|   |   |               Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+|   |   |               Microsoft.CodeAnalysis.resources.dll
+|   |   |               Microsoft.CodeAnalysis.Workspaces.resources.dll
+|   |   |               
+|   |   \---Release
+|   |       \---net8.0
+|   +---Controllers
+|   |       AccountController.cs
+|   |       AdminController.cs
+|   |       BookController.cs
+|   |       CartController.cs
+|   |       CategoriesController.cs
+|   |       CheckoutController.cs
+|   |       ClerkWebhookController.cs
+|   |       CourseController.cs
+|   |       LecturerController.cs
+|   |       NewsController.cs
+|   |       RefundController.cs
+|   |       
+|   +---DTOs
+|   |   |   AxisDto.cs
+|   |   |   BookResponseDto.cs
+|   |   |   CartDto.cs
+|   |   |   CartItemDto.cs
+|   |   |   CourseCardDto.cs
+|   |   |   CourseDto.cs
+|   |   |   CourseFileDto.cs
+|   |   |   NewsDetailsDto.cs
+|   |   |   NewsListDto.cs
+|   |   |   ProgramCoursesDto.cs
+|   |   |   
+|   |   \---PaymentDtos
+|   |           CheckoutRequestDto.cs
+|   |           OrderDto.cs
+|   |           PaymentResponseDto.cs
+|   |           RefundRequestResponseDto.cs
+|   |           
+|   +---Helpers
+|   |       MappingProfiles.cs
+|   |       NewsPictureUrlResolver.cs
+|   |       Pagination.cs
+|   |       
+|   +---obj
+|   |   |   Institute.API.csproj.nuget.dgspec.json
+|   |   |   Institute.API.csproj.nuget.g.props
+|   |   |   Institute.API.csproj.nuget.g.targets
+|   |   |   project.assets.json
+|   |   |   project.nuget.cache
+|   |   |   
+|   |   +---Debug
+|   |   |   \---net8.0
+|   |   |       |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+|   |   |       |   ApiEndpoints.json
+|   |   |       |   apphost.exe
+|   |   |       |   AppSettingsSchema.json
+|   |   |       |   CombinedComponentSchema.json
+|   |   |       |   Institut.755799FA.Up2Date
+|   |   |       |   Institute.API.AssemblyInfo.cs
+|   |   |       |   Institute.API.AssemblyInfoInputs.cache
+|   |   |       |   Institute.API.assets.cache
+|   |   |       |   Institute.API.csproj.AssemblyReference.cache
+|   |   |       |   Institute.API.csproj.BuildWithSkipAnalyzers
+|   |   |       |   Institute.API.csproj.CoreCompileInputs.cache
+|   |   |       |   Institute.API.csproj.FileListAbsolute.txt
+|   |   |       |   Institute.API.dll
+|   |   |       |   Institute.API.GeneratedMSBuildEditorConfig.editorconfig
+|   |   |       |   Institute.API.genruntimeconfig.cache
+|   |   |       |   Institute.API.GlobalUsings.g.cs
+|   |   |       |   Institute.API.MvcApplicationPartsAssemblyInfo.cache
+|   |   |       |   Institute.API.MvcApplicationPartsAssemblyInfo.cs
+|   |   |       |   Institute.API.pdb
+|   |   |       |   Institute.API.sourcelink.json
+|   |   |       |   rjimswa.dswa.cache.json
+|   |   |       |   rjsmcshtml.dswa.cache.json
+|   |   |       |   rjsmrazor.dswa.cache.json
+|   |   |       |   rpswa.dswa.cache.json
+|   |   |       |   staticwebassets.build.endpoints.json
+|   |   |       |   staticwebassets.build.json
+|   |   |       |   staticwebassets.build.json.cache
+|   |   |       |   staticwebassets.development.json
+|   |   |       |   staticwebassets.references.upToDateCheck.txt
+|   |   |       |   staticwebassets.removed.txt
+|   |   |       |   staticwebassets.upToDateCheck.txt
+|   |   |       |   swae.build.ex.cache
+|   |   |       |   
+|   |   |       +---EndpointInfo
+|   |   |       |       Institute.API.json
+|   |   |       |       Institute.API.OpenApiFiles.cache
+|   |   |       |       
+|   |   |       +---ref
+|   |   |       |       Institute.API.dll
+|   |   |       |       
+|   |   |       +---refint
+|   |   |       |       Institute.API.dll
+|   |   |       |       
+|   |   |       \---staticwebassets
+|   |   \---Release
+|   |       \---net8.0
+|   |           |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+|   |           |   Institute.API.AssemblyInfo.cs
+|   |           |   Institute.API.AssemblyInfoInputs.cache
+|   |           |   Institute.API.assets.cache
+|   |           |   Institute.API.csproj.AssemblyReference.cache
+|   |           |   Institute.API.GeneratedMSBuildEditorConfig.editorconfig
+|   |           |   Institute.API.GlobalUsings.g.cs
+|   |           |   
+|   |           +---ref
+|   |           \---refint
+|   +---Properties
+|   |       launchSettings.json
+|   |       
+|   \---wwwroot
+|       \---certificates
+|               1b083ffd-4f1d-4996-86fc-1cac4b4c258c.pdf
+|               53facd75-39fb-42ca-ba46-9b6dd23a1196.pdf
+|               
++---Institute.Application
+|   |   Institute.Application.csproj
+|   |   
+|   +---bin
+|   |   +---Debug
+|   |   |   \---net8.0
+|   |   |           Institute.Application.deps.json
+|   |   |           Institute.Application.dll
+|   |   |           Institute.Application.pdb
+|   |   |           Institute.Domain.dll
+|   |   |           Institute.Domain.pdb
+|   |   |           
+|   |   \---Release
+|   |       \---net8.0
+|   +---DTOs
+|   |   |   CategoryTreeDto.cs
+|   |   |   ClerkUserDto.cs
+|   |   |   LecturerResponseDto.cs
+|   |   |   PaymentSettings.cs
+|   |   |   
+|   |   \---AdminDtos
+|   |           AdminStatsDto.cs
+|   |           CertificateDto.cs
+|   |           EnrollmentWithCertificateDto.cs
+|   |           PlanworkWithUsersDto.cs
+|   |           UpdateCertificateDto.cs
+|   |           UploadCertificateDto.cs
+|   |           UserCourseDto.cs
+|   |           UserEnrollmentDto.cs
+|   |           UserWithCoursesDto.cs
+|   |           
+|   +---Interfaces
+|   |   |   IRepository.cs
+|   |   |   
+|   |   \---IService
+|   |           IAdminService.cs
+|   |           IBankPaymentService.cs
+|   |           IBookService.cs
+|   |           ICartService.cs
+|   |           ICategoryService.cs
+|   |           ICheckoutService.cs
+|   |           IClerkService.cs
+|   |           ICurrentUserService.cs
+|   |           ILecturerService.cs
+|   |           IReadOnlyService.cs
+|   |           IRefundService.cs
+|   |           
+|   +---obj
+|   |   |   Institute.Application.csproj.nuget.dgspec.json
+|   |   |   Institute.Application.csproj.nuget.g.props
+|   |   |   Institute.Application.csproj.nuget.g.targets
+|   |   |   project.assets.json
+|   |   |   project.nuget.cache
+|   |   |   
+|   |   +---Debug
+|   |   |   \---net8.0
+|   |   |       |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+|   |   |       |   Institut.9B08C9F1.Up2Date
+|   |   |       |   Institute.Application.AssemblyInfo.cs
+|   |   |       |   Institute.Application.AssemblyInfoInputs.cache
+|   |   |       |   Institute.Application.assets.cache
+|   |   |       |   Institute.Application.csproj.AssemblyReference.cache
+|   |   |       |   Institute.Application.csproj.BuildWithSkipAnalyzers
+|   |   |       |   Institute.Application.csproj.CoreCompileInputs.cache
+|   |   |       |   Institute.Application.csproj.FileListAbsolute.txt
+|   |   |       |   Institute.Application.dll
+|   |   |       |   Institute.Application.GeneratedMSBuildEditorConfig.editorconfig
+|   |   |       |   Institute.Application.GlobalUsings.g.cs
+|   |   |       |   Institute.Application.pdb
+|   |   |       |   Institute.Application.sourcelink.json
+|   |   |       |   
+|   |   |       +---ref
+|   |   |       |       Institute.Application.dll
+|   |   |       |       
+|   |   |       \---refint
+|   |   |               Institute.Application.dll
+|   |   |               
+|   |   \---Release
+|   |       \---net8.0
+|   |           |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+|   |           |   Institute.Application.AssemblyInfo.cs
+|   |           |   Institute.Application.AssemblyInfoInputs.cache
+|   |           |   Institute.Application.assets.cache
+|   |           |   Institute.Application.csproj.AssemblyReference.cache
+|   |           |   Institute.Application.GeneratedMSBuildEditorConfig.editorconfig
+|   |           |   Institute.Application.GlobalUsings.g.cs
+|   |           |   
+|   |           +---ref
+|   |           \---refint
+|   \---Services
+|           AdminService.cs
+|           BankPaymentService.cs
+|           BookService.cs
+|           CartService.cs
+|           CategoryService.cs
+|           CheckoutService.cs
+|           ClerkService.cs
+|           CurrentUserService.cs
+|           LecturerService.cs
+|           ReadOnlyService.cs
+|           RefundService.cs
+|           
++---Institute.Domain
+|   |   Institute.Domain.csproj
+|   |   
+|   +---bin
+|   |   +---Debug
+|   |   |   \---net8.0
+|   |   |           Institute.Domain.deps.json
+|   |   |           Institute.Domain.dll
+|   |   |           Institute.Domain.pdb
+|   |   |           
+|   |   \---Release
+|   |       \---net8.0
+|   +---Entities
+|   |       Action.cs
+|   |       AppUser.cs
+|   |       Book.cs
+|   |       BooksType.cs
+|   |       BooksView.cs
+|   |       Cart.cs
+|   |       CartItem.cs
+|   |       Certificate.cs
+|   |       CoursePurchase.cs
+|   |       Dailynews.cs
+|   |       Enrollment.cs
+|   |       ErrorDesc.cs
+|   |       Form.cs
+|   |       FormsCategory.cs
+|   |       GetNewsDetailsView.cs
+|   |       Lecturer.cs
+|   |       NewsPic.cs
+|   |       Order.cs
+|   |       OrderItem.cs
+|   |       Payment.cs
+|   |       PlanFile.cs
+|   |       Planwork.cs
+|   |       RefundResult.cs
+|   |       SitePic.cs
+|   |       SiteVideo.cs
+|   |       SiteVideoType.cs
+|   |       User.cs
+|   |       UsersForm.cs
+|   |       UsersFormsView.cs
+|   |       UsersLog.cs
+|   |       
+|   +---Enums
+|   |       OrderStatus.cs
+|   |       PaymentMethod.cs
+|   |       PaymentStatus.cs
+|   |       
+|   +---obj
+|   |   |   Institute.Domain.csproj.nuget.dgspec.json
+|   |   |   Institute.Domain.csproj.nuget.g.props
+|   |   |   Institute.Domain.csproj.nuget.g.targets
+|   |   |   project.assets.json
+|   |   |   project.nuget.cache
+|   |   |   
+|   |   +---Debug
+|   |   |   \---net8.0
+|   |   |       |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+|   |   |       |   Institute.Domain.AssemblyInfo.cs
+|   |   |       |   Institute.Domain.AssemblyInfoInputs.cache
+|   |   |       |   Institute.Domain.assets.cache
+|   |   |       |   Institute.Domain.csproj.AssemblyReference.cache
+|   |   |       |   Institute.Domain.csproj.BuildWithSkipAnalyzers
+|   |   |       |   Institute.Domain.csproj.CoreCompileInputs.cache
+|   |   |       |   Institute.Domain.csproj.FileListAbsolute.txt
+|   |   |       |   Institute.Domain.dll
+|   |   |       |   Institute.Domain.GeneratedMSBuildEditorConfig.editorconfig
+|   |   |       |   Institute.Domain.GlobalUsings.g.cs
+|   |   |       |   Institute.Domain.pdb
+|   |   |       |   Institute.Domain.sourcelink.json
+|   |   |       |   
+|   |   |       +---ref
+|   |   |       |       Institute.Domain.dll
+|   |   |       |       
+|   |   |       \---refint
+|   |   |               Institute.Domain.dll
+|   |   |               
+|   |   \---Release
+|   |       \---net8.0
+|   |           |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+|   |           |   Institute.Domain.AssemblyInfo.cs
+|   |           |   Institute.Domain.AssemblyInfoInputs.cache
+|   |           |   Institute.Domain.assets.cache
+|   |           |   Institute.Domain.csproj.AssemblyReference.cache
+|   |           |   Institute.Domain.GeneratedMSBuildEditorConfig.editorconfig
+|   |           |   Institute.Domain.GlobalUsings.g.cs
+|   |           |   
+|   |           +---ref
+|   |           \---refint
+|   \---specifications
+|       |   BaseSpecification.cs
+|       |   Ispecification.cs
+|       |   SpecificationEvaluator.cs
+|       |   
+|       +---AdminSpec
+|       |   |   AttendedEnrollmentsSpec.cs
+|       |   |   
+|       |   +---Certificates
+|       |   |       AllCertificateWithUserAndPlanworkSpec.cs
+|       |   |       CertificateWithUserAndPlanworkSpec.cs
+|       |   |       EnrollmentWithUserAndPlanworkSpec.cs
+|       |   |       UserByClerkIdSpec.cs
+|       |   |       
+|       |   +---Course
+|       |   |       PlanworkCount.cs
+|       |   |       PlanworkSearchSpec.cs
+|       |   |       PlanworkSpecParams.cs
+|       |   |       PlanworksWithEnrollmentsSpec.cs
+|       |   |       
+|       |   \---User
+|       |           UserSearchSpec.cs
+|       |           UserSpecParams.cs
+|       |           UsersWithEnrollmentsSpec.cs
+|       |           
+|       +---BookSpec
+|       |       Book&LoadNafigationProperty.cs
+|       |       BookSpecParams.cs
+|       |       BooksWithFiltersForCountSpec.cs
+|       |       
+|       +---CourseSpec
+|       |       EnrollmentsByUserSpecification.cs
+|       |       LatestCoursesSpecification.cs
+|       |       TrainingPlanSpec.cs
+|       |       
+|       \---NewsSpec
+|               NewsSpecParames.cs
+|               NewsWithDetailsSpec.cs
+|               NewsWithFiltersForCountSpec.cs
+|               NewsWithMainPicSpec.cs
+|               
+\---Institute.Infrastructure
+    |   AppDbContext.cs
+    |   Institute.Infrastructure.csproj
+    |   SpecificationEvaluator.cs
+    |   
+    +---bin
+    |   +---Debug
+    |   |   \---net8.0
+    |   |           Institute.Application.dll
+    |   |           Institute.Application.pdb
+    |   |           Institute.Domain.dll
+    |   |           Institute.Domain.pdb
+    |   |           Institute.Infrastructure.deps.json
+    |   |           Institute.Infrastructure.dll
+    |   |           Institute.Infrastructure.pdb
+    |   |           Institute.Infrastructure.runtimeconfig.json
+    |   |           
+    |   \---Release
+    |       \---net8.0
+    +---Migrations
+    |       20251228161351_AddAppUserCoursePayment.cs.txt
+    |       20251228161351_AddAppUserCoursePayment.Designer.cs.txt
+    |       20251229132708_AddTablesAppUser-Cart-CartItems-Order-OrderItems-Payment.cs.txt
+    |       20251229132708_AddTablesAppUser-Cart-CartItems-Order-OrderItems-Payment.Designer.cs.txt
+    |       20251229152510_InAppUserTableMakeEmailFNameLNameNullableAndAddUsername.cs.txt
+    |       20251229152510_InAppUserTableMakeEmailFNameLNameNullableAndAddUsername.Designer.cs.txt
+    |       20260104101519_UserUpdate.cs.txt
+    |       20260104101519_UserUpdate.Designer.cs.txt
+    |       20260112091518_AddNavProperties.cs.txt
+    |       20260112091518_AddNavProperties.Designer.cs.txt
+    |       20260201135142_Add-Soft-Delete.cs.txt
+    |       20260201135142_Add-Soft-Delete.Designer.cs.txt
+    |       20260208114028_UpdateEmailIndexInAppUserTable.cs.txt
+    |       20260208114028_UpdateEmailIndexInAppUserTable.Designer.cs.txt
+    |       20260208114512_UpdateUserNameIndexInAppUserTable.cs.txt
+    |       20260208114512_UpdateUserNameIndexInAppUserTable.Designer.cs.txt
+    |       20260208132239_UpdateClerkUserIdIndexInAppUserTable.cs.txt
+    |       20260208132239_UpdateClerkUserIdIndexInAppUserTable.Designer.cs.txt
+    |       20260211121123_DeletePlanSaleAndChangePlanCostfromDecimalToFloat.cs
+    |       20260211121123_DeletePlanSaleAndChangePlanCostfromDecimalToFloat.Designer.cs
+    |       20260329142903_UpdateEnrollmentEntityForUserAndPlanworkToBeNulluble.cs
+    |       20260329142903_UpdateEnrollmentEntityForUserAndPlanworkToBeNulluble.Designer.cs
+    |       AppDbContextModelSnapshot.cs
+    |       AppDbContextModelSnapshot.cs.txt
+    |       
+    +---obj
+    |   |   Institute.Infrastructure.csproj.nuget.dgspec.json
+    |   |   Institute.Infrastructure.csproj.nuget.g.props
+    |   |   Institute.Infrastructure.csproj.nuget.g.targets
+    |   |   project.assets.json
+    |   |   project.nuget.cache
+    |   |   
+    |   +---Debug
+    |   |   \---net8.0
+    |   |       |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+    |   |       |   Institut.2F878E52.Up2Date
+    |   |       |   Institute.Infrastructure.AssemblyInfo.cs
+    |   |       |   Institute.Infrastructure.AssemblyInfoInputs.cache
+    |   |       |   Institute.Infrastructure.assets.cache
+    |   |       |   Institute.Infrastructure.csproj.AssemblyReference.cache
+    |   |       |   Institute.Infrastructure.csproj.BuildWithSkipAnalyzers
+    |   |       |   Institute.Infrastructure.csproj.CoreCompileInputs.cache
+    |   |       |   Institute.Infrastructure.csproj.FileListAbsolute.txt
+    |   |       |   Institute.Infrastructure.dll
+    |   |       |   Institute.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+    |   |       |   Institute.Infrastructure.genruntimeconfig.cache
+    |   |       |   Institute.Infrastructure.GlobalUsings.g.cs
+    |   |       |   Institute.Infrastructure.pdb
+    |   |       |   Institute.Infrastructure.sourcelink.json
+    |   |       |   
+    |   |       +---ref
+    |   |       |       Institute.Infrastructure.dll
+    |   |       |       
+    |   |       \---refint
+    |   |               Institute.Infrastructure.dll
+    |   |               
+    |   \---Release
+    |       \---net8.0
+    |           |   .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+    |           |   Institute.Infrastructure.AssemblyInfo.cs
+    |           |   Institute.Infrastructure.AssemblyInfoInputs.cache
+    |           |   Institute.Infrastructure.assets.cache
+    |           |   Institute.Infrastructure.csproj.AssemblyReference.cache
+    |           |   Institute.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+    |           |   Institute.Infrastructure.GlobalUsings.g.cs
+    |           |   
+    |           +---ref
+    |           \---refint
+    \---Repositories
+            BaseRepository.cs
+            

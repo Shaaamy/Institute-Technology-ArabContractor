@@ -181,6 +181,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
@@ -322,6 +323,25 @@ builder.Services.AddAutoMapper(cfg =>
 
 // ======= Build App =======
 var app = builder.Build();
+
+// ======= Pre-fetch Clerk JWKS at startup =======
+// Forces the JwtBearer ConfigurationManager to resolve and cache the JWKS
+// before the app starts accepting traffic, eliminating the cold-start race.
+{
+    var jwtOptions = app.Services
+        .GetRequiredService<IOptionsMonitor<JwtBearerOptions>>()
+        .Get(JwtBearerDefaults.AuthenticationScheme);
+
+    try
+    {
+        var config = await jwtOptions.ConfigurationManager!.GetConfigurationAsync(default);
+        Console.WriteLine($"✅ Clerk JWKS warmed up, {config.SigningKeys.Count} key(s) loaded");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌ Failed to warm up Clerk JWKS at startup: " + ex.Message);
+    }
+}
 
 // ======= Middleware =======
 if (app.Environment.IsDevelopment())
