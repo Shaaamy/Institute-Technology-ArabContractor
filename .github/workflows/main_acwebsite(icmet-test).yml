@@ -2,13 +2,13 @@ name: Build and deploy ASP+React to Azure Web App - acwebsite
 
 on:
   push:
-   branches:
+    branches:
       - main
   workflow_dispatch:
-  
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  
+
 jobs:
   build:
     runs-on: windows-latest
@@ -75,7 +75,6 @@ jobs:
           Copy-Item -Path src/Frontend/dist/* -Destination published/wwwroot -Recurse -Force
 
       # ✅ Remove web.config from wwwroot — ASP.NET handles all routing via UseDefaultFiles + MapFallbackToFile
-      #    A web.config in wwwroot causes IIS to skip "/" rewrite (treats it as a directory)
       - name: Remove web.config from wwwroot if present
         shell: pwsh
         run: |
@@ -86,7 +85,6 @@ jobs:
           } else {
             Write-Host "No web.config in wwwroot - nothing to remove"
           }
-
 
       # ------------------ Verify publish folder ------------------
       - name: Show publish folder contents
@@ -105,12 +103,13 @@ jobs:
             $files
           }
 
-      # ------------------ Upload artifact ------------------
+      # ------------------ Upload artifact (معدّل) ------------------
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ASP-app
           path: published/
+          retention-days: 1 # 👈 بيقلل استهلاك المساحة بمسح الملف بعد يوم واحد تلقائياً
 
   deploy:
     runs-on: windows-latest
