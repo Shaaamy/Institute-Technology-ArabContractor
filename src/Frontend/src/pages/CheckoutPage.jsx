@@ -274,7 +274,7 @@ export default function CheckoutPage() {
             setCartError("");
             try {
                 const token = await getToken();
-                const res = await fetch(`${API_BASE}/api/cart`, {
+                const res = await fetch(`${API_BASE}/cart`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error(`فشل تحميل السلة (${res.status})`);
