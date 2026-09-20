@@ -30,6 +30,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
+
 // rate limiting
 builder.Services.AddRateLimiter(options =>
 {
@@ -42,6 +43,7 @@ builder.Services.AddRateLimiter(options =>
     });
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -101,28 +103,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("News", policy =>
-        policy.Requirements.Add(new PermissionRequirement("News")));
-
-    options.AddPolicy("Books", policy =>
-        policy.Requirements.Add(new PermissionRequirement("Books")));
-
-    options.AddPolicy("Lecturers", policy =>
-        policy.Requirements.Add(new PermissionRequirement("Lecturers")));
-
-    options.AddPolicy("Courses", policy =>
-        policy.Requirements.Add(new PermissionRequirement("Courses")));
-
-    options.AddPolicy("ManagerOnly", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.Requirements.Add(new ManagerRequirement());
-    });
-});
-
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ILecturerService, LecturerService>();
@@ -141,24 +121,14 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IUserPermissionService, UserPermissionService>();
 builder.Services.AddScoped<BankPaymentService>();
 builder.Services.AddScoped<IRefundService, RefundService>();
-builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
-
 builder.Services.AddScoped<IAuthorizationHandler, ManagerAuthorizationHandler>();
+
 builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("PaymentSettings"));
-builder.Services.AddHttpClient("BankClient", client =>
-{
-    var paymentSettings = builder.Configuration.GetSection("PaymentSettings").Get<PaymentSettings>();
-    if (paymentSettings == null) throw new Exception("PaymentSettings section not found in configuration.");
 
-    client.BaseAddress = new Uri(paymentSettings.BaseUrl);
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
-
-    var authValue = Convert.ToBase64String(
-        Encoding.ASCII.GetBytes($"merchant.{paymentSettings.MerchantId}:{paymentSettings.ApiPassword}")
-    );
-    client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authValue);
-});
+// NOTE: you had this "BankClient" HttpClient registered TWICE (once without a
+// timeout, once with). Only the second one is needed — the duplicate above it
+// has been removed here since AddHttpClient with the same name just adds a
+// second configuration delegate that both run, which is redundant.
 builder.Services.AddHttpClient("BankClient", client =>
 {
     var paymentSettings = builder.Configuration
@@ -167,7 +137,7 @@ builder.Services.AddHttpClient("BankClient", client =>
         ?? throw new InvalidOperationException("PaymentSettings section not found.");
 
     client.BaseAddress = new Uri(paymentSettings.BaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(30);  // ← أضف ده
+    client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 
     var authValue = Convert.ToBase64String(
@@ -180,20 +150,25 @@ builder.Services.AddHttpClient("BankClient", client =>
 #endregion
 
 #region (Authentication And Authorization)
+var clerkAuthority = builder.Configuration["Clerk:Authority"];
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = builder.Configuration["Clerk:Authority"];
+        options.Authority = clerkAuthority;
+        options.MetadataAddress = $"{clerkAuthority}/.well-known/openid-configuration";
         options.RequireHttpsMetadata = true;
         options.MapInboundClaims = false;
+        options.RefreshOnIssuerKeyNotFound = true;
+        options.BackchannelTimeout = TimeSpan.FromSeconds(30);
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,  // from true to false
+            ValidateIssuerSigningKey = true,
             NameClaimType = "sub"
         };
 
@@ -201,21 +176,39 @@ builder.Services
         {
             OnAuthenticationFailed = context =>
             {
-                Console.WriteLine("❌ AUTH FAILED");
-                Console.WriteLine(context.Exception.Message);
+                Console.WriteLine("❌ AUTH FAILED: " + context.Exception);
                 return Task.CompletedTask;
             },
             OnTokenValidated = context =>
             {
                 Console.WriteLine("✅ TOKEN VALIDATED");
                 return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                Console.WriteLine($"⚠️ CHALLENGE: error={context.Error}, description={context.ErrorDescription}");
+                return Task.CompletedTask;
             }
         };
     });
 
-
+// Single AddAuthorization call — merged all policies from both places they
+// were previously defined, since only the LAST call was actually winning
+// and the News/Books/Lecturers/Courses policies were being silently dropped.
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy("News", policy =>
+        policy.Requirements.Add(new PermissionRequirement("News")));
+
+    options.AddPolicy("Books", policy =>
+        policy.Requirements.Add(new PermissionRequirement("Books")));
+
+    options.AddPolicy("Lecturers", policy =>
+        policy.Requirements.Add(new PermissionRequirement("Lecturers")));
+
+    options.AddPolicy("Courses", policy =>
+        policy.Requirements.Add(new PermissionRequirement("Courses")));
+
     options.AddPolicy("ManagerOnly", policy =>
     {
         policy.RequireAuthenticatedUser();
@@ -248,7 +241,7 @@ var app = builder.Build();
     }
     catch (Exception ex)
     {
-        Console.WriteLine("❌ Failed to warm up Clerk JWKS at startup: " + ex.Message);
+        Console.WriteLine("❌ Failed to warm up Clerk JWKS at startup: " + ex);
     }
 }
 
