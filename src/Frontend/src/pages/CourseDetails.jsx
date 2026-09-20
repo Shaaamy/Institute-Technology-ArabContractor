@@ -573,6 +573,9 @@ const CourseDetails = () => {
     const [enrolling, setEnrolling] = useState(false);
     const [enrollMsg, setEnrollMsg] = useState(null);
 
+    // Toast for cart/add errors that shouldn't be swallowed silently
+    const [cartMsg, setCartMsg] = useState(null);
+
     const [showRefund, setShowRefund] = useState(false);
     const [refundReason, setRefundReason] = useState('');
     const [bankName, setBankName] = useState('');
@@ -587,8 +590,16 @@ const CourseDetails = () => {
     const [onlineSetting, setOnlineSetting] = useState(null);
     const [onlineLoading, setOnlineLoading] = useState(false);
 
+    // Used for read-only / non-critical calls where a slightly stale token is fine.
     const safeGetToken = useCallback(async () => {
         try { return await getToken(); } catch (_) { return null; }
+    }, [getToken]);
+
+    // Used for calls that must succeed (add to cart) — bypasses Clerk's short-lived
+    // client cache so we don't send a token that looks valid locally but has
+    // already expired / been revoked server-side.
+    const freshGetToken = useCallback(async () => {
+        try { return await getToken({ skipCache: true }); } catch (_) { return null; }
     }, [getToken]);
 
     const fetchOwnedCourses = useCallback(async () => {
@@ -865,20 +876,57 @@ const CourseDetails = () => {
         document.title = course?.title ? `${course.title} - المعهد التكنولوجي` : 'المعهد التكنولوجي';
     }, [course]);
 
+    // ── Add to cart ───────────────────────────────────────────────────────────
+    // Requires sign-in and a fresh, valid token from the server before the item
+    // is ever mirrored into localStorage — previously this silently swallowed
+    // a missing/expired token and still wrote the item locally, making it look
+    // "added" even though the server rejected the request with a 401.
     const addToCart = async (buyNow = false, courseMode = 'onsite') => {
         if (!course) return;
+        setCartMsg(null);
+
+        if (!isSignedIn) {
+            navigate('/sign-in');
+            return;
+        }
+
         const isOnline = courseMode === 'online';
         const priceToUse = isOnline ? (course.onlineCost != null ? course.onlineCost : 0) : course.price;
+
         try {
-            const token = await safeGetToken();
-            if (token) {
-                await fetch(`${API_BASE}/cart/add/${course.id}`, {
-                    method: 'POST',
-                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isOnline }),
-                });
+            // skipCache forces a fresh token instead of a possibly-stale cached one
+            const token = await freshGetToken();
+            if (!token) {
+                setCartMsg({ type: 'error', text: 'انتهت الجلسة، سجل دخول مرة أخرى' });
+                navigate('/sign-in');
+                return;
             }
-        } catch { }
+
+            const res = await fetch(`${API_BASE}/cart/add/${course.id}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isOnline }),
+            });
+
+            if (!res.ok) {
+                if (res.status === 401) {
+                    setCartMsg({ type: 'error', text: 'انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى' });
+                    navigate('/sign-in');
+                    return;
+                }
+                if (res.status === 409) {
+                    // already in cart — treat as success and continue to cart/checkout
+                } else {
+                    setCartMsg({ type: 'error', text: await parseServerError(res) });
+                    return;
+                }
+            }
+        } catch (err) {
+            setCartMsg({ type: 'error', text: err.message || 'حدث خطأ أثناء إضافة الدورة إلى السلة' });
+            return;
+        }
+
+        // Only mirror into localStorage after the server call actually succeeded (or item already existed)
         const cart = JSON.parse(localStorage.getItem('cartItems') || '[]');
         if (!cart.some(i => i.id === course.id)) {
             cart.push({
@@ -899,12 +947,17 @@ const CourseDetails = () => {
         if (!isSignedIn) { navigate('/sign-in'); return; }
         setEnrolling(true); setEnrollMsg(null);
         try {
-            const token = await safeGetToken();
-            if (!token) { setEnrollMsg({ type: 'error', text: 'يجب تسجيل الدخول أولاً.' }); return; }
+            const token = await freshGetToken();
+            if (!token) { setEnrollMsg({ type: 'error', text: 'يجب تسجيل الدخول أولاً.' }); navigate('/sign-in'); return; }
             const res = await fetch(`${API_BASE}/course/enroll-free/${course.id}`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             });
+            if (res.status === 401) {
+                setEnrollMsg({ type: 'error', text: 'انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى.' });
+                navigate('/sign-in');
+                return;
+            }
             const data = await res.json().catch(() => ({}));
             if (!res.ok) { setEnrollMsg({ type: 'error', text: data?.message || 'حدث خطأ، حاول مرة أخرى.' }); return; }
             if (data.alreadyEnrolled) {
@@ -1252,6 +1305,17 @@ const CourseDetails = () => {
                                         )}
                                     </div>
 
+                                    {cartMsg && (
+                                        <div style={{
+                                            ...S.enrollMsgBox,
+                                            backgroundColor: '#ffebee',
+                                            border: '1px solid #f44336',
+                                            color: '#c62828',
+                                        }}>
+                                            {cartMsg.text}
+                                        </div>
+                                    )}
+
                                     <div style={S.actionBtns}>
                                         {isOwned ? (
                                             <>
@@ -1359,7 +1423,7 @@ const CourseDetails = () => {
 
             {/* ── CERTIFICATE PREVIEW MODAL ──────────────────────────────────── */}
             {showCertModal && hasCert && (
-                <CertificateModal cert={cert} courseTitle={course.title} onClose={() => setShowCertModal(false)} />
+                <CertificateModal cert={cert} courseTitle={course.title} onClose={() => setShowCertModal(false)} getToken={safeGetToken} />
             )}
 
             {/* ── REFUND MODAL ───────────────────────────────────────────────── */}
