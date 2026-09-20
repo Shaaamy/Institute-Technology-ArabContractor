@@ -469,7 +469,7 @@ const CoursesPage = () => {
     const showToast = (message, type = 'success') => setToast({ message, type });
 
     const safeGetToken = useCallback(async () => {
-        try { return await getToken({ skipCache: true }); } catch (_) { return null; }
+        try { return await getToken(); } catch (_) { return null; }
     }, [getToken]);
 
     const fetchOwnedCourses = useCallback(async () => {
@@ -581,14 +581,9 @@ const CoursesPage = () => {
                 body: JSON.stringify({ isOnline }),
             });
             if (!res.ok) {
-    if (res.status === 401) {
-        showToast('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى', 'error');
-        navigate('/sign-in'); // or trigger Clerk's signOut() first if you want to fully clear state
-        return;
-    }
-    const msgs = { 404: 'الدورة غير موجودة', 409: 'الدورة موجودة بالفعل في السلة', 500: 'خطأ في الخادم' };
-    throw new Error(msgs[res.status] || 'فشل إضافة الدورة');
-}
+                const msgs = { 401: 'انتهت الجلسة، سجل دخول مرة أخرى', 404: 'الدورة غير موجودة', 409: 'الدورة موجودة بالفعل في السلة', 500: 'خطأ في الخادم' };
+                throw new Error(msgs[res.status] || 'فشل إضافة الدورة');
+            }
             const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
             if (!cartItems.some(i => i.id === course.id)) {
                 cartItems.push({
