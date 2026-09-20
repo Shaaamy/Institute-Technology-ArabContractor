@@ -381,7 +381,7 @@ export default function CheckoutPage() {
             const token = await getToken();
             if (!token) throw new Error("فشل في الحصول على رمز المصادقة");
 
-            const response = await fetch(`${API_BASE}/checkout`, {
+            const response = await fetch(`${API_BASE}/Checkout/checkout`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
