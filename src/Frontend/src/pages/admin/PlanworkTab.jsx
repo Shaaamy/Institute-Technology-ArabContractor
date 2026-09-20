@@ -10,7 +10,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { T } from "../../components/admin/constants";
 
-const BASE_URL = 'https://acwebsite-icmet-test.azurewebsites.net';
+const BASE_URL = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
 
 // ── Auth token ────────────────────────────────────────────────────────────────
 async function getToken() {

@@ -2,7 +2,7 @@
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { BookOpen, Calendar, MapPin, Search, X, TrendingUp, Clock } from 'lucide-react';
 
-const API_BASE = 'https://acwebsite-icmet-test.azurewebsites.net/api';
+const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
 
 const SearchPage = () => {
     const navigate = useNavigate();

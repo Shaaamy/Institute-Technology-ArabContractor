@@ -15,7 +15,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-const API_BASE = 'https://acwebsite-icmet-test.azurewebsites.net/api';
+const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 const toastAnim = `

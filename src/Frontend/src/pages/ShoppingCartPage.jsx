@@ -3,7 +3,7 @@ import { ShoppingCart, Trash2, ArrowRight, BookOpen } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { useAuth } from '@clerk/clerk-react';
 
-const API_BASE = 'https://acwebsite-icmet-test.azurewebsites.net/api';
+const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
 
 const CartItemFull = ({ item, onRemove }) => {
     return (

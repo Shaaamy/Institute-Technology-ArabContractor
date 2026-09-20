@@ -4,7 +4,7 @@ import { T } from "../../components/admin/constants";
 // ─────────────────────────────────────────────────────────────────────────────
 // API CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
-const API_BASE = 'https://acwebsite-icmet-test.azurewebsites.net/api/admin';
+const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api/admin';
 const BOOKS_API = `${API_BASE}/AdminBook`;
 const TYPES_API = `${API_BASE}/AdminBooksType`;
 

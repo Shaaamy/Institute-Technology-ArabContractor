@@ -11,7 +11,7 @@ const T = {
     font: '"Noto Kufi Arabic", serif',
 };
 
-const BASE = 'https://acwebsite-icmet-test.azurewebsites.net';
+const BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
 
 function resolveImg(url) {
     if (!url || url === 'N/A' || url === 'pending') return null;

@@ -15,7 +15,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 
-const API_BASE = 'https://acwebsite-icmet-test.azurewebsites.net';
+const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
 
 // ─── Persist purchased courses to localStorage ────────────────────────────────
 const persistPurchasedCourses = (cartItems) => {
