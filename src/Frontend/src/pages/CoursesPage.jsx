@@ -468,8 +468,9 @@ const CoursesPage = () => {
 
     const showToast = (message, type = 'success') => setToast({ message, type });
 
-    const token = await getToken({ skipCache: true }).catch(() => null);
-if (!token) { showToast('انتهت الجلسة، سجل دخول مرة أخرى', 'error'); return; }
+    const safeGetToken = useCallback(async () => {
+        try { return await getToken({ skipCache: true }); } catch (_) { return null; }
+    }, [getToken]);
 
     const fetchOwnedCourses = useCallback(async () => {
         if (!isSignedIn) { setOwnedCourseIds(new Set()); return; }
