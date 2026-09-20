@@ -468,17 +468,8 @@ const CoursesPage = () => {
 
     const showToast = (message, type = 'success') => setToast({ message, type });
 
-    // Used for read-only / non-critical calls where a slightly stale token is fine.
-    const safeGetToken = useCallback(async () => {
-        try { return await getToken(); } catch (_) { return null; }
-    }, [getToken]);
-
-    // Used for calls that must succeed (add to cart, enroll) — bypasses Clerk's
-    // short-lived client cache so we don't send a token that looks valid
-    // locally but has already expired / been revoked server-side.
-    const freshGetToken = useCallback(async () => {
-        try { return await getToken({ skipCache: true }); } catch (_) { return null; }
-    }, [getToken]);
+    const token = await getToken({ skipCache: true }).catch(() => null);
+if (!token) { showToast('انتهت الجلسة، سجل دخول مرة أخرى', 'error'); return; }
 
     const fetchOwnedCourses = useCallback(async () => {
         if (!isSignedIn) { setOwnedCourseIds(new Set()); return; }
@@ -546,24 +537,12 @@ const CoursesPage = () => {
         setEnrollingId(course.id);
         setEnrollMsgs(prev => ({ ...prev, [course.id]: null }));
         try {
-            // Force a fresh token — a cached token can look valid client-side
-            // for up to ~60s after the session has actually expired server-side.
-            const token = await freshGetToken();
-            if (!token) {
-                setEnrollMsgs(prev => ({ ...prev, [course.id]: { type: 'error', text: 'انتهت الجلسة، سجل دخول مرة أخرى' } }));
-                navigate('/sign-in');
-                return;
-            }
+            const token = await safeGetToken();
+            if (!token) { setEnrollMsgs(prev => ({ ...prev, [course.id]: { type: 'error', text: 'انتهت الجلسة، سجل دخول مرة أخرى' } })); return; }
             const res = await fetch(`${API_BASE}/course/enroll-free/${course.id}`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             });
-            if (res.status === 401) {
-                setEnrollMsgs(prev => ({ ...prev, [course.id]: { type: 'error', text: 'انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى' } }));
-                showToast('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى', 'error');
-                navigate('/sign-in');
-                return;
-            }
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
                 const errMsg = data?.message || await parseServerError(res);
@@ -587,35 +566,28 @@ const CoursesPage = () => {
     };
 
     const addToCart = async (course) => {
-        if (!isSignedIn) { showToast('الرجاء تسجيل الدخول أولاً', 'warning'); navigate('/sign-in'); return; }
+        if (!isSignedIn) { showToast('الرجاء تسجيل الدخول أولاً', 'warning'); return; }
         const isOnline = getCourseMode(course.id) === 'online';
         const onlinePrice = course.onlineCost != null ? course.onlineCost : 0;
         const priceToUse = isOnline ? onlinePrice : (course.cost || 0);
         setAddingToCart(course.id);
         try {
-            // Force a fresh token from Clerk instead of the cached one — the cached
-            // token can look valid client-side for up to ~60s after the session
-            // has actually expired server-side, which is what caused the 401 here.
-            const token = await freshGetToken();
-            if (!token) {
-                showToast('انتهت الجلسة، سجل دخول مرة أخرى', 'error');
-                navigate('/sign-in');
-                return;
-            }
+            const token = await safeGetToken();
+            if (!token) { showToast('انتهت الجلسة، سجل دخول مرة أخرى', 'error'); return; }
             const res = await fetch(`${API_BASE}/cart/add/${course.id}`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isOnline }),
             });
             if (!res.ok) {
-                if (res.status === 401) {
-                    showToast('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى', 'error');
-                    navigate('/sign-in');
-                    return;
-                }
-                const msgs = { 404: 'الدورة غير موجودة', 409: 'الدورة موجودة بالفعل في السلة', 500: 'خطأ في الخادم' };
-                throw new Error(msgs[res.status] || 'فشل إضافة الدورة');
-            }
+    if (res.status === 401) {
+        showToast('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى', 'error');
+        navigate('/sign-in'); // or trigger Clerk's signOut() first if you want to fully clear state
+        return;
+    }
+    const msgs = { 404: 'الدورة غير موجودة', 409: 'الدورة موجودة بالفعل في السلة', 500: 'خطأ في الخادم' };
+    throw new Error(msgs[res.status] || 'فشل إضافة الدورة');
+}
             const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
             if (!cartItems.some(i => i.id === course.id)) {
                 cartItems.push({
