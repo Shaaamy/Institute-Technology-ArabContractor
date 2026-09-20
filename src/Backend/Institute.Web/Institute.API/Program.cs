@@ -79,7 +79,9 @@ builder.Services.AddCors(options =>
         builder => builder
             .WithOrigins(
                 "http://localhost:5173",
-                "https://acwebsite-icmet-test.azurewebsites.net"
+                "https://acwebsite-icmet-test.azurewebsites.net",
+                "https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net"
+
             )
             .AllowAnyHeader()
             .AllowAnyMethod());
