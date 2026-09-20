@@ -18,6 +18,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -25,13 +26,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 Console.WriteLine("AzureStorage Conn = " + builder.Configuration["AzureStorage:ConnectionString"]);
 
-// ======= DbContext =======
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 
-// rate limiting
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("CheckoutLimit", opt =>
@@ -88,7 +87,6 @@ builder.Services.AddCors(options =>
 #endregion
 
 #region (Dependency Injection)
-
 builder.Services.Configure<AzureStorageSettings>(
     builder.Configuration.GetSection("AzureStorage"));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
@@ -125,10 +123,6 @@ builder.Services.AddScoped<IAuthorizationHandler, ManagerAuthorizationHandler>()
 
 builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("PaymentSettings"));
 
-// NOTE: you had this "BankClient" HttpClient registered TWICE (once without a
-// timeout, once with). Only the second one is needed — the duplicate above it
-// has been removed here since AddHttpClient with the same name just adds a
-// second configuration delegate that both run, which is redundant.
 builder.Services.AddHttpClient("BankClient", client =>
 {
     var paymentSettings = builder.Configuration
@@ -151,17 +145,35 @@ builder.Services.AddHttpClient("BankClient", client =>
 
 #region (Authentication And Authorization)
 var clerkAuthority = builder.Configuration["Clerk:Authority"];
+var jwksUrl = $"{clerkAuthority}/.well-known/jwks.json";
+
+List<SecurityKey> clerkSigningKeys = new();
+using (var startupHttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) })
+{
+    for (int attempt = 1; attempt <= 3; attempt++)
+    {
+        try
+        {
+            var json = await startupHttpClient.GetStringAsync(jwksUrl);
+            var jwks = new Microsoft.IdentityModel.Tokens.JsonWebKeySet(json);
+            clerkSigningKeys = jwks.GetSigningKeys().ToList();
+            Console.WriteLine($"✅ Clerk JWKS fetched manually, {clerkSigningKeys.Count} key(s) loaded (attempt {attempt})");
+            break;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Attempt {attempt} to fetch Clerk JWKS failed: {ex}");
+            if (attempt < 3) await Task.Delay(1000 * attempt);
+        }
+    }
+}
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = clerkAuthority;
-        options.MetadataAddress = $"{clerkAuthority}/.well-known/openid-configuration";
         options.RequireHttpsMetadata = true;
         options.MapInboundClaims = false;
-        options.RefreshOnIssuerKeyNotFound = true;
-        options.BackchannelTimeout = TimeSpan.FromSeconds(30);
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -169,7 +181,26 @@ builder.Services
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            NameClaimType = "sub"
+            NameClaimType = "sub",
+            IssuerSigningKeys = clerkSigningKeys,
+            IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+            {
+                if (clerkSigningKeys.Any(k => k.KeyId == kid))
+                    return clerkSigningKeys.Where(k => k.KeyId == kid);
+
+                try
+                {
+                    using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+                    var json = client.GetStringAsync(jwksUrl).GetAwaiter().GetResult();
+                    var jwks = new Microsoft.IdentityModel.Tokens.JsonWebKeySet(json);
+                    clerkSigningKeys = jwks.GetSigningKeys().ToList();
+                    return clerkSigningKeys.Where(k => k.KeyId == kid);
+                }
+                catch
+                {
+                    return clerkSigningKeys;
+                }
+            }
         };
 
         options.Events = new JwtBearerEvents
@@ -186,15 +217,18 @@ builder.Services
             },
             OnChallenge = context =>
             {
-                Console.WriteLine($"⚠️ CHALLENGE: error={context.Error}, description={context.ErrorDescription}");
-                return Task.CompletedTask;
+                context.HandleResponse();
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsJsonAsync(new
+                {
+                    error = context.Error,
+                    errorDescription = context.ErrorDescription
+                });
             }
         };
     });
 
-// Single AddAuthorization call — merged all policies from both places they
-// were previously defined, since only the LAST call was actually winning
-// and the News/Books/Lecturers/Courses policies were being silently dropped.
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("News", policy =>
@@ -217,35 +251,13 @@ builder.Services.AddAuthorization(options =>
 });
 #endregion
 
-// ======= AutoMapper =======
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfiles>();
 });
 
-// ======= Build App =======
 var app = builder.Build();
 
-// ======= Pre-fetch Clerk JWKS at startup =======
-// Forces the JwtBearer ConfigurationManager to resolve and cache the JWKS
-// before the app starts accepting traffic, eliminating the cold-start race.
-{
-    var jwtOptions = app.Services
-        .GetRequiredService<IOptionsMonitor<JwtBearerOptions>>()
-        .Get(JwtBearerDefaults.AuthenticationScheme);
-
-    try
-    {
-        var config = await jwtOptions.ConfigurationManager!.GetConfigurationAsync(default);
-        Console.WriteLine($"✅ Clerk JWKS warmed up, {config.SigningKeys.Count} key(s) loaded");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("❌ Failed to warm up Clerk JWKS at startup: " + ex);
-    }
-}
-
-// ======= Middleware =======
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
