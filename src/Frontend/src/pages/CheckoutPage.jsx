@@ -212,7 +212,7 @@ function TermsModal({ onClose, onAccept }) {
 
                     <div style={{ background: '#f0f9ff', borderRadius: 10, padding: '12px 16px', borderRight: '4px solid #0865a8' }}>
                         <p style={{ margin: 0, fontSize: '0.78rem', color: '#1e40af', fontWeight: 600 }}>
-                            آخر تحديث: يناير 2025 — المعهد التكنولوجي لهندسة التشييد والإدارة (ICMET)
+                            آخر تحديث: يناير 2025 — المعهد التكنولوجي لهندسة التشييد والإدارة (ICEMT)
                         </p>
                     </div>
                 </div>
@@ -620,7 +620,7 @@ export default function CheckoutPage() {
                                                 style={{ color: '#0865a8', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}>
                                                 الشروط والأحكام وسياسة الاسترجاع
                                             </span>
-                                            {' '}الخاصة بالمعهد التكنولوجي لهندسة التشييد والإدارة (ICMET).
+                                            {' '}الخاصة بالمعهد التكنولوجي لهندسة التشييد والإدارة (ICEMT).
                                         </p>
                                     </div>
                                     {termsError && (

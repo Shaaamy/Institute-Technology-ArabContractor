@@ -262,7 +262,7 @@ export default function Home() {
 
     const statsCounted = useRef(false);
 
-    useEffect(() => { document.title = 'المعهد التكنولوجي — ICMET'; }, []);
+    useEffect(() => { document.title = 'المعهد التكنولوجي — ICEMT'; }, []);
 
     useEffect(() => {
         fetch('https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api/News/getAllNews')
