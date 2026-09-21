@@ -17,7 +17,11 @@ import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
     const { t, i18n } = useTranslation();
-    const isRTL = i18n.language === 'ar';
+    const isRTL = true; // Arabic-only site now
+
+    React.useEffect(() => {
+        i18n.changeLanguage('ar');
+    }, [i18n]);
 
     const quickLinks = [
         { key: 'footer.links.about', path: '/overview' },
@@ -29,8 +33,8 @@ const Footer = () => {
         content: '""',
         position: 'absolute',
         bottom: -8,
-        left: isRTL ? 'auto' : 0,
-        right: isRTL ? 0 : 'auto',
+        left: 'auto',
+        right: 0,
         width: 40,
         height: 2,
         bgcolor: '#f57c00',
@@ -39,7 +43,7 @@ const Footer = () => {
     return (
         <Box
             component="footer"
-            dir={isRTL ? 'rtl' : 'ltr'}
+            dir="rtl"
             sx={{
                 backgroundImage: 'linear-gradient(#070707,#0865a8)',
                 color: 'white',
@@ -116,7 +120,7 @@ const Footer = () => {
                                     display: 'flex', alignItems: 'center', gap: 1.5,
                                     transition: 'all 0.2s ease',
                                     '&:hover': {
-                                        transform: isRTL ? 'translateX(-3px)' : 'translateX(3px)',
+                                        transform: 'translateX(-3px)',
                                         '& .MuiSvgIcon-root': { color: '#f57c00' },
                                     },
                                 }}>
@@ -187,12 +191,12 @@ const Footer = () => {
                                     color: 'rgba(255,255,255,0.85)', transition: 'all 0.2s ease', py: 0.5,
                                     '&:hover': {
                                         color: '#f57c00',
-                                        transform: isRTL ? 'translateX(-5px)' : 'translateX(5px)',
+                                        transform: 'translateX(-5px)',
                                         '& .arrow': { color: '#f57c00' },
                                     },
                                 }}>
                                     <Box component="span" className="arrow" sx={{ color: '#0865a8', fontWeight: 'bold', fontSize: '0.7rem', transition: 'color 0.2s ease', flexShrink: 0 }}>
-                                        {isRTL ? '◄' : '►'}
+                                        ◄
                                     </Box>
                                     {t(key)}
                                 </MuiLink>
