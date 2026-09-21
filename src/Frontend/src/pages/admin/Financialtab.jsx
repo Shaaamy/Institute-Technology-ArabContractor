@@ -255,10 +255,10 @@ export default function FinancialTab() {
     useEffect(() => {
         const errs = [];
         Promise.allSettled([
-            apiFetch('/api/Admin/users'),
-            apiFetch('/api/Admin/planworks'),
-            apiFetch('/api/Refund/admin/all'),
-            apiFetch('/api/Admin/stats'),
+            apiFetch('/Admin/users'),
+            apiFetch('/Admin/planworks'),
+            apiFetch('/Refund/admin/all'),
+            apiFetch('/Admin/stats'),
         ]).then(([u, p, r, s]) => {
             if (u.status === 'fulfilled' && Array.isArray(u.value)) setUsersData(u.value);
             else errs.push('فشل تحميل بيانات المستخدمين');
