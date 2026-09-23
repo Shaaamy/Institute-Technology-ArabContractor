@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { SignedIn, SignedOut, SignInButton, useUser, useAuth } from '@clerk/clerk-react';
 import { Button } from '@mui/material';
 
-const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
+const API_BASE = 'https://icemt.arabcont.com/api';
 
 function resolveCertUrl(url) {
     if (!url) return null;

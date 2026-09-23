@@ -6,7 +6,7 @@ const Instructors = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const API_BASE_URL = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
+    const API_BASE_URL = 'https://icemt.arabcont.com/api';
 
     // الـ pic من الـ API بييجي full URL زي:
     // "https://acwebappbackup.blob.core.windows.net/icemt/lecturers/lect01.jpg"

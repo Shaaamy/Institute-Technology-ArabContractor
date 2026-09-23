@@ -30,8 +30,8 @@ export const ADMIN_EMAILS = [
     'mahmoud_salah@arabcont.com',
 ];
 
-export const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
-export const API_HOST = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
+export const API_BASE = 'https://icemt.arabcont.com/api';
+export const API_HOST = 'https://icemt.arabcont.com/api';
 export const NAVBAR_H = 70;
 export const OVERVIEW_H = 38;
 export const ITEMS_PER_PAGE = 10;

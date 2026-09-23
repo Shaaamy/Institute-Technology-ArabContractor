@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api/sitemap.xml
+Sitemap: https://icemt.arabcont.com/api/sitemap.xml

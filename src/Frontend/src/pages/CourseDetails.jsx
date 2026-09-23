@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 
-const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
+const API_BASE = 'https://icemt.arabcont.com/api';
 
 const font = '"Noto Kufi Arabic",serif';
 

@@ -6,7 +6,7 @@ import {
     XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
 
-const BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
+const BASE = 'https://icemt.arabcont.com/api';
 const LOGO_SRC = new URL('../../assets/black.webp', import.meta.url).href;
 
 const T = {

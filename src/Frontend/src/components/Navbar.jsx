@@ -25,7 +25,7 @@ import { useTranslation } from 'react-i18next';
 const ADMIN_EMAILS = ['yasminamaged22@gmail.com', 'abeer.naguib@gmail.com', 'amrshamy91@gmail.com', 'abdelmawla1642@gmail.com', 'mostafa.awaad@gmail.com', 'samiryousri96@gmail.com', 'mahmoud_salah@arabcont.com'];
 const RECENT_SEARCHES_KEY = 'recentSearches';
 const MAX_RECENT_SEARCHES = 5;
-const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api';
+const API_BASE = 'https://icemt.arabcont.com/api';
 
 const Navbar = () => {
     const { t, i18n } = useTranslation();
