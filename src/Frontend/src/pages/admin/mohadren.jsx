@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { T } from "../../components/admin/constants";
 
 // ── API base ──────────────────────────────────────────────────────────────────
-const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api/admin/AdminLecturer';
+const API_BASE = 'https://icemt.arabcont.com/api/admin/AdminLecturer';
 const IMAGE_BASE_URL = 'https://www.arabcont.com/icemt/assets/images/';
 
 // ── Map API response → internal form shape ────────────────────────────────────

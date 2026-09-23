@@ -219,7 +219,7 @@ export default function Home() {
     const [apiStats, setApiStats] = useState(null);
 
     useEffect(() => {
-        fetch('https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api/Admin/stats')
+        fetch('https://icemt.arabcont.com/api/Admin/stats')
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(d => setApiStats(d))
             .catch(() => setApiStats(null));
@@ -265,7 +265,7 @@ export default function Home() {
     useEffect(() => { document.title = 'المعهد التكنولوجي — ICEMT'; }, []);
 
     useEffect(() => {
-        fetch('https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api/News/getAllNews')
+        fetch('https://icemt.arabcont.com/api/News/getAllNews')
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(d => {
                 setNewsItems((d.data || []).sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)).slice(0, 6));

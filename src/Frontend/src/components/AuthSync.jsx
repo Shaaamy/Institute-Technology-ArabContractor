@@ -23,7 +23,7 @@ export default function AuthSync() {
             // Only call /api/Account/sync once per session
             if (!syncedRef.current) {
                 syncedRef.current = true;
-                await fetch("https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api/Account/sync", {
+                await fetch("https://icemt.arabcont.com/api/Account/sync", {
                     method: "POST",
                     headers: {
                         Authorization: `Bearer ${window.__clerkToken}`,
