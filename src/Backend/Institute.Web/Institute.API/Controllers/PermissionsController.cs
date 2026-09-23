@@ -21,6 +21,7 @@ namespace Institute.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAllAsync();
+
             return Ok(result);
         }
 
@@ -28,23 +29,11 @@ namespace Institute.API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null) return NotFound();
+
+            if (result == null)
+                return NotFound();
 
             return Ok(result);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] string name)
-        {
-            await _service.CreateAsync(name);
-            return Ok();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _service.DeleteAsync(id);
-            return Ok();
         }
     }
 }

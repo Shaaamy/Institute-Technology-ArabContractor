@@ -11,8 +11,8 @@ namespace Institute.Application.Interfaces.IService
     {
         Task<IEnumerable<Permission>> GetAllAsync();
         Task<Permission?> GetByIdAsync(int id);
-        Task CreateAsync(string name);
-        Task DeleteAsync(int id);
+        //Task CreateAsync(string name);
+        //Task DeleteAsync(int id);
     }
 }
 

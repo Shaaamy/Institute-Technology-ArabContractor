@@ -148,7 +148,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<UserPermission>()
             .HasOne(x => x.Permission)
-            .WithMany()
+            .WithMany(x => x.UserPermissions)
             .HasForeignKey(x => x.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
         // Cart

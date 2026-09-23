@@ -13,9 +13,9 @@ namespace Institute.Application.Services
     {
         private readonly IRepository<Permission> _permissionRepo;
 
-        public PermissionService(IRepository<Permission> repo)
+        public PermissionService(IRepository<Permission> permissionRepo)
         {
-            _permissionRepo = repo;
+            _permissionRepo = permissionRepo;
         }
 
         public async Task<IEnumerable<Permission>> GetAllAsync()
@@ -26,26 +26,6 @@ namespace Institute.Application.Services
         public async Task<Permission?> GetByIdAsync(int id)
         {
             return await _permissionRepo.GetByIdAsync(id);
-        }
-
-        public async Task CreateAsync(string name)
-        {
-            var permission = new Permission
-            {
-                Name = name
-            };
-
-            await _permissionRepo.AddAsync(permission);
-            await _permissionRepo.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var permission = await _permissionRepo.GetByIdAsync(id);
-            if (permission == null) return;
-
-            _permissionRepo.Delete(permission);
-            await _permissionRepo.SaveChangesAsync();
         }
     }
 }

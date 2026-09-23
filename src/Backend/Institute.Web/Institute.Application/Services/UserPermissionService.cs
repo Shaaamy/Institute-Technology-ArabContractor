@@ -5,96 +5,107 @@ using Institute.Domain.specifications.PermissionsSpec;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Institute.Application.Services
 {
     public class UserPermissionService : IUserPermissionService
     {
-        private readonly IRepository<UserPermission> _userpermissionsRepo;
+        private readonly IRepository<UserPermission> _userPermissionsRepo;
+        private readonly IRepository<AppUser> _appUserRepo;
 
-        public UserPermissionService(IRepository<UserPermission> userpermissionsRepo)
+        public UserPermissionService(
+            IRepository<UserPermission> userPermissionsRepo,
+            IRepository<AppUser> appUserRepo)
         {
-            _userpermissionsRepo = userpermissionsRepo;
+            _userPermissionsRepo = userPermissionsRepo;
+            _appUserRepo = appUserRepo;
         }
 
         public async Task AssignAsync(int userId, int permissionId)
         {
-            var exists = await _userpermissionsRepo
-                .AnyAsync(x => x.AppUserId == userId && x.PermissionId == permissionId);
+            var user = await _appUserRepo.GetByIdAsync(userId);
 
-            if (exists)
-                return;
+            if (user == null)
+                throw new Exception("User not found");
 
-            var userPermission = new UserPermission
+            var exists = await _userPermissionsRepo.AnyAsync(
+                x => x.AppUserId == userId &&
+                     x.PermissionId == permissionId);
+
+            if (!exists)
             {
-                AppUserId = userId,
-                PermissionId = permissionId
-            };
+                var userPermission = new UserPermission
+                {
+                    AppUserId = userId,
+                    PermissionId = permissionId
+                };
 
-            await _userpermissionsRepo.AddAsync(userPermission);
-            await _userpermissionsRepo.SaveChangesAsync();
+                await _userPermissionsRepo.AddAsync(userPermission);
+            }
+
+            // User has at least one admin permission
+            user.IsAdmin = true;
+
+            await _userPermissionsRepo.SaveChangesAsync();
         }
 
         public async Task RemoveAsync(int userId, int permissionId)
         {
-            var spec = new UserPermissionByUserAndPermissionSpec(userId, permissionId);
+            var spec = new UserPermissionByUserAndPermissionSpec(
+                userId,
+                permissionId);
 
-            var entity = (await _userpermissionsRepo.ListAsync(spec))
+            var entity = (await _userPermissionsRepo.ListAsync(spec))
                 .FirstOrDefault();
 
             if (entity == null)
                 return;
 
-            _userpermissionsRepo.Delete(entity);
-            await _userpermissionsRepo.SaveChangesAsync();
+            _userPermissionsRepo.Delete(entity);
+
+            // Check if the user still has other permissions
+            var hasOtherPermissions = await _userPermissionsRepo.AnyAsync(
+                x => x.AppUserId == userId &&
+                     x.PermissionId != permissionId);
+
+            var user = await _appUserRepo.GetByIdAsync(userId);
+
+            if (user != null)
+            {
+                user.IsAdmin = hasOtherPermissions;
+            }
+
+            await _userPermissionsRepo.SaveChangesAsync();
         }
 
         public async Task<List<string>> GetUserPermissionsAsync(int userId)
         {
             var spec = new UserPermissionsSpec(userId);
 
-            var result = await _userpermissionsRepo.ListAsync(spec);
+            var result = await _userPermissionsRepo.ListAsync(spec);
 
             return result
+                .Where(x => x.Permission != null)
                 .Select(x => x.Permission.Name)
                 .ToList();
         }
 
-        //public async Task<List<string>> GetPermissionsByClerkId(string clerkId)
-        //{
-        //    // ✅ 1. هات اليوزر من UserRepo مش UserPermissionRepo
-        //    var user = await _userpermissionsRepo.GetByClerkIdAsync(clerkId);
-
-        //    if (user == null)
-        //        return new List<string>();
-
-        //    // ✅ 2. هات كل اليوزر بيرميشن
-        //    var all = await _userpermissionsRepo.GetAllAsync();
-
-        //    // ⚠️ لو مفيش Include → Permission ممكن تبقى null
-        //    var result = all
-        //        .Where(x => x.Id == user.Id)
-        //        .Where(x => x.Permission != null)
-        //        .Select(x => x.Permission.Name)
-        //        .ToList();
-
-        //    return result;
-        //}
-
-        public async Task<List<string>> GetPermissionsByClerkId(string clerkId)
+        public async Task<List<string>> GetPermissionsByClerkId(
+            string clerkId)
         {
-            var user = await _userpermissionsRepo.GetByClerkIdAsync(clerkId);
+            var user = await _appUserRepo.GetByClerkIdAsync(clerkId);
 
             if (user == null)
                 return new List<string>();
 
             var spec = new UserPermissionsSpec(user.Id);
 
-            var userPermissions = await _userpermissionsRepo.GetAllWithSpecAsync(spec);
+            var userPermissions =
+                await _userPermissionsRepo.GetAllWithSpecAsync(spec);
 
             return userPermissions
+                .Where(x => x.Permission != null)
                 .Select(x => x.Permission.Name)
                 .ToList();
         }

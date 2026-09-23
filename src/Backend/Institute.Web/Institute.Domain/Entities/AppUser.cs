@@ -20,6 +20,7 @@ namespace Institute.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; }
         public bool IsManager { get; set; }
+        public bool IsAdmin { get; set; }
         // Navigation
         public ICollection<Cart> Carts { get; set; } = new HashSet<Cart>();
         public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
