@@ -19,7 +19,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 
-const BASE = "https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/api";
+const BASE = "https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net/";
 
 const T = {
     orange: '#f57c00', orangeLight: '#ff9a3c', orangeDark: '#bf5200',

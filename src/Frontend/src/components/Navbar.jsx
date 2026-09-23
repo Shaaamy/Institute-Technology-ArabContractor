@@ -29,11 +29,12 @@ const API_BASE = 'https://icmet-a3bvdmgua9akf7c5.westeurope-01.azurewebsites.net
 
 const Navbar = () => {
     const { t, i18n } = useTranslation();
-    const isRTL = i18n.language === 'ar';
+    const isRTL = true; // Arabic-only site now
 
-    const toggleLanguage = () => {
-        i18n.changeLanguage(isRTL ? 'en' : 'ar');
-    };
+    // Force Arabic on mount (in case i18n was previously set to 'en' via localStorage, etc.)
+    useEffect(() => {
+        i18n.changeLanguage('ar');
+    }, [i18n]);
 
     const [mobileOpen, setMobileOpen] = useState(false);
     const [mobileCoursesOpen, setMobileCoursesOpen] = useState(false);
@@ -89,7 +90,7 @@ const Navbar = () => {
         { ar: 'مجلس قادة المستقبل', en: 'Future Leaders Council', path: '/future-leaders' },
     ];
 
-    const label = (item) => isRTL ? item.ar : item.en;
+    const label = (item) => item.ar;
 
     const updateCartCount = () => {
         try {
@@ -261,23 +262,6 @@ const Navbar = () => {
         else if (e.key === 'Escape') { setSearchFocused(false); setActiveSuggestionIndex(-1); searchInputRef.current?.blur(); }
     };
 
-    const LangToggle = ({ sx = {} }) => (
-        <Button onClick={toggleLanguage} size="small"
-            sx={{
-                minWidth: 46, height: 28, px: 1, borderRadius: '6px',
-                border: '2px solid #0865a8', color: '#0865a8',
-                fontWeight: 'bold', fontSize: '0.75rem', letterSpacing: '0.5px',
-                bgcolor: 'transparent', fontFamily: '"Noto Kufi Arabic",serif',
-                transition: 'all 0.2s',
-                '&:hover': { bgcolor: '#0865a8', color: '#fff' },
-                ...sx,
-            }}
-            title={isRTL ? 'Switch to English' : 'التبديل للعربية'}
-        >
-            {isRTL ? 'EN' : 'AR'}
-        </Button>
-    );
-
     return (
         <>
             <style>{`
@@ -320,7 +304,6 @@ const Navbar = () => {
                     transform: translateY(-10px);
                     z-index: 1300;
                     padding: 8px 0;
-                    /* Use inline-start so it respects dir attribute automatically */
                     inset-inline-start: 0;
                     inset-inline-end: auto;
                 }
@@ -365,14 +348,9 @@ const Navbar = () => {
                 }
             `}</style>
 
-            {/*
-              KEY: dir is set directly on the AppBar element.
-              The browser + MUI will then lay everything out in the correct direction
-              automatically — no flexDirection hacks needed.
-            */}
             <AppBar
                 position="fixed" elevation={4}
-                dir={isRTL ? 'rtl' : 'ltr'}
+                dir="rtl"
                 sx={{ bgcolor: 'white', color: '#000', py: 0.5, top: 0, zIndex: 1100, height: 70 }}
             >
                 <Toolbar sx={{ justifyContent: 'space-between', display: 'flex', px: { xs: 1, md: 4 } }}>
@@ -394,13 +372,13 @@ const Navbar = () => {
                                         fontWeight: 'bold', color: '#0865a8', fontSize: '0.8rem',
                                         whiteSpace: 'nowrap', fontFamily: '"Noto Kufi Arabic",serif',
                                     }}>
-                                        {isRTL ? 'المقاولون العرب' : 'Arab Contractors'}
+                                        المقاولون العرب
                                     </Typography>
                                     <Typography variant="caption" sx={{
                                         color: '#000', display: { xs: 'none', md: 'block' },
                                         fontFamily: '"Noto Kufi Arabic",serif',
                                     }}>
-                                        {isRTL ? 'المعهد التكنولوجى لهندسة التشييد والإدارة' : 'Institute of Construction Engineering & Management Technology'}
+                                        المعهد التكنولوجى لهندسة التشييد والإدارة
                                     </Typography>
                                 </Box>
                             )}
@@ -415,7 +393,7 @@ const Navbar = () => {
                                 {t('nav.courses')}
                             </Button>
                             <div className="courses-dropdown-menu">
-                                <Box sx={{ display: 'flex', height: '420px' }} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <Box sx={{ display: 'flex', height: '420px' }} dir="rtl">
                                     <Box sx={{
                                         width: '280px',
                                         borderInlineEnd: '1px solid #e0e0e0',
@@ -491,7 +469,7 @@ const Navbar = () => {
                                                                             <Box sx={{ paddingInlineStart: 4 }}>
                                                                                 {sub.topics.map(topic => (
                                                                                     <Link key={topic.id} to={topic.link} style={{ textDecoration: 'none' }}>
-                                                                                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, py: 0.8, px: 1.5, mb: 0.5, borderRadius: 1, cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(245,124,0,0.08)', transform: isRTL ? 'translateX(-4px)' : 'translateX(4px)', '& .topic-bullet': { bgcolor: '#f57c00' } } }}>
+                                                                                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, py: 0.8, px: 1.5, mb: 0.5, borderRadius: 1, cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(245,124,0,0.08)', transform: 'translateX(-4px)', '& .topic-bullet': { bgcolor: '#f57c00' } } }}>
                                                                                             <Box className="topic-bullet" sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#0865a8', mt: 0.8, flexShrink: 0, transition: 'all 0.2s' }} />
                                                                                             <Typography sx={{ fontSize: '0.8rem', fontFamily: '"Noto Kufi Arabic",serif', color: '#444', lineHeight: 1.6 }}>
                                                                                                 {topic.name.length > 50 ? topic.name.substring(0, 50) + '...' : topic.name}
@@ -532,9 +510,8 @@ const Navbar = () => {
                                 boxShadow: searchFocused ? '0 0 0 2px rgba(8,101,168,0.1)' : 'none',
                                 borderBottom: searchFocused && dropdownVisible ? '1px solid #e0e0e0' : undefined,
                             }}>
-                                {/* Search icon on the inline-start side */}
                                 <IconButton type="submit" disabled={!searchValue.trim()}
-                                    sx={{ p: 0.5, '&:hover': { bgcolor: 'transparent' }, '&.Mui-disabled': { opacity: 0.4 }, order: isRTL ? 3 : 0 }}
+                                    sx={{ p: 0.5, '&:hover': { bgcolor: 'transparent' }, '&.Mui-disabled': { opacity: 0.4 }, order: 3 }}
                                     aria-label={t('courses.search')}>
                                     <SearchIcon sx={{ color: '#0865a8', fontSize: { xs: 18, md: 22 } }} />
                                 </IconButton>
@@ -644,7 +621,7 @@ const Navbar = () => {
                                                         </Box>
                                                         <Box sx={{ opacity: activeSuggestionIndex === i ? 1 : 0, transition: 'opacity 0.15s', color: '#0865a8', flexShrink: 0 }}>
                                                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={isRTL ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"} />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                                                             </svg>
                                                         </Box>
                                                     </Box>
@@ -708,7 +685,6 @@ const Navbar = () => {
                                         {t('nav.admin')}
                                     </Link>
                                 )}
-                                <LangToggle />
                             </Stack>
                         )}
 
@@ -744,27 +720,20 @@ const Navbar = () => {
                 </Toolbar>
             </AppBar>
 
-            {/* ── MOBILE DRAWER — right for Arabic, left for English ── */}
-            <Drawer anchor={isRTL ? 'right' : 'left'} open={mobileOpen} onClose={toggleDrawer(false)}>
-                <Box sx={{ width: 300, p: 2, bgcolor: 'white', height: '100%' }} dir={isRTL ? 'rtl' : 'ltr'}>
+            {/* ── MOBILE DRAWER ── */}
+            <Drawer anchor="right" open={mobileOpen} onClose={toggleDrawer(false)}>
+                <Box sx={{ width: 300, p: 2, bgcolor: 'white', height: '100%' }} dir="rtl">
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '2px solid #0865a8' }}>
                         <Typography variant="h6" sx={{ fontFamily: '"Noto Kufi Arabic",serif', color: '#0865a8', fontWeight: 'bold' }}>{t('nav.menu')}</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <LangToggle sx={{ height: 24, minWidth: 40, fontSize: '0.7rem' }} />
-                            <IconButton onClick={toggleDrawer(false)} sx={{ color: '#f57c00', '&:hover': { bgcolor: 'rgba(245,124,0,0.08)' } }}><CloseIcon /></IconButton>
-                        </Box>
+                        <IconButton onClick={toggleDrawer(false)} sx={{ color: '#f57c00', '&:hover': { bgcolor: 'rgba(245,124,0,0.08)' } }}><CloseIcon /></IconButton>
                     </Box>
 
-                    {/*
-                      Shared text props for all drawer items.
-                      textAlign:'start' = left in LTR, right in RTL — no JS needed.
-                    */}
                     <List>
                         {/* Training Courses */}
                         <ListItemButton onClick={() => setMobileCoursesOpen(!mobileCoursesOpen)}
                             sx={{ bgcolor: mobileCoursesOpen ? 'rgba(8,101,168,0.08)' : 'transparent', borderRadius: 1, mb: 0.5, '&:hover': { bgcolor: 'rgba(8,101,168,0.12)' }, justifyContent: 'space-between' }}>
                             <ListItemText primary={t('nav.courses')} primaryTypographyProps={{ fontFamily: '"Noto Kufi Arabic",serif', fontWeight: 'bold', color: '#0865a8', textAlign: 'start' }} />
-                            {mobileCoursesOpen ? <ExpandMoreIcon sx={{ color: '#0865a8' }} /> : <ChevronRightIcon sx={{ color: '#0865a8', transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
+                            {mobileCoursesOpen ? <ExpandMoreIcon sx={{ color: '#0865a8' }} /> : <ChevronRightIcon sx={{ color: '#0865a8' }} />}
                         </ListItemButton>
                         <Collapse in={mobileCoursesOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding sx={{ paddingInlineStart: 2 }}>
@@ -778,7 +747,7 @@ const Navbar = () => {
                                                     onClick={() => { if (course.link) { navigate(course.link); toggleDrawer(false)(); } else if (course.sub) { setOpenSub(openSub === course.id ? null : course.id); } }}
                                                     sx={{ bgcolor: 'rgba(0,0,0,0.02)', mb: 0.5, borderRadius: 1, '&:hover': { bgcolor: 'rgba(245,124,0,0.08)' }, justifyContent: 'space-between' }}>
                                                     <ListItemText primary={course.title} primaryTypographyProps={{ fontFamily: '"Noto Kufi Arabic",serif', fontSize: '0.9rem', textAlign: 'start' }} />
-                                                    {course.sub && (openSub === course.id ? <ExpandMoreIcon fontSize="small" sx={{ color: '#f57c00' }} /> : <ChevronRightIcon fontSize="small" sx={{ color: '#0865a8', transform: isRTL ? 'scaleX(-1)' : 'none' }} />)}
+                                                    {course.sub && (openSub === course.id ? <ExpandMoreIcon fontSize="small" sx={{ color: '#f57c00' }} /> : <ChevronRightIcon fontSize="small" sx={{ color: '#0865a8' }} />)}
                                                 </ListItemButton>
                                                 {course.sub && (
                                                     <Collapse in={openSub === course.id} timeout="auto" unmountOnExit>
@@ -789,7 +758,7 @@ const Navbar = () => {
                                                                         onClick={() => subItem.topics && setOpenTopic(openTopic === subItem.id ? null : subItem.id)}
                                                                         sx={{ borderInlineStart: '3px solid #0865a8', '&:hover': { bgcolor: 'rgba(8,101,168,0.08)' }, justifyContent: 'space-between' }}>
                                                                         <ListItemText primary={subItem.title} primaryTypographyProps={{ fontFamily: '"Noto Kufi Arabic",serif', fontSize: '0.85rem', color: '#0865a8', fontWeight: 'bold', textAlign: 'start' }} />
-                                                                        {subItem.topics && (openTopic === subItem.id ? <ExpandMoreIcon fontSize="small" sx={{ color: '#f57c00' }} /> : <ChevronRightIcon fontSize="small" sx={{ color: '#0865a8', transform: isRTL ? 'scaleX(-1)' : 'none' }} />)}
+                                                                        {subItem.topics && (openTopic === subItem.id ? <ExpandMoreIcon fontSize="small" sx={{ color: '#f57c00' }} /> : <ChevronRightIcon fontSize="small" sx={{ color: '#0865a8' }} />)}
                                                                     </ListItemButton>
                                                                     {subItem.topics && (
                                                                         <Collapse in={openTopic === subItem.id} timeout="auto" unmountOnExit>
@@ -840,7 +809,7 @@ const Navbar = () => {
                         <ListItemButton onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
                             sx={{ bgcolor: mobileAboutOpen ? 'rgba(8,101,168,0.08)' : 'transparent', borderRadius: 1, mb: 0.5, '&:hover': { bgcolor: 'rgba(8,101,168,0.12)' }, justifyContent: 'space-between' }}>
                             <ListItemText primary={t('nav.about')} primaryTypographyProps={{ fontFamily: '"Noto Kufi Arabic",serif', fontWeight: 'bold', color: '#0865a8', textAlign: 'start' }} />
-                            {mobileAboutOpen ? <ExpandMoreIcon sx={{ color: '#0865a8' }} /> : <ChevronRightIcon sx={{ color: '#0865a8', transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
+                            {mobileAboutOpen ? <ExpandMoreIcon sx={{ color: '#0865a8' }} /> : <ChevronRightIcon sx={{ color: '#0865a8' }} />}
                         </ListItemButton>
                         <Collapse in={mobileAboutOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding sx={{ paddingInlineStart: 2 }}>
@@ -867,7 +836,7 @@ const Navbar = () => {
                         <ListItemButton onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
                             sx={{ bgcolor: mobileServicesOpen ? 'rgba(8,101,168,0.08)' : 'transparent', borderRadius: 1, mb: 0.5, '&:hover': { bgcolor: 'rgba(8,101,168,0.12)' }, justifyContent: 'space-between' }}>
                             <ListItemText primary={t('nav.services')} primaryTypographyProps={{ fontFamily: '"Noto Kufi Arabic",serif', fontWeight: 'bold', color: '#0865a8', textAlign: 'start' }} />
-                            {mobileServicesOpen ? <ExpandMoreIcon sx={{ color: '#0865a8' }} /> : <ChevronRightIcon sx={{ color: '#0865a8', transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
+                            {mobileServicesOpen ? <ExpandMoreIcon sx={{ color: '#0865a8' }} /> : <ChevronRightIcon sx={{ color: '#0865a8' }} />}
                         </ListItemButton>
                         <Collapse in={mobileServicesOpen} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding sx={{ paddingInlineStart: 2 }}>
