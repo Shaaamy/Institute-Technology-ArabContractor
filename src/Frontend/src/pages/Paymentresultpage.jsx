@@ -26,7 +26,7 @@ export default function PaymentResultPage() {
     const verifyPayment = async (orderId, resultIndicator) => {
         try {
             const res = await fetch(
-                `${API_BASE}/api/checkout/result?orderId=${orderId}&resultIndicator=${resultIndicator}`,
+                `${API_BASE}/checkout/result?orderId=${orderId}&resultIndicator=${resultIndicator}`,
                 { method: "GET" }
             );
             const data = await res.json();
@@ -37,7 +37,7 @@ export default function PaymentResultPage() {
                 return;
             }
 
-            const orderRes = await fetch(`${API_BASE}/api/checkout/order/${orderId}`);
+            const orderRes = await fetch(`${API_BASE}/checkout/order/${orderId}`);
             const orderJson = await orderRes.json();
             if (orderJson.success) setOrderData(orderJson.data);
 
