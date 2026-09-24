@@ -16,17 +16,20 @@ namespace Institute.API.Controllers
         private readonly ICurrentUserService _currentUser;
         private readonly ICheckoutService _checkoutService;
         private readonly BankPaymentService _bankPaymentService;
+        private readonly IUserPermissionService _permissionService;
 
         public RefundController(
             IRefundService refundService,
             ICurrentUserService currentUser,
             ICheckoutService checkoutService,
-            BankPaymentService bankPaymentService)
+            BankPaymentService bankPaymentService,
+            IUserPermissionService permissionService)
         {
             _refundService = refundService;
             _currentUser = currentUser;
             _checkoutService = checkoutService;
             _bankPaymentService = bankPaymentService;
+            _permissionService = permissionService;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -121,9 +124,11 @@ namespace Institute.API.Controllers
 
         /// GET /api/refund/admin/all?status=Pending
         [HttpGet("admin/all")]
-      //  [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> GetAll([FromQuery] string? status = null)
         {
+            if (!await HasRefundAccessAsync())
+                return Forbid();
+
             var requests = await _refundService.GetAllAsync(status);
             return Ok(new
             {
@@ -135,9 +140,11 @@ namespace Institute.API.Controllers
 
         /// PUT /api/refund/{id}/approve
         [HttpPut("{id:int}/approve")]
-        [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> Approve(int id, [FromBody] ApproveRefundDto dto)
         {
+            if (!await HasRefundAccessAsync())
+                return Forbid();
+
             var (isSuccess, message) = await _refundService.ApproveAsync(id, dto.AdminNote);
             if (!isSuccess)
                 return BadRequest(new { success = false, message });
@@ -148,9 +155,11 @@ namespace Institute.API.Controllers
 
         /// PUT /api/refund/{id}/reject
         [HttpPut("{id:int}/reject")]
-        [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> Reject(int id, [FromBody] RejectRefundDto dto)
         {
+            if (!await HasRefundAccessAsync())
+                return Forbid();
+
             if (string.IsNullOrWhiteSpace(dto.RejectionReason))
                 return BadRequest(new { success = false, message = "يجب ذكر سبب الرفض." });
 
@@ -164,9 +173,11 @@ namespace Institute.API.Controllers
 
         /// PUT /api/refund/{id}/sent
         [HttpPut("{id:int}/sent")]
-        [Authorize(Roles = "Admin")]  // ✅
         public async Task<IActionResult> MarkAsSent(int id, [FromBody] MarkSentDto dto)
         {
+            if (!await HasRefundAccessAsync())
+                return Forbid();
+
             var (isSuccess, message) = await _refundService.MarkAsSentAsync(
                 id, dto.AdminNote, _bankPaymentService);
             if (!isSuccess)
@@ -174,6 +185,22 @@ namespace Institute.API.Controllers
 
             var request = await _refundService.GetByIdAsync(id);
             return Ok(new { success = true, message, data = MapToDto(request!) });
+        }
+
+        // ─── Permission check — same rule the frontend already trusts ──
+        // Grants access if the caller is a manager, OR has been granted the
+        // "Refunds" permission (matching UserPermissionsMeController's logic
+        // and the "permissionName: 'Refunds'" tab check in the React admin UI).
+        private async Task<bool> HasRefundAccessAsync()
+        {
+            var clerkId = _currentUser.UserId;
+            if (string.IsNullOrEmpty(clerkId))
+                return false;
+
+            var (isManager, permissions) = await _permissionService.GetMyRoleAsync(clerkId);
+
+            return isManager || (permissions?.Any(p =>
+                string.Equals(p, "Refunds", StringComparison.OrdinalIgnoreCase)) ?? false);
         }
 
         // ─── Helper mapper ─────────────────────────────────────────────
