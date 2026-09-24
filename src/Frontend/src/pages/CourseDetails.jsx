@@ -1343,13 +1343,14 @@ const CourseDetails = () => {
                                                 <button className="btnViewMyCourses" style={S.btnViewMyCourses} onClick={() => navigate('/my-courses')}>عرض في دوراتي</button>
 
                                                 {onlineLoading ? (
-                                                    <div style={{ padding: '12px 0', textAlign: 'center', fontSize: '13px', color: '#7c3aed', fontFamily }}>
+                                                    <div style={{ padding: '12px 0', textAlign: 'center', fontSize: '13px', color: '#7c3aed', fontFamily: font }}>
                                                         <svg style={{ width: 16, height: 16, animation: 'spin 1s linear infinite', verticalAlign: 'middle', marginLeft: 6 }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                                                         جاري تحميل رابط الاجتماع...
                                                     </div>
                                                 ) : onlineSetting?.visible && onlineSetting?.link ? (
                                                     <a href={onlineSetting.link} target="_blank" rel="noopener noreferrer"
-                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 20px', boxSizing: 'border-box', background: 'linear-gradient(135deg,#5b21b6,#7c3aed)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: 'bold', fontFamily, boxShadow: '0 4px 14px rgba(124,58,237,0.35)', transition: 'all .25s ease' }}
+
+
                                                         onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(124,58,237,0.5)'; }}
                                                         onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 14px rgba(124,58,237,0.35)'; }}>
                                                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -1358,8 +1359,7 @@ const CourseDetails = () => {
                                                     🌐 انضم إلى الاجتماع الإلكتروني
                                                 </a>
                                             ) : onlineSetting && !onlineSetting.visible ? (
-                                                <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8f9fa', border: '1.5px solid #e2e8f0', fontSize: '13px', color: '#6b7280', fontFamily, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                                                    🕐 رابط الاجتماع سيُتاح قريبًا
+                                                            <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8f9fa', border: '1.5px solid #e2e8f0', fontSize: '13px', color: '#6b7280', fontFamily: font, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>                                                    🕐 رابط الاجتماع سيُتاح قريبًا
                                                 </div>
                                             ) : null}
 
