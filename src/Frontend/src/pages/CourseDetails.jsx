@@ -1349,24 +1349,24 @@ const CourseDetails = () => {
                                                     </div>
                                                 ) : onlineSetting?.visible && onlineSetting?.link ? (
                                                     <a href={onlineSetting.link} target="_blank" rel="noopener noreferrer"
-
-
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 20px', boxSizing: 'border-box', background: 'linear-gradient(135deg,#5b21b6,#7c3aed)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: 'bold', fontFamily: font, boxShadow: '0 4px 14px rgba(124,58,237,0.35)', transition: 'all .25s ease' }}
                                                         onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(124,58,237,0.5)'; }}
                                                         onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 14px rgba(124,58,237,0.35)'; }}>
                                                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                                                             <path d="M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6v6l-4-4" />
-                                                    </svg>
-                                                    🌐 انضم إلى الاجتماع الإلكتروني
-                                                </a>
-                                            ) : onlineSetting && !onlineSetting.visible ? (
-                                                            <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8f9fa', border: '1.5px solid #e2e8f0', fontSize: '13px', color: '#6b7280', fontFamily: font, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>                                                    🕐 رابط الاجتماع سيُتاح قريبًا
-                                                </div>
-                                            ) : null}
+                                                        </svg>
+                                                        🌐 انضم إلى الاجتماع الإلكتروني
+                                                    </a>
+                                                ) : onlineSetting && !onlineSetting.visible ? (
+                                                    <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#f8f9fa', border: '1.5px solid #e2e8f0', fontSize: '13px', color: '#6b7280', fontFamily: font, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                                        🕐 رابط الاجتماع سيُتاح قريبًا
+                                                    </div>
+                                                ) : null}
 
-                                            {!course.isFree && (
-                                                <button className="btnRefund" style={S.btnRefund} onClick={openRefund}>💸 طلب استرداد المبلغ</button>
-                                            )}
-                                        </>
+                                                {!course.isFree && (
+                                                    <button className="btnRefund" style={S.btnRefund} onClick={openRefund}>💸 طلب استرداد المبلغ</button>
+                                                )}
+                                            </>
                                         ) : course.isFree ? (
                                             <>
                                                 {enrollMsg && (
@@ -1450,17 +1450,17 @@ const CourseDetails = () => {
                             ) : existingRefund && !refundSuccess ? (
                                 <div style={{ textAlign: 'center', padding: '10px 0' }}>
                                     <div style={{ fontSize: '52px', marginBottom: '16px' }}>{statusInfo?.icon}</div>
-                                    <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#000', marginBottom: '12px', fontFamily }}>لديك طلب استرداد مسبق</h3>
+                                    <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#000', marginBottom: '12px', fontFamily: font }}>لديك طلب استرداد مسبق</h3>
                                     <div style={{ ...S.statusBadge, backgroundColor: statusInfo?.bg, color: statusInfo?.color, margin: '0 auto 16px', display: 'inline-flex' }}>{statusInfo?.label}</div>
                                     {existingRefund.status === 'Rejected' && existingRefund.rejectionReason && (
                                         <div style={{ ...S.warningBox, textAlign: 'right', marginTop: '12px' }}>
                                             <div><strong style={{ display: 'block', marginBottom: '4px' }}>سبب الرفض:</strong>{existingRefund.rejectionReason}</div>
                                         </div>
                                     )}
-                                    {existingRefund.status === 'Pending' && <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.7', fontFamily, marginBottom: '20px' }}>طلبك قيد المراجعة. سنتواصل معك خلال 3-5 أيام عمل.</p>}
+                                    {existingRefund.status === 'Pending' && <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.7', fontFamily: font, marginBottom: '20px' }}>طلبك قيد المراجعة. سنتواصل معك خلال 3-5 أيام عمل.</p>}
                                     <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '16px', marginTop: '8px', textAlign: 'right' }}>
-                                        <div style={{ fontSize: '13px', color: '#888', fontFamily }}>رقم الطلب: <strong style={{ color: '#0865a8' }}>{existingRefund.refNumber || `#${existingRefund.id}`}</strong></div>
-                                        {existingRefund.requestedAt && <div style={{ fontSize: '13px', color: '#888', fontFamily, marginTop: '4px' }}>تاريخ الطلب: {new Date(existingRefund.requestedAt).toLocaleDateString('ar-EG')}</div>}
+                                        <div style={{ fontSize: '13px', color: '#888', fontFamily: font }}>رقم الطلب: <strong style={{ color: '#0865a8' }}>{existingRefund.refNumber || `#${existingRefund.id}`}</strong></div>
+                                        {existingRefund.requestedAt && <div style={{ fontSize: '13px', color: '#888', fontFamily: font, marginTop: '4px' }}>تاريخ الطلب: {new Date(existingRefund.requestedAt).toLocaleDateString('ar-EG')}</div>}
                                     </div>
                                     <button style={{ ...S.btnCancel, width: '100%', marginTop: '20px' }} onClick={closeRefund}>إغلاق</button>
                                 </div>
@@ -1482,7 +1482,7 @@ const CourseDetails = () => {
                                     <textarea style={S.textarea} rows={4} maxLength={500} placeholder="يرجى توضيح سبب رغبتك في استرداد المبلغ..." value={refundReason} onChange={e => { setRefundReason(e.target.value); setRefundError(null); }} />
                                     <div style={S.charCount}>{refundReason.length} / 500</div>
                                     <div style={{ borderTop: '1px dashed #e0e0e0', paddingTop: '16px', marginBottom: '4px' }}>
-                                        <p style={{ fontSize: '13px', color: '#888', marginBottom: '12px', fontFamily }}>بيانات بنكية (اختياري)</p>
+                                        <p style={{ fontSize: '13px', color: '#888', marginBottom: '12px', fontFamily: font }}>بيانات بنكية (اختياري)</p>
                                         <label style={S.formLabel}>اسم البنك</label>
                                         <input style={S.formInput} type="text" placeholder="مثال: بنك مصر" value={bankName} onChange={e => setBankName(e.target.value)} maxLength={100} />
                                         <label style={S.formLabel}>رقم الـ IBAN أو الحساب</label>
