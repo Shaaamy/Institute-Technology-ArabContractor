@@ -18,11 +18,10 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import HistoryIcon from '@mui/icons-material/History';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser, useAuth } from '@clerk/clerk-react';
 import AuthSync from '../components/AuthSync.jsx';
 import { useTranslation } from 'react-i18next';
 
-const ADMIN_EMAILS = ['yasminamaged22@gmail.com', 'abeer.naguib@gmail.com', 'amrshamy91@gmail.com', 'abdelmawla1642@gmail.com', 'mostafa.awaad@gmail.com', 'samiryousri96@gmail.com', 'mahmoud_salah@arabcont.com'];
 const RECENT_SEARCHES_KEY = 'recentSearches';
 const MAX_RECENT_SEARCHES = 5;
 const API_BASE = 'https://icemt.arabcont.com/api';
@@ -59,9 +58,55 @@ const Navbar = () => {
     const [openSub, setOpenSub] = useState(null);
     const [openTopic, setOpenTopic] = useState(null);
     const { user } = useUser();
-    const isAdmin = ADMIN_EMAILS.includes(
-        (user?.primaryEmailAddress?.emailAddress || '').toLowerCase()
-    );
+    const { getToken } = useAuth();
+
+    // ── Admin/Manager access — driven by live DB permissions, not a hardcoded email list ──
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadAdminAccess = async () => {
+            const email = (user?.primaryEmailAddress?.emailAddress || '').toLowerCase();
+            if (!email) { setIsAdmin(false); return; }
+
+            try {
+                let token = null;
+                try { token = await getToken(); } catch (_) { }
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                };
+
+                const usersRes = await fetch(`${API_BASE}/AdminUsers`, { headers });
+                if (!usersRes.ok) { if (!cancelled) setIsAdmin(false); return; }
+                const usersJson = await usersRes.json();
+
+                const me = (Array.isArray(usersJson) ? usersJson : [])
+                    .find(u => (u.email ?? u.Email ?? '').toLowerCase() === email);
+
+                if (!me) { if (!cancelled) setIsAdmin(false); return; }
+
+                if (me.isManager ?? me.IsManager) {
+                    if (!cancelled) setIsAdmin(true);
+                    return;
+                }
+
+                const myId = me.id ?? me.Id;
+                const permsRes = await fetch(`${API_BASE}/UserPermissions/${myId}`, { headers });
+                const permsJson = permsRes.ok ? await permsRes.json() : [];
+                const hasAny = Array.isArray(permsJson) && permsJson.length > 0;
+
+                if (!cancelled) setIsAdmin(hasAny);
+            } catch (err) {
+                console.error('Failed to check admin access:', err);
+                if (!cancelled) setIsAdmin(false);
+            }
+        };
+
+        loadAdminAccess();
+        return () => { cancelled = true; };
+    }, [user, getToken]);
 
     const navigate = useNavigate();
     const theme = useTheme();

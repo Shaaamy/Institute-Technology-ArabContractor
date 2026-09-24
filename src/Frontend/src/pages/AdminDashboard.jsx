@@ -26,20 +26,23 @@ import LecturersTab from './mohadren';
 import NewsTab from './NewsTab';
 import BooksTab from './BooksTab';
 import PlanworkTab from './PlanworkTab';
-import SettingsTab, { getAdminEmails } from './SettingsTab'; // ← single source of truth
+import SettingsTab from './SettingsTab'; // ← no more getAdminEmails import, it doesn't exist
 
+// ── TABS ──
+// permissionName MUST match Permission.Name in the DB — same strings used in
+// SettingsTab.jsx's ADMIN_TABS, so a permission granted there shows up here.
 const TABS = [
-    { id: 'users',        label: 'المستخدمون', icon: '👤' },
-    { id: 'courses',      label: 'الدورات',    icon: '📚' },
-    { id: 'attendance',   label: 'الحضور',     icon: '✅' },
-    { id: 'certificates', label: 'الشهادات',   icon: '📜' },
-    { id: 'refunds',      label: 'المستردات',  icon: '💳' },
-    { id: 'financial',    label: 'المالية',    icon: '💰' },
-    { id: 'lecturers',    label: 'المحاضرون',  icon: '🎓' },
-    { id: 'news',         label: 'الأخبار',    icon: '📰' },
-    { id: 'books',        label: 'الكتب',      icon: '📖' },
-    { id: 'planwork',     label: 'خطة العمل',  icon: '📋' },
-    { id: 'settings',     label: 'الإعدادات',  icon: '⚙️' },
+    { id: 'users', label: 'المستخدمون', icon: '👤', permissionName: 'Users' },
+    { id: 'courses', label: 'الدورات', icon: '📚', permissionName: 'Courses' },
+    { id: 'attendance', label: 'الحضور', icon: '✅', permissionName: 'Attendance' },
+    { id: 'certificates', label: 'الشهادات', icon: '📜', permissionName: 'Certificates' },
+    { id: 'refunds', label: 'المستردات', icon: '💳', permissionName: 'Refunds' },
+    { id: 'financial', label: 'المالية', icon: '💰', permissionName: 'Finance' },
+    { id: 'lecturers', label: 'المحاضرون', icon: '🎓', permissionName: 'Lecturers' },
+    { id: 'news', label: 'الأخبار', icon: '📰', permissionName: 'News' },
+    { id: 'books', label: 'الكتب', icon: '📖', permissionName: 'Books' },
+    { id: 'planwork', label: 'خطة العمل', icon: '📋', permissionName: 'Workplan' },
+    { id: 'settings', label: 'الإعدادات', icon: '⚙️', permissionName: 'Settings' },
 ];
 
 const AdminDashboard = () => {
@@ -48,63 +51,68 @@ const AdminDashboard = () => {
     const navigate = useNavigate();
 
     // ── Tab / UI state ──
-    const [activeTab, setActiveTab]     = useState('users');
+    const [activeTab, setActiveTab] = useState('users');
     const [expandedRow, setExpandedRow] = useState(null);
-    const [exporting, setExporting]     = useState(false);
+    const [exporting, setExporting] = useState(false);
     const [exportError, setExportError] = useState(null);
 
     // ── Data state ──
-    const [usersData, setUsersData]   = useState([]);
+    const [usersData, setUsersData] = useState([]);
     const [coursesData, setCoursesData] = useState([]);
-    const [apiStats, setApiStats]     = useState(null);
-    const [loading, setLoading]       = useState(true);
-    const [error, setError]           = useState(null);
+    const [apiStats, setApiStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // ── Attendance state ──
-    const [attendance, setAttendance]             = useState({});
+    const [attendance, setAttendance] = useState({});
     const [attendanceSaving, setAttendanceSaving] = useState({});
-    const [attError, setAttError]                 = useState(null);
-    const [attCourseFilter, setAttCourseFilter]   = useState('all');
-    const [attUserSearch, setAttUserSearch]       = useState('');
+    const [attError, setAttError] = useState(null);
+    const [attCourseFilter, setAttCourseFilter] = useState('all');
+    const [attUserSearch, setAttUserSearch] = useState('');
 
     // ── Certificate state ──
-    const [certificates, setCertificates]         = useState({});
-    const [certUploading, setCertUploading]       = useState({});
-    const [certDeleting, setCertDeleting]         = useState({});
-    const [certError, setCertError]               = useState(null);
-    const [certModal, setCertModal]               = useState(null);
-    const [certSearch, setCertSearch]             = useState('');
+    const [certificates, setCertificates] = useState({});
+    const [certUploading, setCertUploading] = useState({});
+    const [certDeleting, setCertDeleting] = useState({});
+    const [certError, setCertError] = useState(null);
+    const [certModal, setCertModal] = useState(null);
+    const [certSearch, setCertSearch] = useState('');
     const [certStatusFilter, setCertStatusFilter] = useState('all');
 
     // ── Refund state ──
-    const [refunds, setRefunds]                       = useState([]);
-    const [refundsLoading, setRefundsLoading]         = useState(false);
-    const [refundsError, setRefundsError]             = useState(null);
+    const [refunds, setRefunds] = useState([]);
+    const [refundsLoading, setRefundsLoading] = useState(false);
+    const [refundsError, setRefundsError] = useState(null);
     const [refundStatusFilter, setRefundStatusFilter] = useState('all');
-    const [refundSearch, setRefundSearch]             = useState('');
-    const [refundDetailModal, setRefundDetailModal]   = useState(null);
-    const [refundActionModal, setRefundActionModal]   = useState(null);
-    const [refundActionNote, setRefundActionNote]     = useState('');
+    const [refundSearch, setRefundSearch] = useState('');
+    const [refundDetailModal, setRefundDetailModal] = useState(null);
+    const [refundActionModal, setRefundActionModal] = useState(null);
+    const [refundActionNote, setRefundActionNote] = useState('');
     const [refundActionSaving, setRefundActionSaving] = useState(false);
-    const [refundActionError, setRefundActionError]   = useState('');
-    const [bankResultBanner, setBankResultBanner]     = useState(null);
+    const [refundActionError, setRefundActionError] = useState('');
+    const [bankResultBanner, setBankResultBanner] = useState(null);
 
     // ── Search / filter (users + courses tab) ──
     const [searchQuery, setSearchQuery] = useState('');
-    const [dateFrom, setDateFrom]       = useState('');
-    const [dateTo, setDateTo]           = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
 
     // ── Books state ──
-    const [booksData, setBooksData]   = useState([]);
-    const [booksPage, setBooksPage]   = useState(1);
+    const [booksData, setBooksData] = useState([]);
+    const [booksPage, setBooksPage] = useState(1);
     const [booksSearch, setBooksSearch] = useState('');
 
     // ── Pagination ──
-    const [usersPage, setUsersPage]     = useState(1);
+    const [usersPage, setUsersPage] = useState(1);
     const [coursesPage, setCoursesPage] = useState(1);
-    const [attPage, setAttPage]         = useState(1);
-    const [certPage, setCertPage]       = useState(1);
-    const [refundPage, setRefundPage]   = useState(1);
+    const [attPage, setAttPage] = useState(1);
+    const [certPage, setCertPage] = useState(1);
+    const [refundPage, setRefundPage] = useState(1);
+
+    // ── Current user's role/permissions (drives sidebar + access guard) ──
+    const [myRole, setMyRole] = useState({ isManager: false, tabs: new Set() });
+    const [myRoleLoading, setMyRoleLoading] = useState(true);
+    const [myRoleError, setMyRoleError] = useState(null);
 
     // ── Effects ──
     useEffect(() => { injectAdminStyles(); }, []);
@@ -114,17 +122,10 @@ const AdminDashboard = () => {
     useEffect(() => { setCertPage(1); }, [certSearch, certStatusFilter]);
     useEffect(() => { setRefundPage(1); }, [refundSearch, refundStatusFilter]);
 
-    // ── Auth guard — uses live list from localStorage ──
-    useEffect(() => {
-        if (!isLoaded || !user) return;
-        if (!getAdminEmails().includes((user.primaryEmailAddress?.emailAddress || '').toLowerCase()))
-            navigate('/');
-    }, [isLoaded, user, navigate]);
-
     // ── Auth fetch helpers ──
     const authFetch = useCallback(async (url, options = {}) => {
         let token = null;
-        try { token = await getToken(); } catch (_) {}
+        try { token = await getToken(); } catch (_) { }
         return fetch(url, {
             ...options,
             headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers },
@@ -133,9 +134,93 @@ const AdminDashboard = () => {
 
     const authFetchForm = useCallback(async (url, formData) => {
         let token = null;
-        try { token = await getToken(); } catch (_) {}
+        try { token = await getToken(); } catch (_) { }
         return fetch(url, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: formData });
     }, [getToken]);
+
+    // ── Load current user's role/permissions ──
+    // Same endpoints SettingsTab.jsx uses: /api/AdminUsers, /api/Permissions, /api/UserPermissions/{id}
+    const loadMyRole = useCallback(async () => {
+        if (!isLoaded || !user) return;
+        setMyRoleLoading(true);
+        setMyRoleError(null);
+        const myEmail = (user.primaryEmailAddress?.emailAddress || '').toLowerCase();
+
+        try {
+            const [usersRes, permsRes] = await Promise.all([
+                authFetch(`${API_BASE.replace('/api', '')}/api/AdminUsers`),
+                authFetch(`${API_BASE.replace('/api', '')}/api/Permissions`),
+            ]);
+
+            const usersJson = usersRes.ok ? await usersRes.json() : [];
+            const permsJson = permsRes.ok ? await permsRes.json() : [];
+
+            const me = (Array.isArray(usersJson) ? usersJson : [])
+                .find(u => (u.email ?? u.Email ?? '').toLowerCase() === myEmail);
+
+            if (!me) {
+                // Not in AdminUsers at all → no admin access
+                setMyRole({ isManager: false, tabs: new Set() });
+                setMyRoleLoading(false);
+                return;
+            }
+
+            const isManager = !!(me.isManager ?? me.IsManager);
+
+            if (isManager) {
+                setMyRole({ isManager: true, tabs: new Set() });
+                setMyRoleLoading(false);
+                return;
+            }
+
+            const myUserId = me.id ?? me.Id;
+            const myPermsRes = await authFetch(`${API_BASE.replace('/api', '')}/api/UserPermissions/${myUserId}`);
+            const myPermsJson = myPermsRes.ok ? await myPermsRes.json() : [];
+
+            const grantedIds = new Set(
+                (Array.isArray(myPermsJson) ? myPermsJson : [])
+                    .map(p => p?.permissionId ?? p?.PermissionId ?? p?.id ?? p?.Id)
+                    .filter(id => id != null)
+            );
+
+            const grantedNames = new Set(
+                (Array.isArray(permsJson) ? permsJson : [])
+                    .filter(p => grantedIds.has(p.id ?? p.Id))
+                    .map(p => (p.name ?? p.Name ?? '').trim().toLowerCase())
+            );
+
+            setMyRole({ isManager: false, tabs: grantedNames });
+        } catch (err) {
+            console.error('Failed to load current admin role:', err);
+            setMyRoleError(err.message || 'تعذّر تحميل الصلاحيات');
+        } finally {
+            setMyRoleLoading(false);
+        }
+    }, [isLoaded, user, authFetch]);
+
+    useEffect(() => { loadMyRole(); }, [loadMyRole]);
+
+    // ── Visible tabs (Manager = all, Admin = only granted permissions) ──
+    const visibleTabs = myRole.isManager
+        ? TABS
+        : TABS.filter(t => myRole.tabs.has(t.permissionName.trim().toLowerCase()));
+
+    // ── Auth guard: redirect out if the user has zero admin access ──
+    useEffect(() => {
+        if (!isLoaded || !user || myRoleLoading) return;
+        const hasAnyAccess = myRole.isManager || myRole.tabs.size > 0;
+        if (!hasAnyAccess) navigate('/');
+    }, [isLoaded, user, myRoleLoading, myRole, navigate]);
+
+    // ── If the active tab isn't in the visible list once role has loaded, jump to the first visible tab ──
+    useEffect(() => {
+        if (myRoleLoading) return;
+        if (visibleTabs.length === 0) return;
+        if (!visibleTabs.some(t => t.id === activeTab)) {
+            setActiveTab(visibleTabs[0].id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [myRoleLoading, myRole]);
 
     // ── Books loader ──
     const loadBooks = useCallback(async () => {
@@ -166,7 +251,7 @@ const AdminDashboard = () => {
                 if (cRes.ok) { const j = await cRes.json(); coursesRaw = Array.isArray(j) ? j : j?.data ?? j?.planWorks ?? j?.courses ?? j?.result ?? []; }
                 if (sRes.ok) statsRaw = await sRes.json();
 
-                const normUsers   = usersRaw.map(normalizeUser).filter(u => u.id != null);
+                const normUsers = usersRaw.map(normalizeUser).filter(u => u.id != null);
                 const normCourses = coursesRaw.map(normalizeCourse).filter(c => c.id != null);
                 setUsersData(normUsers); setCoursesData(normCourses); setApiStats(statsRaw);
                 seedAttendance(normUsers);
@@ -177,8 +262,8 @@ const AdminDashboard = () => {
         if (isLoaded && user) load();
     }, [isLoaded, user, authFetch]);
 
-    useEffect(() => { if (activeTab === 'refunds')      fetchRefunds(refundStatusFilter); }, [activeTab, refundStatusFilter]); // eslint-disable-line
-    useEffect(() => { if (activeTab === 'certificates') refreshCertificates(); },           [activeTab]);                      // eslint-disable-line
+    useEffect(() => { if (activeTab === 'refunds') fetchRefunds(refundStatusFilter); }, [activeTab, refundStatusFilter]); // eslint-disable-line
+    useEffect(() => { if (activeTab === 'certificates') refreshCertificates(); }, [activeTab]);                      // eslint-disable-line
 
     // ── Attendance helpers ──
     const seedAttendance = useCallback((users) => {
@@ -204,14 +289,14 @@ const AdminDashboard = () => {
             const res = await authFetch(`${API_BASE}/Admin/certificates`);
             if (!res.ok) return;
             const json = await res.json();
-            const arr  = Array.isArray(json) ? json : json?.data ?? json?.certificates ?? json?.result ?? [];
-            const map  = {};
+            const arr = Array.isArray(json) ? json : json?.data ?? json?.certificates ?? json?.result ?? [];
+            const map = {};
             arr.forEach(raw => {
-                const certId     = raw.id       ?? raw.Id       ?? null;
-                const userId     = raw.userId   ?? raw.UserId   ?? null;
+                const certId = raw.id ?? raw.Id ?? null;
+                const userId = raw.userId ?? raw.UserId ?? null;
                 const planworkId = raw.planworkId ?? raw.PlanworkId ?? null;
-                const rawFileUrl = raw.fileUrl  ?? raw.FileUrl  ?? raw.filePath ?? raw.FilePath ?? null;
-                const fileName   = raw.fileName ?? raw.FileName ?? (rawFileUrl ? rawFileUrl.split('/').pop().split('?')[0] : 'certificate');
+                const rawFileUrl = raw.fileUrl ?? raw.FileUrl ?? raw.filePath ?? raw.FilePath ?? null;
+                const fileName = raw.fileName ?? raw.FileName ?? (rawFileUrl ? rawFileUrl.split('/').pop().split('?')[0] : 'certificate');
                 const uploadedAt = fmtDate(raw.uploadedAt ?? raw.UploadedAt ?? null);
                 let fileUrl = null;
                 if (rawFileUrl && rawFileUrl !== 'uploaded')
@@ -235,16 +320,16 @@ const AdminDashboard = () => {
             let res, text;
             if (existing?.certId != null) {
                 const fd = new FormData(); fd.append('CertificateId', Number(existing.certId)); fd.append('File', file, file.name);
-                let token = null; try { token = await getToken(); } catch (_) {}
-                res  = await fetch(`${API_BASE}/Admin/certificates`, { method: 'PUT', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: fd });
+                let token = null; try { token = await getToken(); } catch (_) { }
+                res = await fetch(`${API_BASE}/Admin/certificates`, { method: 'PUT', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: fd });
                 text = await res.text();
             } else {
                 const fd = new FormData();
-                if (userId     != null) fd.append('UserId',       Number(userId));
-                if (planworkId != null) fd.append('PlanworkId',   Number(planworkId));
+                if (userId != null) fd.append('UserId', Number(userId));
+                if (planworkId != null) fd.append('PlanworkId', Number(planworkId));
                 if (enrollmentId != null) fd.append('EnrollmentId', Number(enrollmentId));
                 fd.append('File', file, file.name);
-                res  = await authFetchForm(`${API_BASE}/Admin/upload`, fd);
+                res = await authFetchForm(`${API_BASE}/Admin/upload`, fd);
                 text = await res.text();
             }
             if (!res.ok) {
@@ -272,14 +357,14 @@ const AdminDashboard = () => {
     }, [authFetch, certificates, refreshCertificates]);
 
     const viewCert = useCallback(async (certId, url, rawUrl, filename, userId, planworkId) => {
-        let token = null; try { token = await getToken(); } catch (_) {}
+        let token = null; try { token = await getToken(); } catch (_) { }
         const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
         let fileUrl = null;
         if (userId != null && planworkId != null) {
             try {
                 const r = await fetch(`${API_BASE}/Admin/certificates/${userId}/${planworkId}`, { headers: authHeaders });
                 if (r.ok) { const meta = await r.json(); const obj = Array.isArray(meta) ? meta[0] : meta; const fu = obj?.fileUrl ?? obj?.FileUrl ?? obj?.url ?? obj?.Url ?? null; if (fu && fu !== 'uploaded') fileUrl = fu.startsWith('http') ? fu : `${API_BASE.replace('/api', '')}${fu}`; }
-            } catch (_) {}
+            } catch (_) { }
         }
         if (!fileUrl && url && url !== 'uploaded') fileUrl = url;
         if (!fileUrl && rawUrl) fileUrl = rawUrl.startsWith('http') ? rawUrl : `${API_BASE.replace('/api', '')}${rawUrl}`;
@@ -291,11 +376,11 @@ const AdminDashboard = () => {
     const fetchRefunds = useCallback(async (statusFilter = 'all') => {
         setRefundsLoading(true); setRefundsError(null);
         try {
-            const qs  = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
+            const qs = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
             const res = await authFetch(`${API_BASE}/refund/admin/all${qs}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const json = await res.json();
-            const raw  = Array.isArray(json) ? json : json?.data ?? json?.items ?? [];
+            const raw = Array.isArray(json) ? json : json?.data ?? json?.items ?? [];
             setRefunds(raw.map(normalizeRefund));
         } catch (err) { setRefundsError('فشل تحميل طلبات الاسترداد: ' + err.message); }
         finally { setRefundsLoading(false); }
@@ -308,13 +393,13 @@ const AdminDashboard = () => {
         setRefundActionSaving(true); setRefundActionError('');
         try {
             const endpoint = {
-                approve:      `${API_BASE}/refund/${r.id}/approve`,
-                reject:       `${API_BASE}/refund/${r.id}/reject`,
+                approve: `${API_BASE}/refund/${r.id}/approve`,
+                reject: `${API_BASE}/refund/${r.id}/reject`,
                 send_to_bank: `${API_BASE}/refund/${r.id}/sent`,
             }[action];
             const body = {};
-            if (action === 'reject')       body.rejectionReason = refundActionNote.trim();
-            if (action === 'approve')      body.adminNote = refundActionNote.trim();
+            if (action === 'reject') body.rejectionReason = refundActionNote.trim();
+            if (action === 'approve') body.adminNote = refundActionNote.trim();
             if (action === 'send_to_bank') body.adminNote = refundActionNote.trim();
             const res = await authFetch(endpoint, { method: 'PUT', body: JSON.stringify(body) });
             if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j?.message ?? j?.error ?? `HTTP ${res.status}`); }
@@ -343,7 +428,7 @@ const AdminDashboard = () => {
         return true;
     };
     const q = searchQuery.toLowerCase();
-    const filteredUsers   = usersData.map(u => ({ ...u, enrolledCourses: u.enrolledCourses.filter(c => inRange(c.date)) })).filter(u => { const m = `${u.firstName} ${u.lastName} ${u.email} ${u.username}`.toLowerCase().includes(q); return (dateFrom || dateTo) ? m && u.enrolledCourses.length > 0 : m; });
+    const filteredUsers = usersData.map(u => ({ ...u, enrolledCourses: u.enrolledCourses.filter(c => inRange(c.date)) })).filter(u => { const m = `${u.firstName} ${u.lastName} ${u.email} ${u.username}`.toLowerCase().includes(q); return (dateFrom || dateTo) ? m && u.enrolledCourses.length > 0 : m; });
     const filteredCourses = coursesData.map(c => ({ ...c, enrolledUsers: c.enrolledUsers.filter(u => inRange(u.date)) })).filter(c => { const m = `${c.title} ${c.category}`.toLowerCase().includes(q); return (dateFrom || dateTo) ? m && c.enrolledUsers.length > 0 : m; });
 
     const attRows = usersData.flatMap(u => u.enrolledCourses.filter(c => c.enrollmentId != null).map(c => ({ user: u, course: c }))).filter(r =>
@@ -355,16 +440,16 @@ const AdminDashboard = () => {
     Object.values(certificates).forEach(ce => { if (!ce || ce.userId == null) return; const uid = Number(ce.userId); (certsByUser[uid] = certsByUser[uid] || []).push(ce); });
 
     const certRows = usersData.flatMap(u => u.enrolledCourses.map(c => {
-        const mc         = coursesData.find(cd => cd.title === c.title || cd.title === c._titleRaw);
+        const mc = coursesData.find(cd => cd.title === c.title || cd.title === c._titleRaw);
         const planworkId = c.id ?? mc?.id ?? null;
-        const userCerts  = certsByUser[Number(u.id)] ?? [];
+        const userCerts = certsByUser[Number(u.id)] ?? [];
         const titleMatch = userCerts.find(ce => { const cd = coursesData.find(x => Number(x.id) === Number(ce.planworkId)); return cd && (cd.title === c.title || cd.title === c._titleRaw); });
-        const certKey    = planworkId != null ? `${Number(u.id)}-${Number(planworkId)}` : (titleMatch ? `${Number(u.id)}-${Number(titleMatch.planworkId)}` : `${u.id}-unknown`);
-        const altKey     = titleMatch ? `${Number(u.id)}-${Number(titleMatch.planworkId)}` : null;
+        const certKey = planworkId != null ? `${Number(u.id)}-${Number(planworkId)}` : (titleMatch ? `${Number(u.id)}-${Number(titleMatch.planworkId)}` : `${u.id}-unknown`);
+        const altKey = titleMatch ? `${Number(u.id)}-${Number(titleMatch.planworkId)}` : null;
         return { user: u, course: c, certKey, altKey, enrollmentId: c.enrollmentId, userId: u.id, planworkId: planworkId ?? titleMatch?.planworkId ?? null };
     })).filter(r => {
-        const hasCert     = !!(certificates[r.certKey] ?? (r.altKey ? certificates[r.altKey] : undefined));
-        const isAtt       = !!attendance[String(r.enrollmentId)];
+        const hasCert = !!(certificates[r.certKey] ?? (r.altKey ? certificates[r.altKey] : undefined));
+        const isAtt = !!attendance[String(r.enrollmentId)];
         const matchSearch = `${r.user.firstName} ${r.user.lastName} ${r.user.email} ${r.course.title}`.toLowerCase().includes(certSearch.toLowerCase());
         const matchStatus = certStatusFilter === 'all' ? true : certStatusFilter === 'uploaded' ? hasCert : certStatusFilter === 'pending' ? (!hasCert && isAtt) : !isAtt;
         return matchSearch && matchStatus;
@@ -373,15 +458,15 @@ const AdminDashboard = () => {
     const totalCerts = (() => { const seen = new Set(); Object.values(certificates).forEach(v => { if (v) seen.add(v.certId ?? Math.random()); }); return seen.size; })();
     const gs = (fields, fb) => { if (!apiStats) return fb; for (const f of fields) { if (apiStats[f] != null) return apiStats[f]; } return fb; };
     const displayStats = {
-        users:          gs(['usersCount'],       usersData.length),
-        courses:        gs(['planworksCount'],    coursesData.length),
-        enrollments:    gs(['enrollmentsCount'],  usersData.reduce((s, u) => s + u.enrolledCourses.length, 0)),
-        attended:       gs(['attendanceCount'],   attRows.filter(r => !!attendance[String(r.course.enrollmentId)]).length),
-        certificates:   gs(['certificatesCount'], totalCerts),
-        refundsPending: gs(['refundsCount'],      refunds.filter(r => r.status === 'Pending').length),
+        users: gs(['usersCount'], usersData.length),
+        courses: gs(['planworksCount'], coursesData.length),
+        enrollments: gs(['enrollmentsCount'], usersData.reduce((s, u) => s + u.enrolledCourses.length, 0)),
+        attended: gs(['attendanceCount'], attRows.filter(r => !!attendance[String(r.course.enrollmentId)]).length),
+        certificates: gs(['certificatesCount'], totalCerts),
+        refundsPending: gs(['refundsCount'], refunds.filter(r => r.status === 'Pending').length),
     };
 
-    const refundSearch_q  = refundSearch.toLowerCase();
+    const refundSearch_q = refundSearch.toLowerCase();
     const filteredRefunds = refunds.filter(r => {
         const u = usersData.find(u => u.id === r.userId);
         const c = coursesData.find(c => c.id === r.courseId);
@@ -391,7 +476,7 @@ const AdminDashboard = () => {
     });
 
     // ── Early returns ──
-    if (!isLoaded || !user) return (
+    if (!isLoaded || !user || myRoleLoading) return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: T.gray100 }}>
             <div style={{ textAlign: 'center' }}>
                 <div style={{ width: 48, height: 48, border: `3px solid ${T.gray300}`, borderTopColor: T.blue, borderRadius: '50%', animation: 'adm-spin .7s linear infinite', margin: '0 auto 16px' }} />
@@ -399,8 +484,9 @@ const AdminDashboard = () => {
             </div>
         </div>
     );
-    // ← live check against localStorage list
-    if (!getAdminEmails().includes((user.primaryEmailAddress?.emailAddress || '').toLowerCase())) return null;
+
+    // No manager flag and zero granted permissions → no admin access at all
+    if (!myRole.isManager && myRole.tabs.size === 0) return null;
 
     return (
         <>
@@ -454,7 +540,7 @@ const AdminDashboard = () => {
 
             <div className="adm-root">
                 <Sidebar
-                    user={user} activeTab={activeTab} tabs={TABS}
+                    user={user} activeTab={activeTab} tabs={visibleTabs}
                     totalCerts={totalCerts}
                     pendingRefunds={refunds.filter(r => r.status === 'Pending').length}
                     onTabChange={id => { setActiveTab(id); setExpandedRow(null); setSearchQuery(''); }}
@@ -469,6 +555,12 @@ const AdminDashboard = () => {
                         {exportError && (
                             <div className="adm-err">⚠️ {exportError}
                                 <button style={{ marginRight: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '1rem' }} onClick={() => setExportError(null)}>✕</button>
+                            </div>
+                        )}
+
+                        {visibleTabs.length === 0 && (
+                            <div className="adm-err">
+                                ⚠️ لا توجد صلاحيات مُفعّلة لحسابك بعد. تواصل مع مدير النظام.
                             </div>
                         )}
 
@@ -568,7 +660,6 @@ const AdminDashboard = () => {
 
                         {activeTab === 'planwork' && <PlanworkTab />}
 
-                        {/* ── Settings Tab ── */}
                         {activeTab === 'settings' && (
                             <SettingsTab
                                 currentUserEmail={user?.primaryEmailAddress?.emailAddress || ''}
