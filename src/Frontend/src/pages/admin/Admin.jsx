@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 
-import { ADMIN_EMAILS, API_BASE, API_HOST, ITEMS_PER_PAGE, T } from '../../components/admin/constants';
+import { API_BASE, API_HOST, T } from '../../components/admin/constants';
 import { injectAdminStyles } from '../../components/admin/styles';
 import { fmtDate, toStatusKey } from '../../components/admin/helpers';
 import { normalizeUser, normalizeCourse, normalizeRefund } from '../../components/admin/normalizers';
-import { withExport, buildUsersRows, buildCoursesRows, buildAttRows, buildCertRows, buildRefundRows } from '../../components/admin/exportHelpers';
 
 import Sidebar from '../../components/admin/Sidebar';
 import PageHero from '../../components/admin/PageHero';
@@ -28,19 +27,22 @@ import BooksTab from './BooksTab';
 import PlanworkTab from './PlanworkTab';
 import SettingsTab from './SettingsTab';
 
+// permissionName MUST match Permission.Name in the DB (case-insensitive).
 const TABS = [
-    { id: 'users', label: 'المستخدمون', icon: '👤' },
-    { id: 'courses', label: 'الدورات', icon: '📚' },
-    { id: 'attendance', label: 'الحضور', icon: '✅' },
-    { id: 'certificates', label: 'الشهادات', icon: '📜' },
-    { id: 'refunds', label: 'المستردات', icon: '💳' },
-    { id: 'financial', label: 'المالية', icon: '💰' },
-    { id: 'lecturers', label: 'المحاضرون', icon: '🎓' },
-    { id: 'news', label: 'الأخبار', icon: '📰' },
-    { id: 'books', label: 'الكتب', icon: '📖' },
-    { id: 'planwork', label: 'خطة العمل', icon: '📋' },
-    { id: 'settings', label: 'الإعدادات', icon: '⚙️' },
+    { id: 'users', label: 'المستخدمون', icon: '👤', permissionName: 'Users' },
+    { id: 'courses', label: 'الدورات', icon: '📚', permissionName: 'Courses' },
+    { id: 'attendance', label: 'الحضور', icon: '✅', permissionName: 'Attendance' },
+    { id: 'certificates', label: 'الشهادات', icon: '📜', permissionName: 'Certificates' },
+    { id: 'refunds', label: 'المستردات', icon: '💳', permissionName: 'Refunds' },
+    { id: 'financial', label: 'المالية', icon: '💰', permissionName: 'Finance' },
+    { id: 'lecturers', label: 'المحاضرون', icon: '🎓', permissionName: 'Lecturers' },
+    { id: 'news', label: 'الأخبار', icon: '📰', permissionName: 'News' },
+    { id: 'books', label: 'الكتب', icon: '📖', permissionName: 'Books' },
+    { id: 'planwork', label: 'خطة العمل', icon: '📋', permissionName: 'Workplan' },
+    { id: 'settings', label: 'الإعدادات', icon: '⚙️', permissionName: 'Settings' },
 ];
+
+const permKey = (p) => (typeof p === 'string' ? p : p?.name ?? p?.permissionName ?? '').trim().toLowerCase();
 
 const AdminDashboard = () => {
     const { user, isLoaded } = useUser();
@@ -106,21 +108,18 @@ const AdminDashboard = () => {
     const [certPage, setCertPage] = useState(1);
     const [refundPage, setRefundPage] = useState(1);
 
+    // ── Current user's role/permissions ──
+    const [myRole, setMyRole] = useState({ isManager: false, tabs: new Set() });
+    const [myRoleLoading, setMyRoleLoading] = useState(true);
+    const [myRoleError, setMyRoleError] = useState(null);
+
     // ── Effects ──
     useEffect(() => { injectAdminStyles(); }, []);
-    useEffect(() => {
-        setUsersPage(1); setCoursesPage(1); setBooksPage(1); setExpandedRow(null);
-    }, [activeTab]);
+    useEffect(() => { setUsersPage(1); setCoursesPage(1); setBooksPage(1); setExpandedRow(null); }, [activeTab]);
     useEffect(() => { setUsersPage(1); setExpandedRow(null); }, [searchQuery, dateFrom, dateTo]);
     useEffect(() => { setAttPage(1); }, [attCourseFilter, attUserSearch]);
     useEffect(() => { setCertPage(1); }, [certSearch, certStatusFilter]);
     useEffect(() => { setRefundPage(1); }, [refundSearch, refundStatusFilter]);
-
-    useEffect(() => {
-        if (!isLoaded || !user) return;
-        if (!ADMIN_EMAILS.includes((user.primaryEmailAddress?.emailAddress || '').toLowerCase()))
-            navigate('/');
-    }, [isLoaded, user, navigate]);
 
     // ── Auth fetch helpers ──
     const authFetch = useCallback(async (url, options = {}) => {
@@ -146,7 +145,53 @@ const AdminDashboard = () => {
         });
     }, [getToken]);
 
-    // ── FIX 1: Standalone loadStats so it can be called after any mutation ──
+    // ── Load current user's role/permissions ──
+    const loadMyRole = useCallback(async () => {
+        if (!isLoaded || !user) return;
+        setMyRoleLoading(true);
+        setMyRoleError(null);
+        try {
+            const res = await authFetch(`${API_BASE}/UserPermissions/me`);
+            if (!res.ok) {
+                setMyRole({ isManager: false, tabs: new Set() });
+                return;
+            }
+            const data = await res.json();
+            setMyRole({
+                isManager: !!data.isManager,
+                tabs: new Set((data.permissions || []).map(permKey).filter(Boolean)),
+            });
+        } catch (err) {
+            console.error('Failed to load current admin role:', err);
+            setMyRoleError(err.message || 'تعذّر تحميل الصلاحيات');
+        } finally {
+            setMyRoleLoading(false);
+        }
+    }, [isLoaded, user, authFetch]);
+
+    useEffect(() => { loadMyRole(); }, [loadMyRole]);
+
+    // Manager = all tabs, Admin = only granted permissions
+    const visibleTabs = myRole.isManager
+        ? TABS
+        : TABS.filter(t => myRole.tabs.has(t.permissionName.trim().toLowerCase()));
+
+    // Redirect only after the role has finished loading and there is zero access
+    useEffect(() => {
+        if (!isLoaded || !user || myRoleLoading) return;
+        const hasAnyAccess = myRole.isManager || myRole.tabs.size > 0;
+        if (!hasAnyAccess) navigate('/');
+    }, [isLoaded, user, myRoleLoading, myRole, navigate]);
+
+    // Jump to first visible tab if the active one isn't allowed
+    useEffect(() => {
+        if (myRoleLoading) return;
+        if (visibleTabs.length === 0) return;
+        if (!visibleTabs.some(t => t.id === activeTab)) setActiveTab(visibleTabs[0].id);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [myRoleLoading, myRole]);
+
+    // ── Stats loader (call after any mutation) ──
     const loadStats = useCallback(async () => {
         try {
             const sRes = await authFetch(`${API_BASE}/Admin/stats`);
@@ -167,9 +212,7 @@ const AdminDashboard = () => {
         }
     }, [authFetch]);
 
-    useEffect(() => {
-        if (activeTab === 'books') loadBooks();
-    }, [activeTab, loadBooks]);
+    useEffect(() => { if (activeTab === 'books') loadBooks(); }, [activeTab, loadBooks]);
 
     // ── Load main data ──
     useEffect(() => {
@@ -211,13 +254,8 @@ const AdminDashboard = () => {
         if (isLoaded && user) load();
     }, [isLoaded, user, authFetch]); // eslint-disable-line
 
-    useEffect(() => {
-        if (activeTab === 'refunds') fetchRefunds(refundStatusFilter);
-    }, [activeTab, refundStatusFilter]); // eslint-disable-line
-
-    useEffect(() => {
-        if (activeTab === 'certificates') refreshCertificates();
-    }, [activeTab]); // eslint-disable-line
+    useEffect(() => { if (activeTab === 'refunds') fetchRefunds(refundStatusFilter); }, [activeTab, refundStatusFilter]); // eslint-disable-line
+    useEffect(() => { if (activeTab === 'certificates') refreshCertificates(); }, [activeTab]); // eslint-disable-line
 
     // ── Attendance helpers ──
     const seedAttendance = useCallback((users) => {
@@ -230,7 +268,6 @@ const AdminDashboard = () => {
         setAttendance(map);
     }, []);
 
-    // ── FIX 2: Call loadStats() after toggling attendance ──
     const toggleAttendance = async (enrollmentId, currentVal) => {
         if (enrollmentId == null) { setAttError('لا يوجد enrollmentId لهذا التسجيل'); return; }
         const k = String(enrollmentId);
@@ -247,7 +284,6 @@ const AdminDashboard = () => {
                 const j = await res.json().catch(() => ({}));
                 throw new Error(j?.message ?? `HTTP ${res.status}`);
             }
-            // Refresh stats so the "attended" card updates immediately
             await loadStats();
         } catch (err) {
             setAttendance(p => ({ ...p, [k]: currentVal }));
@@ -285,7 +321,7 @@ const AdminDashboard = () => {
         }
     }, [authFetch]);
 
-    // ── FIX 3: refreshCertificates also calls loadStats so cert card updates immediately ──
+    // Also refreshes stats so the certificates card updates immediately
     const refreshCertificates = useCallback(async () => {
         await loadCertificatesFromApi();
         await loadStats();
@@ -330,7 +366,6 @@ const AdminDashboard = () => {
                 }
                 throw new Error(msg);
             }
-            // refreshCertificates now also calls loadStats internally
             await refreshCertificates();
         } catch (err) {
             setCertError('فشل رفع الشهادة: ' + err.message);
@@ -353,7 +388,6 @@ const AdminDashboard = () => {
                     throw new Error(j?.message ?? j?.title ?? `HTTP ${res.status}`);
                 }
             }
-            // refreshCertificates now also calls loadStats internally
             await refreshCertificates();
         } catch (err) {
             setCertError('فشل حذف الشهادة: ' + err.message);
@@ -435,7 +469,6 @@ const AdminDashboard = () => {
             setRefundActionNote('');
             setRefundDetailModal(null);
             await fetchRefunds(refundStatusFilter);
-            // Also refresh stats so refunds-pending card stays accurate
             await loadStats();
         } catch (err) {
             setRefundActionError(err.message || 'حدث خطأ');
@@ -539,7 +572,6 @@ const AdminDashboard = () => {
         return fb;
     };
 
-    // ── FIX 4: totalCerts from live local state always wins over stale apiStats ──
     const displayStats = {
         users: gs(['usersCount'], usersData.length),
         courses: gs(['planworksCount'], coursesData.length),
@@ -561,7 +593,7 @@ const AdminDashboard = () => {
     });
 
     // ── Early returns ──
-    if (!isLoaded || !user) return (
+    if (!isLoaded || !user || myRoleLoading) return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: T.gray100 }}>
             <div style={{ textAlign: 'center' }}>
                 <div style={{ width: 48, height: 48, border: `3px solid ${T.gray300}`, borderTopColor: T.blue, borderRadius: '50%', animation: 'adm-spin .7s linear infinite', margin: '0 auto 16px' }} />
@@ -569,11 +601,18 @@ const AdminDashboard = () => {
             </div>
         </div>
     );
-    if (!ADMIN_EMAILS.includes((user.primaryEmailAddress?.emailAddress || '').toLowerCase())) return null;
+
+    if (myRoleError) return (
+        <div style={{ padding: 40, textAlign: 'center', fontFamily: T.font, color: '#dc2626' }}>
+            ⚠️ {myRoleError}
+        </div>
+    );
+
+    // No manager flag and zero granted permissions → no admin access (redirect effect handles navigation)
+    if (!myRole.isManager && myRole.tabs.size === 0) return null;
 
     return (
         <>
-            {/* Loading overlay */}
             {exporting && (
                 <div className="adm-ovl">
                     <div className="adm-ovlb">
@@ -583,14 +622,12 @@ const AdminDashboard = () => {
                 </div>
             )}
 
-            {/* Breadcrumb */}
             <div className="adm-bc">
                 <a href="/">الصفحة الرئيسية</a>
                 <span className="sep">•</span>
                 <span className="cur">لوحة الإدارة</span>
             </div>
 
-            {/* Modals */}
             {certModal && (
                 <CertUploadModal
                     modal={certModal}
@@ -623,7 +660,7 @@ const AdminDashboard = () => {
 
             <div className="adm-root">
                 <Sidebar
-                    user={user} activeTab={activeTab} tabs={TABS}
+                    user={user} activeTab={activeTab} tabs={visibleTabs}
                     totalCerts={totalCerts}
                     pendingRefunds={refunds.filter(r => r.status === 'Pending').length}
                     onTabChange={id => { setActiveTab(id); setExpandedRow(null); setSearchQuery(''); }}
@@ -642,6 +679,10 @@ const AdminDashboard = () => {
                                     onClick={() => setExportError(null)}
                                 >✕</button>
                             </div>
+                        )}
+
+                        {visibleTabs.length === 0 && (
+                            <div className="adm-err">⚠️ لا توجد صلاحيات مُفعّلة لحسابك بعد. تواصل مع مدير النظام.</div>
                         )}
 
                         {activeTab === 'users' && (
@@ -725,7 +766,6 @@ const AdminDashboard = () => {
                         )}
 
                         {activeTab === 'lecturers' && <LecturersTab />}
-
                         {activeTab === 'news' && <NewsTab />}
 
                         {activeTab === 'books' && (
@@ -744,9 +784,7 @@ const AdminDashboard = () => {
                         {activeTab === 'planwork' && <PlanworkTab />}
 
                         {activeTab === 'settings' && (
-                            <SettingsTab
-                                currentUserEmail={user?.primaryEmailAddress?.emailAddress || ''}
-                            />
+                            <SettingsTab currentUserEmail={user?.primaryEmailAddress?.emailAddress || ''} />
                         )}
                     </div>
 
