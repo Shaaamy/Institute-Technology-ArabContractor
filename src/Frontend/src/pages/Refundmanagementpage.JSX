@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, RefreshCw, CheckCircle, XCircle, AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 
-const API_BASE = "https://localhost:7177";
+const API_BASE = "https://icemt.arabcont.com/";
 
 const statusColors = {
     Paid:      { bg: "bg-green-50",  text: "text-green-700",  border: "border-green-200",  label: "مدفوع"    },

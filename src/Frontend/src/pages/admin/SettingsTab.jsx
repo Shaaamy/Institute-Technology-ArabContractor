@@ -135,7 +135,7 @@ const ITEMS_PER_PAGE = 6;
 
 const API_BASE = (
     import.meta.env.VITE_API_URL ??
-    'https://localhost:7177'
+    'https://icemt.arabcont.com/'
 ).replace(/\/$/, '');
 
 
