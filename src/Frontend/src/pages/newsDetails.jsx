@@ -261,13 +261,13 @@ const NewsDetails = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setLoading(true);
 
-        fetch(`${BASE}/api/news/${id}`)
+        fetch(`${BASE}/news/${id}`)
             .then(r => { if (!r.ok) throw new Error('Failed to fetch'); return r.json(); })
             .then(data => {
                 setNewsItem(data);
                 setLoading(false);
                 const year = new Date(data.publishedAt).getFullYear();
-                return fetch(`${BASE}/api/News/getAllNews?year=${year}`);
+                return fetch(`${BASE}/News/getAllNews?year=${year}`);
             })
             .then(r => r.json())
             .then(data => {
