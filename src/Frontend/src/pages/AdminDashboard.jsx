@@ -26,7 +26,7 @@ import LecturersTab from './mohadren';
 import NewsTab from './NewsTab';
 import BooksTab from './BooksTab';
 import PlanworkTab from './PlanworkTab';
-import SettingsTab from './SettingsTab'; // ← no more getAdminEmails import, it doesn't exist
+import SettingsTab from './SettingsTab';
 
 // ── TABS ──
 // permissionName MUST match Permission.Name in the DB — same strings used in
@@ -138,58 +138,24 @@ const AdminDashboard = () => {
         return fetch(url, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: formData });
     }, [getToken]);
 
-    // ── Load current user's role/permissions ──
-    // Same endpoints SettingsTab.jsx uses: /api/AdminUsers, /api/Permissions, /api/UserPermissions/{id}
+    // ── Load current user's role/permissions via the single /me endpoint ──
     const loadMyRole = useCallback(async () => {
         if (!isLoaded || !user) return;
         setMyRoleLoading(true);
         setMyRoleError(null);
-        const myEmail = (user.primaryEmailAddress?.emailAddress || '').toLowerCase();
 
         try {
-            const [usersRes, permsRes] = await Promise.all([
-                authFetch(`${API_BASE.replace('/api', '')}/api/AdminUsers`),
-                authFetch(`${API_BASE.replace('/api', '')}/api/Permissions`),
-            ]);
-
-            const usersJson = usersRes.ok ? await usersRes.json() : [];
-            const permsJson = permsRes.ok ? await permsRes.json() : [];
-
-            const me = (Array.isArray(usersJson) ? usersJson : [])
-                .find(u => (u.email ?? u.Email ?? '').toLowerCase() === myEmail);
-
-            if (!me) {
-                // Not in AdminUsers at all → no admin access
+            const res = await authFetch(`${API_BASE.replace('/api', '')}/api/UserPermissions/me`);
+            if (!res.ok) {
                 setMyRole({ isManager: false, tabs: new Set() });
                 setMyRoleLoading(false);
                 return;
             }
-
-            const isManager = !!(me.isManager ?? me.IsManager);
-
-            if (isManager) {
-                setMyRole({ isManager: true, tabs: new Set() });
-                setMyRoleLoading(false);
-                return;
-            }
-
-            const myUserId = me.id ?? me.Id;
-            const myPermsRes = await authFetch(`${API_BASE.replace('/api', '')}/api/UserPermissions/${myUserId}`);
-            const myPermsJson = myPermsRes.ok ? await myPermsRes.json() : [];
-
-            const grantedIds = new Set(
-                (Array.isArray(myPermsJson) ? myPermsJson : [])
-                    .map(p => p?.permissionId ?? p?.PermissionId ?? p?.id ?? p?.Id)
-                    .filter(id => id != null)
-            );
-
-            const grantedNames = new Set(
-                (Array.isArray(permsJson) ? permsJson : [])
-                    .filter(p => grantedIds.has(p.id ?? p.Id))
-                    .map(p => (p.name ?? p.Name ?? '').trim().toLowerCase())
-            );
-
-            setMyRole({ isManager: false, tabs: grantedNames });
+            const data = await res.json();
+            setMyRole({
+                isManager: !!data.isManager,
+                tabs: new Set((data.permissions || []).map(p => p.trim().toLowerCase())),
+            });
         } catch (err) {
             console.error('Failed to load current admin role:', err);
             setMyRoleError(err.message || 'تعذّر تحميل الصلاحيات');

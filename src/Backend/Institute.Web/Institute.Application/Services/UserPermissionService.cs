@@ -109,5 +109,31 @@ namespace Institute.Application.Services
                 .Select(x => x.Permission.Name)
                 .ToList();
         }
+
+        // ── New: powers GET /api/UserPermissions/me ──
+        public async Task<(bool IsManager, List<string> Permissions)> GetMyRoleAsync(
+            string clerkId)
+        {
+            var user = await _appUserRepo.GetByClerkIdAsync(clerkId);
+
+            if (user == null)
+                return (false, new List<string>());
+
+            // ⚠️ Verify AppUser.IsManager is the real property name.
+            if (user.IsManager)
+                return (true, new List<string>());
+
+            var spec = new UserPermissionsSpec(user.Id);
+
+            var userPermissions =
+                await _userPermissionsRepo.GetAllWithSpecAsync(spec);
+
+            var names = userPermissions
+                .Where(x => x.Permission != null)
+                .Select(x => x.Permission.Name)
+                .ToList();
+
+            return (false, names);
+        }
     }
 }

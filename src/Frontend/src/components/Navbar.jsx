@@ -60,16 +60,14 @@ const Navbar = () => {
     const { user } = useUser();
     const { getToken } = useAuth();
 
-    // ── Admin/Manager access — driven by live DB permissions, not a hardcoded email list ──
+    // ── Admin/Manager access — driven by live DB permissions via /api/UserPermissions/me ──
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
 
         const loadAdminAccess = async () => {
-            const email = (user?.primaryEmailAddress?.emailAddress || '').toLowerCase();
-            if (!email) { setIsAdmin(false); return; }
-
+            if (!user) { setIsAdmin(false); return; }
             try {
                 let token = null;
                 try { token = await getToken(); } catch (_) { }
@@ -78,26 +76,12 @@ const Navbar = () => {
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 };
 
-                const usersRes = await fetch(`${API_BASE}/AdminUsers`, { headers });
-                if (!usersRes.ok) { if (!cancelled) setIsAdmin(false); return; }
-                const usersJson = await usersRes.json();
+                const res = await fetch(`${API_BASE}/UserPermissions/me`, { headers });
+                if (!res.ok) { if (!cancelled) setIsAdmin(false); return; }
+                const data = await res.json();
 
-                const me = (Array.isArray(usersJson) ? usersJson : [])
-                    .find(u => (u.email ?? u.Email ?? '').toLowerCase() === email);
-
-                if (!me) { if (!cancelled) setIsAdmin(false); return; }
-
-                if (me.isManager ?? me.IsManager) {
-                    if (!cancelled) setIsAdmin(true);
-                    return;
-                }
-
-                const myId = me.id ?? me.Id;
-                const permsRes = await fetch(`${API_BASE}/UserPermissions/${myId}`, { headers });
-                const permsJson = permsRes.ok ? await permsRes.json() : [];
-                const hasAny = Array.isArray(permsJson) && permsJson.length > 0;
-
-                if (!cancelled) setIsAdmin(hasAny);
+                const hasAccess = !!data.isManager || (Array.isArray(data.permissions) && data.permissions.length > 0);
+                if (!cancelled) setIsAdmin(hasAccess);
             } catch (err) {
                 console.error('Failed to check admin access:', err);
                 if (!cancelled) setIsAdmin(false);
