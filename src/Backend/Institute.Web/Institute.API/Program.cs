@@ -144,6 +144,12 @@ builder.Services.AddHttpClient("BankClient", client =>
     client.DefaultRequestHeaders.Authorization =
         new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authValue);
 });
+
+// HttpClient used by the /clerk-proxy route to reach Clerk's Frontend API
+builder.Services.AddHttpClient("ClerkProxy", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 #endregion
 
 #region (Authentication And Authorization)
@@ -274,6 +280,14 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
+
+// ---------------------------------------------------------------------
+// Clerk Frontend API proxy
+// Forwards https://<your-domain>/clerk-proxy/* to https://frontend-api.clerk.dev/*
+// with the three headers Clerk's proxy spec requires: Clerk-Proxy-Url,
+// Clerk-Secret-Key and X-Forwarded-For.
+// Docs: https://clerk.com/docs/guides/dashboard/dns-domains/proxy-fapi
+// ---------------------------------------------------------------------
 app.Map("/clerk-proxy", proxyApp =>
 {
     proxyApp.Run(async ctx =>
@@ -281,9 +295,10 @@ app.Map("/clerk-proxy", proxyApp =>
         var factory = ctx.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = factory.CreateClient("ClerkProxy");
 
+        // ctx.Request.Path is already relative here (Map strips the /clerk-proxy prefix)
         var remainingPath = ctx.Request.Path.ToString();
         var queryString = ctx.Request.QueryString.ToString();
-        var targetUrl = $"https://clerk.acwebsite-icmet-test.azurewebsites.net{remainingPath}{queryString}";
+        var targetUrl = $"https://frontend-api.clerk.dev{remainingPath}{queryString}";
 
         var requestMessage = new HttpRequestMessage
         {
@@ -299,6 +314,28 @@ app.Map("/clerk-proxy", proxyApp =>
 
         if (ctx.Request.ContentLength > 0 || ctx.Request.Headers.ContainsKey("Transfer-Encoding"))
             requestMessage.Content = new StreamContent(ctx.Request.Body);
+
+        // --- Required by Clerk's proxy spec ---
+        // Must match, character-for-character, the proxy URL you enter in
+        // Clerk Dashboard -> Domains -> Frontend API -> Set proxy configuration.
+        var proxyPublicUrl = "https://icemt.arabcont.com/clerk-proxy";
+        requestMessage.Headers.Remove("Clerk-Proxy-Url");
+        requestMessage.Headers.Add("Clerk-Proxy-Url", proxyPublicUrl);
+
+        var clerkSecretKey = builder.Configuration["Clerk:SecretKey"]
+            ?? throw new InvalidOperationException("Clerk:SecretKey is not configured.");
+        requestMessage.Headers.Remove("Clerk-Secret-Key");
+        requestMessage.Headers.Add("Clerk-Secret-Key", clerkSecretKey);
+
+        // Clerk requires the ORIGINAL end-user IP as the leftmost value.
+        // If Azure/App Service has already appended its own IP to an
+        // incoming X-Forwarded-For chain, take the first (leftmost) entry.
+        var clientIp = ctx.Request.Headers.TryGetValue("X-Forwarded-For", out var xff)
+            ? xff.ToString().Split(',')[0].Trim()
+            : ctx.Connection.RemoteIpAddress?.ToString() ?? "";
+        requestMessage.Headers.Remove("X-Forwarded-For");
+        requestMessage.Headers.Add("X-Forwarded-For", clientIp);
+        // ----------------------------------------
 
         try
         {
@@ -320,6 +357,7 @@ app.Map("/clerk-proxy", proxyApp =>
         }
     });
 });
+
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
