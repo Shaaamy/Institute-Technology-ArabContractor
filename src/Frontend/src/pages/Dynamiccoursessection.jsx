@@ -186,7 +186,7 @@ const DynamicCoursesSection = () => {
         try {
             const token = await safeGetToken();
             if (!token) return;
-            const res = await fetch(`${API_BASE}/Admin/certificates/{userId}/{planworkId}`, {
+            const res = await fetch(`${API_BASE}/Admin/certificates/${planworkId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) return;
