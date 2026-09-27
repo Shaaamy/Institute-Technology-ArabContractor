@@ -165,46 +165,71 @@ const DynamicCoursesSection = () => {
 
     // ── Fetch owned courses ───────────────────────────────────────────────────
     const fetchOwnedCourses = useCallback(async () => {
-        if (!isSignedIn) { setOwnedCourseIds(new Set()); return; }
+        if (!isSignedIn) { setOwnedCourseIds(new Set()); return new Set(); }
         try {
             const token = await safeGetToken();
-            if (!token) return;
+            if (!token) return new Set();
             const res = await fetch(`${API_BASE}/course/my-courses`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (!res.ok) return;
+            if (!res.ok) return new Set();
             const data = await res.json();
-            setOwnedCourseIds(new Set(data.map(e => e.childId)));
+            const ids = new Set(data.map(e => e.childId));
+            setOwnedCourseIds(ids);
+            return ids;
         } catch {
             setOwnedCourseIds(new Set());
+            return new Set();
         }
     }, [isSignedIn, safeGetToken]);
 
     // ── Fetch certificates ────────────────────────────────────────────────────
-    const fetchCertificates = useCallback(async () => {
-        if (!isSignedIn || !userId) return;
+    // FIXED: this used to call `/Admin/certificates/${userId}` with the raw
+    // Clerk user id (e.g. "user_39OF6kv..."). The server's own error message
+    // shows that route's single segment is actually `planworkId` (an int,
+    // i.e. a course id) — not a user id — which is exactly why it was
+    // rejected with a 400 ("planworkId ... is not valid"). There is no
+    // per-user endpoint available here, so instead we fetch the full
+    // certificates list once and filter it client-side by each owned
+    // course's id (planworkId) — the same pattern already used successfully
+    // in CourseDetails.jsx and CoursesPage.jsx.
+    const fetchCertificates = useCallback(async (ownedIds) => {
+        if (!isSignedIn || !ownedIds || ownedIds.size === 0) { setCertificates({}); return; }
         try {
             const token = await safeGetToken();
             if (!token) return;
-            // FIX: was referencing an undefined `planworkId`, which produced a
-            // malformed URL (literal "{userId}/{planworkId}" segments -> 400).
-            // This now calls the endpoint with the actual signed-in userId only.
-            const res = await fetch(`${API_BASE}/Admin/certificates/${userId}`, {
+            const res = await fetch(`${API_BASE}/Admin/certificates`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) return;
             const data = await res.json();
+            const list = Array.isArray(data) ? data : [data];
+
             const map = {};
-            (Array.isArray(data) ? data : []).forEach(c => { if (c.courseId) map[c.courseId] = c; });
+            list.forEach(c => {
+                const planworkId = c.planworkId ?? c.PlanworkId ?? c.courseId ?? null;
+                if (planworkId == null || !ownedIds.has(planworkId)) return;
+                const url = c.url ?? c.fileUrl ?? c.filePath ?? c.path ?? null;
+                if (!url) return;
+                map[planworkId] = { ...c, url, name: c.fileName ?? c.filename ?? c.name ?? null };
+            });
             setCertificates(map);
         } catch { /* certs optional */ }
-    }, [isSignedIn, safeGetToken, userId]);
+    }, [isSignedIn, safeGetToken]);
 
-    useEffect(() => { fetchOwnedCourses(); }, [fetchOwnedCourses, userId]);
-    useEffect(() => { fetchCertificates(); }, [fetchCertificates, userId]);
+    // Load owned courses first, then certificates filtered to just those ids.
+    useEffect(() => {
+        (async () => {
+            const ids = await fetchOwnedCourses();
+            await fetchCertificates(ids);
+        })();
+    }, [fetchOwnedCourses, fetchCertificates, userId]);
 
     useEffect(() => {
-        const handler = () => { fetchOwnedCourses(); fetchCertificates(); };
+        const handler = async () => {
+            const ids = await fetchOwnedCourses();
+            await fetchCertificates(ids);
+        };
         window.addEventListener('enrollUpdated', handler);
         window.addEventListener('cartUpdated', handler);
         return () => {
