@@ -442,7 +442,7 @@ const RefundModal = ({ course, onClose, getToken }) => {
 const CoursesPage = () => {
     const navigate = useNavigate();
     const { slug } = useParams();
-    const { getToken, isSignedIn, userId } = useAuth();
+    const { getToken, isSignedIn } = useAuth();
 
     const [programData, setProgramData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -458,6 +458,9 @@ const CoursesPage = () => {
     const [hoveredHeaderCard, setHoveredHeaderCard] = useState(null);
     const [refundCourse, setRefundCourse] = useState(null);
     const [ownedCourseIds, setOwnedCourseIds] = useState(new Set());
+    // NEW: keep the full enrollment records so we have each course's
+    // *internal* userId (from our own API), not just the childId.
+    const [ownedEnrollments, setOwnedEnrollments] = useState([]);
     const [certificates, setCertificates] = useState({});
     const [certsLoading, setCertsLoading] = useState({});
     const [previewCert, setPreviewCert] = useState(null);
@@ -473,7 +476,7 @@ const CoursesPage = () => {
     }, [getToken]);
 
     const fetchOwnedCourses = useCallback(async () => {
-        if (!isSignedIn) { setOwnedCourseIds(new Set()); return; }
+        if (!isSignedIn) { setOwnedCourseIds(new Set()); setOwnedEnrollments([]); return; }
         try {
             const token = await safeGetToken();
             if (!token) return;
@@ -481,23 +484,33 @@ const CoursesPage = () => {
             if (!res.ok) return;
             const data = await res.json();
             setOwnedCourseIds(new Set(data.map(e => e.childId)));
-        } catch { setOwnedCourseIds(new Set()); }
+            setOwnedEnrollments(data); // keep full records for the internal userId lookup
+        } catch { setOwnedCourseIds(new Set()); setOwnedEnrollments([]); }
     }, [isSignedIn, safeGetToken]);
 
+    // ── FIXED: use the internal enrollment userId, not the Clerk auth userId ──
+    // Previously this called `${API_BASE}/Admin/certificates/${userId}/${planworkId}`
+    // using Clerk's `userId` (a string like "user_39OF..."), which the backend's
+    // /Admin/certificates route can't bind — causing a 400 on every request.
+    // The correct internal userId comes from the matching /course/my-courses record.
     const fetchCertForCourse = useCallback(async (planworkId) => {
-        if (!isSignedIn || !userId) return;
+        if (!isSignedIn) return;
+        const enrollment = ownedEnrollments.find(e => String(e.childId) === String(planworkId));
+        const internalUserId = enrollment?.userId ?? enrollment?.UserId ?? null;
+        if (!internalUserId) return; // no matching enrollment yet — nothing to fetch
+
         setCertsLoading(prev => ({ ...prev, [planworkId]: true }));
         try {
             const token = await safeGetToken();
             if (!token) return;
-            const res = await fetch(`${API_BASE}/Admin/certificates/${userId}/${planworkId}`, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch(`${API_BASE}/Admin/certificates/${internalUserId}/${planworkId}`, { headers: { Authorization: `Bearer ${token}` } });
             if (!res.ok) return;
             const data = await res.json();
             if (data && data.url) setCertificates(prev => ({ ...prev, [planworkId]: data }));
         } catch { } finally {
             setCertsLoading(prev => ({ ...prev, [planworkId]: false }));
         }
-    }, [isSignedIn, safeGetToken, userId]);
+    }, [isSignedIn, safeGetToken, ownedEnrollments]);
 
     const fetchCertsForOwned = useCallback(async (ownedIds) => {
         if (!ownedIds?.size) return;
