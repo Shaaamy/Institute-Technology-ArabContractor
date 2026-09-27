@@ -12,10 +12,10 @@ import App from './App.jsx';
 import { ClerkProvider } from '@clerk/clerk-react'
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 import ErrorBoundary from './pages/ErrorBoundary.jsx';
-const PUBLISHABLE_KEY = "pk_test_bWlnaHR5LWJhc2lsaXNrLTExLmNsZXJrLmFjY291bnRzLmRldiQ"
+//const PUBLISHABLE_KEY = "pk_test_bWlnaHR5LWJhc2lsaXNrLTExLmNsZXJrLmFjY291bnRzLmRldiQ"
 import './i18n/index.js'; // ← ADD THIS LINE (before App)
 //const PUBLISHABLE_KEY = "pk_live_Y2xlcmsuYWN3ZWJzaXRlLWljbWV0LXRlc3QuYXp1cmV3ZWJzaXRlcy5uZXQk"
-
+const PUBLISHABLE_KEY = pk_live_Y2xlcmsuYWN3ZWJzaXRlLWljbWV0LXRlc3QuYXp1cmV3ZWJzaXRlcy5uZXQk
 if (!PUBLISHABLE_KEY) {
     throw new Error('Add your Clerk Publishable Key to the .env file')
 }
