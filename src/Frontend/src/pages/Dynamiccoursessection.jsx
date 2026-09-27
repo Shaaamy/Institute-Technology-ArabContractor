@@ -186,7 +186,10 @@ const DynamicCoursesSection = () => {
         try {
             const token = await safeGetToken();
             if (!token) return;
-            const res = await fetch(`${API_BASE}/Admin/certificates/${planworkId}`, {
+            // FIX: was referencing an undefined `planworkId`, which produced a
+            // malformed URL (literal "{userId}/{planworkId}" segments -> 400).
+            // This now calls the endpoint with the actual signed-in userId only.
+            const res = await fetch(`${API_BASE}/Admin/certificates/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) return;
@@ -592,7 +595,7 @@ const DynamicCoursesSection = () => {
                                                                 background: '#ffeded', color: '#e53935',
                                                                 px: '6px', py: '2px', borderRadius: '5px',
                                                                 fontSize: '11px', fontWeight: 700,
-                                                                    fontFamily: '"Noto Kufi Arabic", serif',
+                                                                fontFamily: '"Noto Kufi Arabic", serif',
                                                             }}>
                                                                 خصم {activeDiscount}%
                                                             </Box>
@@ -600,7 +603,7 @@ const DynamicCoursesSection = () => {
                                                     </Box>
                                                     {/* Mode label */}
                                                     <Typography sx={{
-                                                            fontFamily: '"Noto Kufi Arabic", serif',
+                                                        fontFamily: '"Noto Kufi Arabic", serif',
                                                         fontSize: '0.65rem', color: '#888',
                                                     }}>
                                                         {mode === 'online' ? 'السعر الأونلاين' : 'السعر الحضوري'}
