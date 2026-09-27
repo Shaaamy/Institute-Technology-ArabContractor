@@ -56,6 +56,24 @@ function resolvePlanFileUrl(raw) {
     return null;
 }
 
+// ── Map a "latest courses" list item into the shape the "other courses"
+//    sidebar needs. This endpoint returns a lighter DTO than /Course/{slug},
+//    so we don't run it through the full transform() — we just pull out the
+//    handful of fields the sidebar card actually renders, with fallbacks for
+//    different casing (camelCase vs PascalCase) since we don't control the API.
+function mapOtherCourse(a) {
+    const cost = a.cost ?? a.Cost ?? a.price ?? a.Price ?? 0;
+    return {
+        id: a.id ?? a.Id ?? a.childId ?? a.ChildId,
+        slug: a.slug ?? a.Slug,
+        title: a.title ?? a.Title ?? a.serviceTitle ?? a.ServiceTitle ?? '',
+        isFree: !cost || cost === 0,
+        price: cost,
+        currency: 'جنيه',
+        image: a.image ?? a.Image ?? 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800',
+    };
+}
+
 const mediaQueryStyles = `
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes modalSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -647,12 +665,13 @@ const CourseDetails = () => {
         }
     }, [safeGetToken]);
 
-    // ── FIXED: Fetch certificate — mirrors MyCourses.jsx exactly ────────────
-    // Strategy:
-    //   1. Call my-courses to get userId for this course
-    //   2. Primary:  GET /Admin/certificates/{userId}/{planworkId}  → single object with full blob URL
-    //   3. Fallback: GET /Admin/certificates (all certs list)       → filter by planworkId
-    //                (these return relative /api/... paths which resolveCertUrl handles)
+    // ── Fetch certificate ─────────────────────────────────────────────────────
+    // /course/my-courses does not return a userId field from this backend, so
+    // step 2 below (the two-segment route) will normally be skipped — this is
+    // expected and harmless. Step 3 (the full certificates list, filtered by
+    // planworkId) is the path that actually resolves the certificate today.
+    // The two-segment attempt is kept only so nothing needs to change here if
+    // the backend ever starts returning userId in the future.
     const fetchCertForCourse = useCallback(async (courseId) => {
         if (!isSignedIn || !courseId) return;
         setCert(null);
@@ -661,7 +680,7 @@ const CourseDetails = () => {
             const token = await safeGetToken();
             if (!token) return;
 
-            // Step 1: get userId from my-courses
+            // Step 1: try to get an internal userId from my-courses (usually absent)
             let userId = null;
             try {
                 const mcRes = await fetch(`${API_BASE}/course/my-courses`, {
@@ -676,8 +695,7 @@ const CourseDetails = () => {
 
             let raw = null;
 
-            // Step 2 – Primary: /certificates/{userId}/{planworkId}
-            // This endpoint returns a SINGLE object with a full blob URL in fileUrl (Image 1)
+            // Step 2 – Only attempted if we somehow have a userId
             if (userId) {
                 try {
                     const res = await fetch(
@@ -691,8 +709,8 @@ const CourseDetails = () => {
                 } catch { /* fall through */ }
             }
 
-            // Step 3 – Fallback: GET /Admin/certificates (full list, Image 2)
-            // Returns relative paths → resolveCertUrl converts them to absolute
+            // Step 3 – Fallback (the path that actually runs in practice):
+            // GET the full certificates list and filter by planworkId ourselves.
             if (!raw) {
                 try {
                     const res = await fetch(
@@ -809,6 +827,9 @@ const CourseDetails = () => {
     };
 
     // ── Load course data ─────────────────────────────────────────────────────
+    // FIXED: related courses now come from /course/latest instead of a
+    // hardcoded slug list — the hardcoded slugs 404'd whenever one of them
+    // wasn't a currently-published leaf course.
     useEffect(() => {
         if (!slug) return;
         (async () => {
@@ -818,12 +839,23 @@ const CourseDetails = () => {
                 if (!res.ok) throw new Error('not found');
                 const c = transform(await res.json());
                 setCourse(c);
-                const rel = ['solid-liquid-waste-management', 'construction-project-management', 'architectural-engineering']
-                    .filter(s => s !== slug).slice(0, 3);
-                const others = await Promise.all(rel.map(s =>
-                    fetch(`${API_BASE}/Course/${s}`).then(r => r.ok ? r.json() : null).catch(() => null)
-                ));
-                setOtherCourses(others.filter(Boolean).map(transform));
+
+                try {
+                    const latestRes = await fetch(`${API_BASE}/course/latest`);
+                    if (latestRes.ok) {
+                        const latest = await latestRes.json();
+                        const list = Array.isArray(latest) ? latest : [];
+                        const others = list
+                            .filter(x => (x.slug ?? x.Slug) !== slug)
+                            .slice(0, 3)
+                            .map(mapOtherCourse);
+                        setOtherCourses(others);
+                    } else {
+                        setOtherCourses([]);
+                    }
+                } catch {
+                    setOtherCourses([]);
+                }
             } catch (e) { setError(e.message); }
             finally { setLoading(false); }
         })();

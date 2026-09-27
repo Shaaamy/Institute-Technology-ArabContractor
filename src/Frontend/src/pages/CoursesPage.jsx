@@ -458,8 +458,10 @@ const CoursesPage = () => {
     const [hoveredHeaderCard, setHoveredHeaderCard] = useState(null);
     const [refundCourse, setRefundCourse] = useState(null);
     const [ownedCourseIds, setOwnedCourseIds] = useState(new Set());
-    // NEW: keep the full enrollment records so we have each course's
-    // *internal* userId (from our own API), not just the childId.
+    // Kept for forward-compatibility: if /course/my-courses ever starts
+    // returning a userId per enrollment, fetchCertForCourse will pick it up
+    // automatically. Today it doesn't, so this stays empty of userId values
+    // and every cert lookup falls through to the full-list endpoint below.
     const [ownedEnrollments, setOwnedEnrollments] = useState([]);
     const [certificates, setCertificates] = useState({});
     const [certsLoading, setCertsLoading] = useState({});
@@ -488,26 +490,75 @@ const CoursesPage = () => {
         } catch { setOwnedCourseIds(new Set()); setOwnedEnrollments([]); }
     }, [isSignedIn, safeGetToken]);
 
-    // ── FIXED: use the internal enrollment userId, not the Clerk auth userId ──
-    // Previously this called `${API_BASE}/Admin/certificates/${userId}/${planworkId}`
-    // using Clerk's `userId` (a string like "user_39OF..."), which the backend's
-    // /Admin/certificates route can't bind — causing a 400 on every request.
-    // The correct internal userId comes from the matching /course/my-courses record.
+    // ── FIXED: certificate fetch now falls back to the full certificates list ──
+    // /course/my-courses does not return a userId field from this backend, so
+    // the two-segment /Admin/certificates/{userId}/{planworkId} route can almost
+    // never be reached from here. Previously this function just returned early
+    // when no userId was found, meaning certificates never loaded on this page
+    // at all. Now it falls back to GET /Admin/certificates (the full list) and
+    // filters by planworkId client-side — the same pattern already used
+    // successfully on the course-details page.
     const fetchCertForCourse = useCallback(async (planworkId) => {
         if (!isSignedIn) return;
-        const enrollment = ownedEnrollments.find(e => String(e.childId) === String(planworkId));
-        const internalUserId = enrollment?.userId ?? enrollment?.UserId ?? null;
-        if (!internalUserId) return; // no matching enrollment yet — nothing to fetch
 
         setCertsLoading(prev => ({ ...prev, [planworkId]: true }));
         try {
             const token = await safeGetToken();
             if (!token) return;
-            const res = await fetch(`${API_BASE}/Admin/certificates/${internalUserId}/${planworkId}`, { headers: { Authorization: `Bearer ${token}` } });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data && data.url) setCertificates(prev => ({ ...prev, [planworkId]: data }));
-        } catch { } finally {
+
+            const enrollment = ownedEnrollments.find(e => String(e.childId) === String(planworkId));
+            const internalUserId = enrollment?.userId ?? enrollment?.UserId ?? null;
+
+            let raw = null;
+
+            // Only attempted if we actually have a usable internal userId
+            // (kept for forward-compatibility; normally skipped today).
+            if (internalUserId) {
+                try {
+                    const res = await fetch(
+                        `${API_BASE}/Admin/certificates/${internalUserId}/${planworkId}`,
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    if (res.ok) {
+                        const data = await res.json();
+                        raw = Array.isArray(data) ? data[0] : data;
+                    }
+                } catch { /* fall through */ }
+            }
+
+            // Fallback — this is the path that actually runs in practice:
+            // GET the full certificates list and filter by planworkId ourselves.
+            if (!raw) {
+                try {
+                    const res = await fetch(`${API_BASE}/Admin/certificates`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const list = Array.isArray(data) ? data : [data];
+                        raw = list.find(c =>
+                            String(c.planworkId ?? c.PlanworkId ?? '') === String(planworkId)
+                        ) ?? null;
+                    }
+                } catch { /* give up */ }
+            }
+
+            if (raw) {
+                const url = raw.url ?? raw.fileUrl ?? raw.filePath ?? raw.path ?? null;
+                if (url) {
+                    setCertificates(prev => ({
+                        ...prev,
+                        [planworkId]: {
+                            ...raw,
+                            url,
+                            name: raw.fileName ?? raw.filename ?? raw.name ?? null,
+                        },
+                    }));
+                }
+            }
+        } catch {
+            /* no certificate available for this course */
+        } finally {
             setCertsLoading(prev => ({ ...prev, [planworkId]: false }));
         }
     }, [isSignedIn, safeGetToken, ownedEnrollments]);
