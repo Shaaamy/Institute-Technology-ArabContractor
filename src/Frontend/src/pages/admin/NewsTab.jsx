@@ -7,6 +7,10 @@
  * 3. showFlag not in detail response — keep from list or default true
  * 4. Delete image uses correct picId from images[]
  * 5. buildFormData updated to match actual API fields
+ * 6. BASE no longer has a trailing slash — every path already starts with "/",
+ *    so the old BASE produced double-slash URLs (".../com//api/...") which
+ *    Azure's WAF was rejecting outright with a 403 before the request ever
+ *    reached the API.
  *
  * API:
  * GET    /api/admin/AdminNews/getAllNews?PageIndex=1&PageSize=100
@@ -19,7 +23,15 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 
-const BASE = "https://icemt.arabcont.com/";
+// FIXED: previously ended with a trailing slash ("https://.../"), and every
+// path passed to apiFetch/resolveImg already starts with "/", so every
+// request URL came out as ".../com//api/..." — a double slash. Azure's WAF
+// (OWASP CRS) has a built-in rule that flags multiple consecutive slashes in
+// a URL path as a path-normalization/traversal pattern, which is exactly what
+// was silently rejecting PUT/POST requests with a 403 before they ever
+// reached the API. Removing the trailing slash here fixes every URL built
+// from BASE in this file (apiFetch and resolveImg).
+const BASE = "https://icemt.arabcont.com";
 
 const T = {
     orange: '#f57c00', orangeLight: '#ff9a3c', orangeDark: '#bf5200',
